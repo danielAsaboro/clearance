@@ -58,7 +58,9 @@ export function ClusterUiSelect() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">{cluster.name}</Button>
+        <button className="h-8 px-3 text-xs bg-[#1A1A1A] text-[#888] border border-[#2A2A2A] hover:border-[#F5E642]/40 hover:text-white rounded-full transition-colors">
+          {cluster.name}
+        </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {clusters.map((item) => (
