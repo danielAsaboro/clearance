@@ -1,0 +1,144 @@
+import { NextRequest, NextResponse } from "next/server";
+import {
+  ACTIONS_CORS_HEADERS,
+  createPostResponse,
+} from "@solana/actions";
+import {
+  Connection,
+  PublicKey,
+  Transaction,
+  TransactionInstruction,
+} from "@solana/web3.js";
+import { prisma } from "@/lib/db";
+import { format } from "date-fns";
+
+const MEMO_PROGRAM_ID = new PublicKey(
+  "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"
+);
+
+const connection = new Connection(
+  process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "https://api.devnet.solana.com"
+);
+
+// GET /api/actions/join — Blink metadata for joining a live session
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const sessionId = searchParams.get("session");
+
+  let title = "Join Live Session";
+  let description =
+    "Join the next live voting session on The Clearance. Vote on creator content and earn rewards!";
+  let scheduledLabel = "Join Now";
+
+  if (sessionId) {
+    const session = await prisma.weeklySession.findUnique({
+      where: { id: sessionId },
+    });
+    if (session) {
+      title = `Join: ${session.title}`;
+      const when = format(new Date(session.scheduledAt), "MMM d 'at' h:mm a");
+      description = `Week ${session.weekNumber} — ${when}. Join The Clearance live voting session and score 21+ for Gold Tier rewards!`;
+      scheduledLabel =
+        session.status === "live" ? "Join Live Now" : `Join — ${when}`;
+    }
+  }
+
+  const payload = {
+    type: "action" as const,
+    icon: `${new URL(req.url).origin}/icon-512x512.png`,
+    title,
+    description,
+    label: scheduledLabel,
+    links: {
+      actions: [
+        {
+          type: "transaction" as const,
+          label: scheduledLabel,
+          href: `${new URL(req.url).origin}/api/actions/join${sessionId ? `?session=${sessionId}` : ""}`,
+        },
+      ],
+    },
+  };
+
+  return NextResponse.json(payload, { headers: ACTIONS_CORS_HEADERS });
+}
+
+// OPTIONS — CORS preflight
+export async function OPTIONS() {
+  return new NextResponse(null, { headers: ACTIONS_CORS_HEADERS });
+}
+
+// POST /api/actions/join — Process join via Blink
+export async function POST(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const sessionId = searchParams.get("session");
+
+    const body = await req.json();
+    const accountPubkey = new PublicKey(body.account);
+
+    const memoData = JSON.stringify({
+      app: "the-clearance",
+      action: "join_session",
+      session: sessionId || "next",
+      wallet: accountPubkey.toBase58(),
+      ts: Date.now(),
+    });
+
+    const memoIx = new TransactionInstruction({
+      programId: MEMO_PROGRAM_ID,
+      keys: [{ pubkey: accountPubkey, isSigner: true, isWritable: false }],
+      data: Buffer.from(memoData, "utf-8"),
+    });
+
+    const { blockhash } = await connection.getLatestBlockhash();
+    const tx = new Transaction();
+    tx.recentBlockhash = blockhash;
+    tx.feePayer = accountPubkey;
+    tx.add(memoIx);
+
+    // Record join in DB if user exists and session is active
+    let skipJoin = false;
+    if (sessionId) {
+      const session = await prisma.weeklySession.findUnique({ where: { id: sessionId } });
+      if (!session || (session.status !== "live" && session.status !== "scheduled")) {
+        skipJoin = true;
+      }
+    }
+
+    if (sessionId && !skipJoin) {
+      const user = await prisma.user.findFirst({
+        where: { walletAddress: accountPubkey.toBase58() },
+      });
+      if (user) {
+        await prisma.gameResult
+          .create({
+            data: {
+              userId: user.id,
+              sessionId,
+              walletAddress: user.walletAddress,
+            },
+          })
+          .catch(() => {
+            // Already joined — ignore
+          });
+      }
+    }
+
+    const response = await createPostResponse({
+      fields: {
+        type: "transaction",
+        transaction: tx,
+        message: "You're in! Head to The Clearance to start voting when the session goes live.",
+      },
+    });
+
+    return NextResponse.json(response, { headers: ACTIONS_CORS_HEADERS });
+  } catch (error) {
+    console.error("Join action error:", error);
+    return NextResponse.json(
+      { message: "Failed to create join transaction" },
+      { status: 500, headers: ACTIONS_CORS_HEADERS }
+    );
+  }
+}

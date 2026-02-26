@@ -1,0 +1,164 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  creator
+  fan
+  admin
+}
+
+enum TaskStatus {
+  pending
+  submitted
+  verified
+  rejected
+}
+
+enum SessionStatus {
+  scheduled
+  live
+  ended
+}
+
+enum RoundVerdict {
+  approved
+  rejected
+}
+
+enum VoteDecision {
+  approve
+  reject
+}
+
+enum RewardTier {
+  participation
+  base
+  gold
+}
+
+model User {
+  id               String   @id @default(cuid())
+  email            String?  @unique
+  phone            String?
+  displayName      String?
+  profilePhoto     String?
+  tiktokUsername   String?
+  role             UserRole @default(fan)
+  debtSources      Json?
+  willingToDeclare Boolean?
+  consentAccepted  Boolean  @default(false)
+  privyId          String   @unique
+  walletAddress    String?
+  referralCode     String   @unique
+  referredBy       String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  tasks            Task[]
+  votes            Vote[]
+  gameResults      GameResult[]
+  referralsMade    Referral[] @relation("Referrer")
+  referralReceived Referral?  @relation("Referred")
+}
+
+model Task {
+  id            String     @id @default(cuid())
+  creatorId     String
+  creator       User       @relation(fields: [creatorId], references: [id])
+  weekNumber    Int
+  taskNumber    Int
+  description   String
+  hashtag       String     @default("#theclearanceNG")
+  deadline      DateTime
+  tiktokUrl     String?
+  submittedAt   DateTime?
+  status        TaskStatus @default(pending)
+  rejectionNote String?
+  verifiedAt    DateTime?
+  verifiedBy    String?
+  createdAt     DateTime   @default(now())
+
+  sessionRound  SessionRound?
+}
+
+model WeeklySession {
+  id                String        @id @default(cuid())
+  weekNumber        Int           @unique
+  title             String
+  scheduledAt       DateTime
+  status            SessionStatus @default(scheduled)
+  lateJoinCutoff    DateTime?
+  collectionAddress String?
+  vaultAddress      String?
+
+  rounds         SessionRound[]
+  gameResults    GameResult[]
+}
+
+model SessionRound {
+  id              String        @id @default(cuid())
+  sessionId       String
+  session         WeeklySession @relation(fields: [sessionId], references: [id])
+  roundNumber     Int
+  taskId          String        @unique
+  task            Task          @relation(fields: [taskId], references: [id])
+  tiktokUrl       String
+  tiktokEmbedData Json?
+  duration        Int           @default(30)
+  adminVerdict    RoundVerdict?
+
+  votes           Vote[]
+
+  @@unique([sessionId, roundNumber])
+}
+
+model Vote {
+  id          String       @id @default(cuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id])
+  roundId     String
+  round       SessionRound @relation(fields: [roundId], references: [id])
+  decision    VoteDecision
+  submittedAt DateTime     @default(now())
+
+  @@unique([userId, roundId])
+}
+
+model GameResult {
+  id            String        @id @default(cuid())
+  userId        String
+  user          User          @relation(fields: [userId], references: [id])
+  sessionId     String
+  session       WeeklySession @relation(fields: [sessionId], references: [id])
+  totalVotes    Int           @default(0)
+  correctVotes  Int           @default(0)
+  tier          RewardTier?
+  rewardAmount  Float         @default(0)
+  nftMinted     Boolean       @default(false)
+  nftTokenId    String?
+  nftRevealed   Boolean       @default(false)
+  walletAddress String?
+  joinedAt      DateTime      @default(now())
+  lateJoin      Boolean       @default(false)
+  usdcClaimed   Boolean       @default(false)
+  claimTxHash   String?
+  claimedAt     DateTime?
+
+  @@unique([userId, sessionId])
+}
+
+model Referral {
+  id             String   @id @default(cuid())
+  referrerId     String
+  referrer       User     @relation("Referrer", fields: [referrerId], references: [id])
+  referredUserId String   @unique
+  referredUser   User     @relation("Referred", fields: [referredUserId], references: [id])
+  code           String
+  createdAt      DateTime @default(now())
+}
