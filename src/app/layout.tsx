@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
+import { ClusterProvider } from '@/components/cluster/cluster-data-access'
 import Providers from '@/components/Providers'
 import { AppProviders } from '@/components/app-providers'
 import { AppLayout } from '@/components/app-layout'
@@ -65,13 +66,15 @@ export default function RootLayout({
         <ServiceWorkerRegistration />
       </head>
       <body className={`${inter.variable} antialiased bg-black`}>
-        <Providers>
-          <AppProviders>
-            <AppLayout links={links}>
-              <div className="app-container">{children}</div>
-            </AppLayout>
-          </AppProviders>
-        </Providers>
+        <ClusterProvider>
+          <Providers>
+            <AppProviders>
+              <AppLayout links={links}>
+                <div className="app-container">{children}</div>
+              </AppLayout>
+            </AppProviders>
+          </Providers>
+        </ClusterProvider>
       </body>
     </html>
   )

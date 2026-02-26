@@ -12,6 +12,7 @@ import Link from "next/link";
 import BlindBoxCard from "@/components/BlindBoxCard";
 import ConnectWallet from "@/components/ConnectWallet";
 import LoyaltyBadges from "@/components/LoyaltyBadges";
+import { useCluster, getPrivySolanaChain } from "@/components/cluster/cluster-data-access";
 
 interface GameResultNFT {
   id: string;
@@ -34,6 +35,7 @@ export default function RewardsPage() {
   const { getAccessToken } = usePrivy();
   const { wallets: solanaWallets } = useWallets();
   const { signTransaction } = useSignTransaction();
+  const { cluster } = useCluster();
   const [results, setResults] = useState<GameResultNFT[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -124,6 +126,7 @@ export default function RewardsPage() {
       const { signedTransaction } = await signTransaction({
         transaction: txBytes,
         wallet,
+        chain: getPrivySolanaChain(cluster),
       });
 
       // 3. Send signed tx to the network

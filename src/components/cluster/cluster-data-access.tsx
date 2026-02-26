@@ -96,6 +96,19 @@ export function useCluster() {
   return useContext(Context)
 }
 
+export function getPrivySolanaChain(cluster: SolanaCluster): string {
+  switch (cluster.network) {
+    case ClusterNetwork.Mainnet:
+      return 'solana:mainnet'
+    case ClusterNetwork.Devnet:
+      return 'solana:devnet'
+    case ClusterNetwork.Testnet:
+      return 'solana:testnet'
+    default:
+      return 'solana:devnet'
+  }
+}
+
 function getClusterUrlParam(cluster: SolanaCluster): string {
   let suffix = ''
   switch (cluster.network) {
