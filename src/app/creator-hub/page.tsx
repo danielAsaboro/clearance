@@ -110,7 +110,7 @@ export default function CreatorHub() {
   ).length;
 
   return (
-    <div className="min-h-screen bg-black px-6 py-6 pb-12">
+    <div className="flex-1 bg-black px-6 py-6 pb-12">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">

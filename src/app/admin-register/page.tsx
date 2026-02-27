@@ -14,7 +14,7 @@ export default function AdminRegisterPage() {
 
     if (ready && !authenticated) {
         return (
-            <div className="min-h-screen bg-black flex items-center justify-center px-6">
+            <div className="flex-1 bg-black flex items-center justify-center px-6">
                 <div className="text-center">
                     <p className="text-[#888] text-sm">You must be logged in to access this page.</p>
                 </div>
@@ -57,7 +57,7 @@ export default function AdminRegisterPage() {
     };
 
     return (
-        <div className="min-h-screen bg-black flex flex-col items-center justify-center px-6">
+        <div className="flex-1 bg-black flex flex-col items-center justify-center px-6">
             {/* Logo */}
             <div className="flex items-center gap-2 mb-10">
                 <div className="w-8 h-8 bg-[#F5E642] rounded-xl flex items-center justify-center">

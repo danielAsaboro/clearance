@@ -53,7 +53,7 @@ export default function AdminLayout({
 
   if (checking) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="flex-1 bg-black flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-[#F5E642] border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -62,7 +62,7 @@ export default function AdminLayout({
   // Not logged in or not admin — show restricted screen
   if (!authenticated || role !== "admin") {
     return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center px-6 text-center gap-5">
+      <div className="flex-1 bg-black flex flex-col items-center justify-center px-6 text-center gap-5">
         <div className="w-14 h-14 bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl flex items-center justify-center">
           <ShieldX className="w-7 h-7 text-red-500" />
         </div>
@@ -91,7 +91,7 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-black flex flex-col">
+    <div className="flex-1 bg-black flex flex-col">
       {/* Top Header */}
       <div className="border-b border-[#2A2A2A] px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">

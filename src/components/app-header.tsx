@@ -15,7 +15,7 @@ export function AppHeader({ links = [] }: { links: { label: string; path: string
   }
 
   return (
-    <header className="relative z-50 px-4 py-2 bg-black border-b border-[#2A2A2A]">
+    <header className="sticky top-0 z-50 px-4 py-2 bg-black border-b border-[#2A2A2A]">
       <div className="mx-auto flex justify-between items-center">
         <div className="flex items-center gap-4">
           <Link className="flex items-center gap-2 hover:opacity-80 transition-opacity" href="/">

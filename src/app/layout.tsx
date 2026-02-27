@@ -70,7 +70,7 @@ export default function RootLayout({
           <Providers>
             <AppProviders>
               <AppLayout links={links}>
-                <div className="app-container">{children}</div>
+                <div className="app-container flex-1 flex flex-col">{children}</div>
               </AppLayout>
             </AppProviders>
           </Providers>

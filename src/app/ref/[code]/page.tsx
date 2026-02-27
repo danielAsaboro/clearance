@@ -17,7 +17,7 @@ export default async function ReferralPage({
   });
 
   return (
-    <div className="min-h-screen bg-black flex flex-col items-center justify-center px-6">
+    <div className="flex-1 bg-black flex flex-col items-center justify-center px-6">
       <div className="w-16 h-16 bg-[#F5E642] rounded-2xl flex items-center justify-center mb-4">
         <Eye className="w-8 h-8 text-black" strokeWidth={2.5} />
       </div>

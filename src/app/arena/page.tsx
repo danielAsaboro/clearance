@@ -94,7 +94,7 @@ export default function Arena() {
   };
 
   return (
-    <div className="min-h-screen bg-black flex flex-col px-6 py-6">
+    <div className="flex-1 bg-black flex flex-col px-6 py-6">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <Link href="/">

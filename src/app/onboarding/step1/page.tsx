@@ -34,7 +34,7 @@ export default function Step1() {
   const canContinue = data.debtSources.length > 0;
 
   return (
-    <div className="min-h-screen bg-black flex flex-col px-6 py-6">
+    <div className="flex-1 bg-black flex flex-col px-6 py-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <Link href="/">

@@ -41,14 +41,14 @@ function ResultsContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="flex-1 bg-black flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-[#F5E642] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black flex flex-col px-6 py-6">
+    <div className="flex-1 bg-black flex flex-col px-6 py-6">
       {/* Header */}
       <div className="flex items-center gap-3 mb-8">
         <Link href="/arena">
@@ -142,7 +142,7 @@ export default function ResultsPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="flex-1 bg-black flex items-center justify-center">
           <div className="w-8 h-8 border-2 border-[#F5E642] border-t-transparent rounded-full animate-spin" />
         </div>
       }

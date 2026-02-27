@@ -110,7 +110,7 @@ function GameContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="flex-1 bg-black flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-[#F5E642] border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -118,7 +118,7 @@ function GameContent() {
 
   if (!sessionId || rounds.length === 0) {
     return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center px-6">
+      <div className="flex-1 bg-black flex flex-col items-center justify-center px-6">
         <p className="text-[#888] text-sm mb-4">No active session found.</p>
         <button
           onClick={() => router.push("/arena")}
@@ -138,7 +138,7 @@ function GameContent() {
   const currentRound = rounds[currentRoundIndex];
 
   return (
-    <div className="min-h-screen bg-black flex flex-col">
+    <div className="flex-1 bg-black flex flex-col">
       {/* Top Bar */}
       <div className="px-4 pt-4 pb-2">
         <div className="flex items-center justify-between mb-2">
@@ -187,7 +187,7 @@ export default function ArenaGame() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="flex-1 bg-black flex items-center justify-center">
           <div className="w-8 h-8 border-2 border-[#F5E642] border-t-transparent rounded-full animate-spin" />
         </div>
       }

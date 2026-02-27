@@ -21,4 +21,4 @@ address = "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d"
 program = "tests/fixtures/mpl_core.so"
 
 [scripts]
-test = "../node_modules/.bin/jest --preset ts-jest"
+test = "../node_modules/.bin/jest --config jest.config.ts"

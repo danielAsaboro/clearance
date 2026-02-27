@@ -71,7 +71,7 @@ export default function Step5() {
   };
 
   return (
-    <div className="min-h-screen bg-black flex flex-col px-6 py-6">
+    <div className="flex-1 bg-black flex flex-col px-6 py-6">
       {/* Header */}
       <div className="flex items-center justify-center mb-4">
         <div className="w-8 h-8 bg-[#F5E642] rounded-full flex items-center justify-center">

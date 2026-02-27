@@ -66,7 +66,7 @@ export default function Home() {
   const isFan = roleLocked && profile?.role === "fan";
 
   return (
-    <div className="min-h-screen bg-black flex flex-col items-center justify-between px-6 py-12">
+    <div className="flex-1 bg-black flex flex-col items-center justify-between px-6 py-6">
       {/* Logo & Tagline */}
       <div className="flex-1 flex flex-col items-center justify-center">
         <div className="w-20 h-20 bg-[#F5E642] rounded-2xl flex items-center justify-center mb-4">
@@ -150,7 +150,7 @@ export default function Home() {
       </div>
 
       {/* Season Badge */}
-      <p className="text-[#888] text-xs mt-12">
+      <p className="text-[#888] text-xs mt-4">
         {authenticated && user?.email?.address
           ? `Signed in as ${user.email.address}`
           : "Season 1 is LIVE"}
