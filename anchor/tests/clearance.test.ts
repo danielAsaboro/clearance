@@ -316,6 +316,173 @@ describe('clearance', () => {
   })
 
   // -----------------------------------------------------------------------
+  // fan_deposit tests — fan pays entry fee directly into vault
+  // -----------------------------------------------------------------------
+  describe('fan_deposit', () => {
+    const SESSION_ID_3 = new BN(3)
+    const ENTRY_AMOUNT = 3_500_000 // 3.50 USDC
+    const fan = Keypair.generate()
+
+    let vault3Pda: PublicKey
+    let vault3Ata: PublicKey
+    let fanAta: PublicKey
+
+    function deriveFanDepositRecord(
+      vault: PublicKey,
+      depositor: PublicKey,
+    ): [PublicKey, number] {
+      return PublicKey.findProgramAddressSync(
+        [Buffer.from('deposit'), vault.toBuffer(), depositor.toBuffer()],
+        program.programId,
+      )
+    }
+
+    beforeAll(async () => {
+      // Fund fan
+      const sig = await provider.connection.requestAirdrop(
+        fan.publicKey,
+        2 * LAMPORTS_PER_SOL,
+      )
+      await provider.connection.confirmTransaction(sig)
+
+      // Derive vault 3
+      ;[vault3Pda] = deriveVault(SESSION_ID_3)
+      vault3Ata = anchor.utils.token.associatedAddress({
+        mint: usdcMint,
+        owner: vault3Pda,
+      })
+
+      // Initialize vault 3
+      await program.methods
+        .initializeVault(SESSION_ID_3)
+        .accounts({
+          admin: admin.publicKey,
+          vault: vault3Pda,
+          vaultTokenAccount: vault3Ata,
+          usdcMint,
+          systemProgram: SystemProgram.programId,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+        })
+        .rpc()
+
+      // Mint USDC directly to fan's ATA
+      const fanAtaAccount = await getOrCreateAssociatedTokenAccount(
+        provider.connection,
+        (admin as any).payer,
+        usdcMint,
+        fan.publicKey,
+      )
+      fanAta = fanAtaAccount.address
+
+      await mintTo(
+        provider.connection,
+        (admin as any).payer,
+        usdcMint,
+        fanAta,
+        admin.publicKey,
+        10_000_000, // 10 USDC for testing
+      )
+    })
+
+    it('fan_deposit transfers entry fee to vault', async () => {
+      const [depositRecordPda] = deriveFanDepositRecord(vault3Pda, fan.publicKey)
+
+      await program.methods
+        .fanDeposit(new BN(ENTRY_AMOUNT))
+        .accounts({
+          fan: fan.publicKey,
+          vault: vault3Pda,
+          depositRecord: depositRecordPda,
+          fanTokenAccount: fanAta,
+          vaultTokenAccount: vault3Ata,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          systemProgram: SystemProgram.programId,
+        })
+        .signers([fan])
+        .rpc()
+
+      // Vault balance should be ENTRY_AMOUNT
+      const vaultTokenAcct = await getAccount(provider.connection, vault3Ata)
+      expect(Number(vaultTokenAcct.amount)).toEqual(ENTRY_AMOUNT)
+
+      // Vault total_deposited updated
+      const vault = await program.account.vault.fetch(vault3Pda)
+      expect(vault.totalDeposited.toNumber()).toEqual(ENTRY_AMOUNT)
+
+      // Fan deposit record created
+      const depositRecord = await program.account.fanDepositRecord.fetch(depositRecordPda)
+      expect(depositRecord.user.toBase58()).toEqual(fan.publicKey.toBase58())
+      expect(depositRecord.vault.toBase58()).toEqual(vault3Pda.toBase58())
+      expect(depositRecord.sessionId.toNumber()).toEqual(3)
+      expect(depositRecord.amountDeposited.toNumber()).toEqual(ENTRY_AMOUNT)
+      expect(depositRecord.depositedAt.toNumber()).toBeGreaterThan(0)
+    })
+
+    it('double fan_deposit fails (same fan, same vault)', async () => {
+      const [depositRecordPda] = deriveFanDepositRecord(vault3Pda, fan.publicKey)
+
+      await expect(
+        program.methods
+          .fanDeposit(new BN(ENTRY_AMOUNT))
+          .accounts({
+            fan: fan.publicKey,
+            vault: vault3Pda,
+            depositRecord: depositRecordPda,
+            fanTokenAccount: fanAta,
+            vaultTokenAccount: vault3Ata,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            systemProgram: SystemProgram.programId,
+          })
+          .signers([fan])
+          .rpc(),
+      ).rejects.toThrow()
+    })
+
+    it('fan_deposit with zero amount fails (ZeroAmount)', async () => {
+      const fan2 = Keypair.generate()
+      const sig = await provider.connection.requestAirdrop(
+        fan2.publicKey,
+        LAMPORTS_PER_SOL,
+      )
+      await provider.connection.confirmTransaction(sig)
+
+      const fan2AtaAccount = await getOrCreateAssociatedTokenAccount(
+        provider.connection,
+        (admin as any).payer,
+        usdcMint,
+        fan2.publicKey,
+      )
+      await mintTo(
+        provider.connection,
+        (admin as any).payer,
+        usdcMint,
+        fan2AtaAccount.address,
+        admin.publicKey,
+        ENTRY_AMOUNT,
+      )
+
+      const [depositRecordPda] = deriveFanDepositRecord(vault3Pda, fan2.publicKey)
+
+      await expect(
+        program.methods
+          .fanDeposit(new BN(0))
+          .accounts({
+            fan: fan2.publicKey,
+            vault: vault3Pda,
+            depositRecord: depositRecordPda,
+            fanTokenAccount: fan2AtaAccount.address,
+            vaultTokenAccount: vault3Ata,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            systemProgram: SystemProgram.programId,
+          })
+          .signers([fan2])
+          .rpc(),
+      ).rejects.toThrow(/ZeroAmount/)
+    })
+  })
+
+  // -----------------------------------------------------------------------
   // claim_with_nft tests — uses real mpl-core assets (cloned from mainnet)
   // -----------------------------------------------------------------------
   describe('claim_with_nft', () => {
@@ -573,6 +740,277 @@ describe('clearance', () => {
           .signers([nonMplUser])
           .rpc(),
       ).rejects.toThrow(/InvalidNftAccount/)
+    }, TIMEOUT)
+  })
+
+  // -----------------------------------------------------------------------
+  // raffle_vrf tests — VRF-based raffle with testing feature
+  // -----------------------------------------------------------------------
+  describe('raffle_vrf', () => {
+    const TIMEOUT = 30_000
+    const SESSION_ID_4 = new BN(4)
+    const raffleFan = Keypair.generate()
+    const raffleFan2 = Keypair.generate()
+    const raffleFan3 = Keypair.generate()
+
+    let vault4Pda: PublicKey
+    let vault4Ata: PublicKey
+    let raffleNftPubkey: PublicKey
+
+    let umi: Umi
+
+    function deriveRaffleRecord(
+      vault: PublicKey,
+      fan: PublicKey,
+    ): [PublicKey, number] {
+      return PublicKey.findProgramAddressSync(
+        [Buffer.from('raffle'), vault.toBuffer(), fan.toBuffer()],
+        program.programId,
+      )
+    }
+
+    beforeAll(async () => {
+      // Set up UMI
+      umi = createUmi(provider.connection.rpcEndpoint, 'confirmed').use(
+        mplCore(),
+      )
+      const secretKey = new Uint8Array((admin as any).payer.secretKey)
+      const adminKeypair = umi.eddsa.createKeypairFromSecretKey(secretKey)
+      const adminSigner = createSignerFromKeypair(umi, adminKeypair)
+      umi.use(signerIdentity(adminSigner, true))
+
+      // Fund fans
+      for (const fan of [raffleFan, raffleFan2, raffleFan3]) {
+        const sig = await provider.connection.requestAirdrop(
+          fan.publicKey,
+          2 * LAMPORTS_PER_SOL,
+        )
+        await provider.connection.confirmTransaction(sig)
+      }
+
+      // Derive vault 4
+      ;[vault4Pda] = deriveVault(SESSION_ID_4)
+      vault4Ata = anchor.utils.token.associatedAddress({
+        mint: usdcMint,
+        owner: vault4Pda,
+      })
+
+      // Initialize vault 4
+      await program.methods
+        .initializeVault(SESSION_ID_4)
+        .accounts({
+          admin: admin.publicKey,
+          vault: vault4Pda,
+          vaultTokenAccount: vault4Ata,
+          usdcMint,
+          systemProgram: SystemProgram.programId,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+        })
+        .rpc()
+
+      // Deposit 100 USDC into vault 4
+      await program.methods
+        .deposit(new BN(DEPOSIT_AMOUNT))
+        .accounts({
+          admin: admin.publicKey,
+          vault: vault4Pda,
+          adminTokenAccount: adminAta,
+          vaultTokenAccount: vault4Ata,
+          tokenProgram: TOKEN_PROGRAM_ID,
+        })
+        .rpc()
+
+      // Create a real mpl-core asset for raffleFan: owner = raffleFan, updateAuthority = admin
+      const asset = generateSigner(umi)
+      await create(umi, {
+        asset,
+        name: 'Test Raffle Blind Box',
+        uri: 'https://test.com/metadata.json',
+        owner: toUmiPublicKey(raffleFan.publicKey.toBase58()),
+        updateAuthority: toUmiPublicKey(admin.publicKey.toBase58()),
+      }).sendAndConfirm(umi)
+      raffleNftPubkey = new PublicKey(asset.publicKey)
+    }, TIMEOUT)
+
+    it('request_raffle creates RaffleRecord(resolved=false)', async () => {
+      const [raffleRecordPda] = deriveRaffleRecord(vault4Pda, raffleFan.publicKey)
+
+      await program.methods
+        .requestRaffle(2) // tier = gold
+        .accounts({
+          fan: raffleFan.publicKey,
+          admin: admin.publicKey,
+          vault: vault4Pda,
+          raffleRecord: raffleRecordPda,
+          oracleQueue: admin.publicKey, // dummy in testing
+          programIdentity: admin.publicKey, // dummy in testing
+          slotHashes: admin.publicKey, // dummy in testing
+          systemProgram: SystemProgram.programId,
+        })
+        .signers([raffleFan])
+        .rpc()
+
+      const raffleRecord = await program.account.raffleRecord.fetch(raffleRecordPda)
+      expect(raffleRecord.fan.toBase58()).toEqual(raffleFan.publicKey.toBase58())
+      expect(raffleRecord.vault.toBase58()).toEqual(vault4Pda.toBase58())
+      expect(raffleRecord.tier).toEqual(2)
+      expect(raffleRecord.resolved).toEqual(false)
+      expect(raffleRecord.rewardAmount.toNumber()).toEqual(0)
+    })
+
+    it('callback_raffle resolves gold tier correctly', async () => {
+      // --- Part A: High payout (randomness[0] = 0 < 26) ---
+      const [raffleRecordPda] = deriveRaffleRecord(vault4Pda, raffleFan.publicKey)
+
+      const highRandomness = new Array(32).fill(0)
+      highRandomness[0] = 0 // < 26 → high payout
+
+      await program.methods
+        .callbackRaffle(highRandomness)
+        .accounts({
+          vrfProgramIdentity: admin.publicKey, // admin acts as oracle in testing
+          raffleRecord: raffleRecordPda,
+        })
+        .rpc()
+
+      const record = await program.account.raffleRecord.fetch(raffleRecordPda)
+      expect(record.resolved).toEqual(true)
+      expect(record.rewardAmount.toNumber()).toEqual(3_500_000) // Gold high = $3.50
+
+      // --- Part B: Low payout (randomness[0] = 100 >= 26) ---
+      // Need a second fan with their own RaffleRecord
+      const [raffleRecord2Pda] = deriveRaffleRecord(vault4Pda, raffleFan2.publicKey)
+
+      await program.methods
+        .requestRaffle(2) // tier = gold
+        .accounts({
+          fan: raffleFan2.publicKey,
+          admin: admin.publicKey,
+          vault: vault4Pda,
+          raffleRecord: raffleRecord2Pda,
+          oracleQueue: admin.publicKey,
+          programIdentity: admin.publicKey,
+          slotHashes: admin.publicKey,
+          systemProgram: SystemProgram.programId,
+        })
+        .signers([raffleFan2])
+        .rpc()
+
+      const lowRandomness = new Array(32).fill(0)
+      lowRandomness[0] = 100 // >= 26 → low payout
+
+      await program.methods
+        .callbackRaffle(lowRandomness)
+        .accounts({
+          vrfProgramIdentity: admin.publicKey,
+          raffleRecord: raffleRecord2Pda,
+        })
+        .rpc()
+
+      const record2 = await program.account.raffleRecord.fetch(raffleRecord2Pda)
+      expect(record2.resolved).toEqual(true)
+      expect(record2.rewardAmount.toNumber()).toEqual(1_750_000) // Gold low = $1.75
+    }, TIMEOUT)
+
+    it('claim_with_raffle transfers resolved reward amount', async () => {
+      const [raffleRecordPda] = deriveRaffleRecord(vault4Pda, raffleFan.publicKey)
+      const [claimRecordPda] = deriveClaimRecord(vault4Pda, raffleFan.publicKey)
+
+      const fanAta = anchor.utils.token.associatedAddress({
+        mint: usdcMint,
+        owner: raffleFan.publicKey,
+      })
+
+      await program.methods
+        .claimWithRaffle()
+        .accounts({
+          admin: admin.publicKey,
+          fan: raffleFan.publicKey,
+          vault: vault4Pda,
+          raffleRecord: raffleRecordPda,
+          claimRecord: claimRecordPda,
+          vaultTokenAccount: vault4Ata,
+          fanTokenAccount: fanAta,
+          usdcMint,
+          nftAsset: raffleNftPubkey,
+          systemProgram: SystemProgram.programId,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+        })
+        .signers([raffleFan])
+        .rpc()
+
+      // Fan received 3.5 USDC (the high payout amount from callback)
+      const fanTokenAcct = await getAccount(provider.connection, fanAta)
+      expect(Number(fanTokenAcct.amount)).toEqual(3_500_000)
+
+      // Vault totals updated
+      const vault = await program.account.vault.fetch(vault4Pda)
+      expect(vault.totalClaimed.toNumber()).toEqual(3_500_000)
+
+      // Claim record created
+      const claimRecord = await program.account.claimRecord.fetch(claimRecordPda)
+      expect(claimRecord.user.toBase58()).toEqual(raffleFan.publicKey.toBase58())
+      expect(claimRecord.amount.toNumber()).toEqual(3_500_000)
+    }, TIMEOUT)
+
+    it('claim_with_raffle fails if raffle not resolved', async () => {
+      // Create RaffleRecord for raffleFan3 but skip callback
+      const [raffleRecord3Pda] = deriveRaffleRecord(vault4Pda, raffleFan3.publicKey)
+
+      await program.methods
+        .requestRaffle(1) // tier = base
+        .accounts({
+          fan: raffleFan3.publicKey,
+          admin: admin.publicKey,
+          vault: vault4Pda,
+          raffleRecord: raffleRecord3Pda,
+          oracleQueue: admin.publicKey,
+          programIdentity: admin.publicKey,
+          slotHashes: admin.publicKey,
+          systemProgram: SystemProgram.programId,
+        })
+        .signers([raffleFan3])
+        .rpc()
+
+      // Create a dummy NFT for fan3
+      const fan3Asset = generateSigner(umi)
+      await create(umi, {
+        asset: fan3Asset,
+        name: 'Fan3 Blind Box',
+        uri: 'https://test.com/metadata.json',
+        owner: toUmiPublicKey(raffleFan3.publicKey.toBase58()),
+        updateAuthority: toUmiPublicKey(admin.publicKey.toBase58()),
+      }).sendAndConfirm(umi)
+
+      const [claimRecord3Pda] = deriveClaimRecord(vault4Pda, raffleFan3.publicKey)
+      const fan3Ata = anchor.utils.token.associatedAddress({
+        mint: usdcMint,
+        owner: raffleFan3.publicKey,
+      })
+
+      // Attempt claim without callback → should fail with RaffleNotResolved
+      await expect(
+        program.methods
+          .claimWithRaffle()
+          .accounts({
+            admin: admin.publicKey,
+            fan: raffleFan3.publicKey,
+            vault: vault4Pda,
+            raffleRecord: raffleRecord3Pda,
+            claimRecord: claimRecord3Pda,
+            vaultTokenAccount: vault4Ata,
+            fanTokenAccount: fan3Ata,
+            usdcMint,
+            nftAsset: new PublicKey(fan3Asset.publicKey),
+            systemProgram: SystemProgram.programId,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+          })
+          .signers([raffleFan3])
+          .rpc(),
+      ).rejects.toThrow(/RaffleNotResolved/)
     }, TIMEOUT)
   })
 })

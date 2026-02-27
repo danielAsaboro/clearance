@@ -43,7 +43,7 @@ export async function GET(
       );
     }).length;
 
-    const { tier, reward } = calculateTier(correctVotes);
+    const { tier } = calculateTier(correctVotes);
 
     gameResult = await prisma.gameResult.update({
       where: { id: gameResult.id },
@@ -51,7 +51,7 @@ export async function GET(
         totalVotes: votes.length,
         correctVotes,
         tier,
-        rewardAmount: reward,
+        rewardAmount: 0,
       },
     });
   }

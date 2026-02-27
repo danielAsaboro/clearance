@@ -57,7 +57,7 @@ export async function POST(
       );
     }).length;
 
-    const { tier, reward } = calculateTier(correctVotes);
+    const { tier } = calculateTier(correctVotes);
 
     await prisma.gameResult.update({
       where: { id: gr.id },
@@ -65,7 +65,7 @@ export async function POST(
         totalVotes: votes.length,
         correctVotes,
         tier,
-        rewardAmount: reward,
+        rewardAmount: 0, // VRF raffle determines reward at reveal time
       },
     });
   }

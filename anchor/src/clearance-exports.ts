@@ -6,6 +6,7 @@ import {
   PublicKey,
   SystemProgram,
   Transaction,
+  sendAndConfirmTransaction,
 } from '@solana/web3.js'
 import {
   TOKEN_PROGRAM_ID,
@@ -72,6 +73,63 @@ export function getClaimRecordAddress(
 }
 
 /**
+ * Derive the fan deposit record PDA for a given vault + fan.
+ */
+export function getFanDepositRecordAddress(
+  vault: PublicKey,
+  fan: PublicKey,
+): [PublicKey, number] {
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from('deposit'), vault.toBuffer(), fan.toBuffer()],
+    CLEARANCE_PROGRAM_ID,
+  )
+}
+
+/**
+ * Build an unsigned `fan_deposit` transaction.
+ * The fan must sign and submit it. No admin signature required.
+ */
+export async function buildFanDepositTransaction({
+  connection,
+  program,
+  fanPublicKey,
+  sessionId,
+  usdcMint,
+  amount,
+}: {
+  connection: Connection
+  program: Program<Clearance>
+  fanPublicKey: PublicKey
+  sessionId: number
+  usdcMint: PublicKey
+  amount: number
+}): Promise<Transaction> {
+  const [vaultPda] = getVaultAddress(sessionId)
+  const [depositRecordPda] = getFanDepositRecordAddress(vaultPda, fanPublicKey)
+  const vaultAta = getAssociatedTokenAddressSync(usdcMint, vaultPda, true)
+  const fanAta = getAssociatedTokenAddressSync(usdcMint, fanPublicKey)
+
+  const ix = await program.methods
+    .fanDeposit(new BN(amount))
+    .accountsPartial({
+      fan: fanPublicKey,
+      vault: vaultPda,
+      depositRecord: depositRecordPda,
+      fanTokenAccount: fanAta,
+      vaultTokenAccount: vaultAta,
+      tokenProgram: TOKEN_PROGRAM_ID,
+      systemProgram: SystemProgram.programId,
+    })
+    .instruction()
+
+  const tx = new Transaction().add(ix)
+  tx.feePayer = fanPublicKey
+  tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
+
+  return tx
+}
+
+/**
  * Build a partially-signed `claim_with_nft` transaction.
  * Admin signs; the returned tx still needs the user's signature.
  */
@@ -124,4 +182,266 @@ export async function buildClaimWithNftTransaction({
   tx.partialSign(admin)
 
   return tx
+}
+
+/**
+ * Derive the raffle record PDA for a given vault + fan.
+ */
+export function getRaffleRecordAddress(
+  vault: PublicKey,
+  fan: PublicKey,
+): [PublicKey, number] {
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from('raffle'), vault.toBuffer(), fan.toBuffer()],
+    CLEARANCE_PROGRAM_ID,
+  )
+}
+
+/**
+ * Build a partially-signed `request_raffle` transaction.
+ * Admin co-signs to attest the fan's tier. Fan must sign before submitting.
+ */
+export async function buildRequestRaffleTransaction({
+  connection,
+  program,
+  admin,
+  fanPublicKey,
+  sessionId,
+  tier,
+}: {
+  connection: Connection
+  program: Program<Clearance>
+  admin: Keypair
+  fanPublicKey: PublicKey
+  sessionId: number
+  tier: number
+}): Promise<Transaction> {
+  const [vaultPda] = getVaultAddress(sessionId)
+  const [raffleRecordPda] = getRaffleRecordAddress(vaultPda, fanPublicKey)
+
+  const ix = await program.methods
+    .requestRaffle(tier)
+    .accountsPartial({
+      fan: fanPublicKey,
+      admin: admin.publicKey,
+      vault: vaultPda,
+      raffleRecord: raffleRecordPda,
+      oracleQueue: admin.publicKey, // placeholder — production uses real oracle queue
+      programIdentity: admin.publicKey, // placeholder — production uses program identity PDA
+      slotHashes: admin.publicKey, // placeholder — production uses slot hashes sysvar
+      systemProgram: SystemProgram.programId,
+    })
+    .instruction()
+
+  const tx = new Transaction().add(ix)
+  tx.feePayer = fanPublicKey
+  tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
+
+  // Admin partially signs (fan must sign before submitting)
+  tx.partialSign(admin)
+
+  return tx
+}
+
+/**
+ * Build a partially-signed `claim_with_raffle` transaction.
+ * Admin signs; the returned tx still needs the fan's signature.
+ * No `amount` parameter — reads reward_amount from RaffleRecord on-chain.
+ */
+export async function buildClaimWithRaffleTransaction({
+  connection,
+  program,
+  admin,
+  fanPublicKey,
+  sessionId,
+  nftAsset,
+  usdcMint,
+}: {
+  connection: Connection
+  program: Program<Clearance>
+  admin: Keypair
+  fanPublicKey: PublicKey
+  sessionId: number
+  nftAsset: PublicKey
+  usdcMint: PublicKey
+}): Promise<Transaction> {
+  const [vaultPda] = getVaultAddress(sessionId)
+  const [raffleRecordPda] = getRaffleRecordAddress(vaultPda, fanPublicKey)
+  const [claimRecordPda] = getClaimRecordAddress(vaultPda, fanPublicKey)
+  const vaultAta = getAssociatedTokenAddressSync(usdcMint, vaultPda, true)
+  const fanAta = getAssociatedTokenAddressSync(usdcMint, fanPublicKey)
+
+  const ix = await program.methods
+    .claimWithRaffle()
+    .accountsPartial({
+      admin: admin.publicKey,
+      fan: fanPublicKey,
+      vault: vaultPda,
+      raffleRecord: raffleRecordPda,
+      claimRecord: claimRecordPda,
+      vaultTokenAccount: vaultAta,
+      fanTokenAccount: fanAta,
+      usdcMint,
+      nftAsset,
+      systemProgram: SystemProgram.programId,
+      tokenProgram: TOKEN_PROGRAM_ID,
+      associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+    })
+    .instruction()
+
+  const tx = new Transaction().add(ix)
+  tx.feePayer = admin.publicKey
+  tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
+
+  // Admin partially signs (fan must sign before submitting)
+  tx.partialSign(admin)
+
+  return tx
+}
+
+/**
+ * Build and submit an `initialize_vault` transaction.
+ * Admin signs and submits directly (no co-sign needed).
+ * Returns the vault PDA address.
+ */
+export async function buildInitializeVaultTransaction({
+  connection,
+  program,
+  admin,
+  sessionId,
+  usdcMint,
+}: {
+  connection: Connection
+  program: Program<Clearance>
+  admin: Keypair
+  sessionId: number
+  usdcMint: PublicKey
+}): Promise<{ vaultPda: PublicKey; txSignature: string }> {
+  const [vaultPda] = getVaultAddress(sessionId)
+  const vaultAta = getAssociatedTokenAddressSync(usdcMint, vaultPda, true)
+
+  const ix = await program.methods
+    .initializeVault(new BN(sessionId))
+    .accountsPartial({
+      admin: admin.publicKey,
+      vault: vaultPda,
+      vaultTokenAccount: vaultAta,
+      usdcMint,
+      systemProgram: SystemProgram.programId,
+      tokenProgram: TOKEN_PROGRAM_ID,
+      associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+    })
+    .instruction()
+
+  const tx = new Transaction().add(ix)
+  const txSignature = await sendAndConfirmTransaction(connection, tx, [admin])
+
+  return { vaultPda, txSignature }
+}
+
+/**
+ * Build and submit an admin `deposit` transaction.
+ * Admin signs and submits directly (no co-sign needed).
+ * Returns the tx signature.
+ */
+export async function buildAdminDepositTransaction({
+  connection,
+  program,
+  admin,
+  sessionId,
+  usdcMint,
+  amount,
+}: {
+  connection: Connection
+  program: Program<Clearance>
+  admin: Keypair
+  sessionId: number
+  usdcMint: PublicKey
+  amount: number
+}): Promise<string> {
+  const [vaultPda] = getVaultAddress(sessionId)
+  const vaultAta = getAssociatedTokenAddressSync(usdcMint, vaultPda, true)
+  const adminAta = getAssociatedTokenAddressSync(usdcMint, admin.publicKey)
+
+  const ix = await program.methods
+    .deposit(new BN(amount))
+    .accountsPartial({
+      admin: admin.publicKey,
+      vault: vaultPda,
+      adminTokenAccount: adminAta,
+      vaultTokenAccount: vaultAta,
+      tokenProgram: TOKEN_PROGRAM_ID,
+    })
+    .instruction()
+
+  const tx = new Transaction().add(ix)
+  return sendAndConfirmTransaction(connection, tx, [admin])
+}
+
+/**
+ * Build and submit a `callback_raffle` transaction.
+ * In testing mode, admin acts as the VRF oracle identity.
+ * Returns the tx signature.
+ */
+export async function buildCallbackRaffleTransaction({
+  connection,
+  program,
+  admin,
+  fanPublicKey,
+  sessionId,
+  randomness,
+}: {
+  connection: Connection
+  program: Program<Clearance>
+  admin: Keypair
+  fanPublicKey: PublicKey
+  sessionId: number
+  randomness: number[]
+}): Promise<string> {
+  const [vaultPda] = getVaultAddress(sessionId)
+  const [raffleRecordPda] = getRaffleRecordAddress(vaultPda, fanPublicKey)
+
+  const ix = await program.methods
+    .callbackRaffle(randomness)
+    .accountsPartial({
+      vrfProgramIdentity: admin.publicKey,
+      raffleRecord: raffleRecordPda,
+    })
+    .instruction()
+
+  const tx = new Transaction().add(ix)
+  return sendAndConfirmTransaction(connection, tx, [admin])
+}
+
+/**
+ * Fetch a RaffleRecord from the chain. Returns null if not found.
+ */
+export async function fetchRaffleRecord(
+  program: Program<Clearance>,
+  vaultPda: PublicKey,
+  fanPubkey: PublicKey,
+): Promise<{
+  fan: PublicKey
+  vault: PublicKey
+  sessionId: number
+  tier: number
+  rewardAmount: number
+  resolved: boolean
+  bump: number
+} | null> {
+  const [raffleRecordPda] = getRaffleRecordAddress(vaultPda, fanPubkey)
+  try {
+    const record = await program.account.raffleRecord.fetch(raffleRecordPda)
+    return {
+      fan: record.fan,
+      vault: record.vault,
+      sessionId: (record.sessionId as BN).toNumber(),
+      tier: record.tier,
+      rewardAmount: (record.rewardAmount as BN).toNumber(),
+      resolved: record.resolved,
+      bump: record.bump,
+    }
+  } catch {
+    return null
+  }
 }

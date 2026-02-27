@@ -4,8 +4,13 @@ import { getAuthUser } from "@/lib/auth-helpers";
 import { canLateJoin, getCurrentRound } from "@/lib/session-engine";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { trackAction } from "@/lib/torque";
+import { buildFanDepositTx } from "@/lib/vault-claim";
+
+const ENTRY_FEE_USDC = 3.5;
 
 // POST /api/sessions/:id/join — Fan joins a session
+// Returns an unsigned fan_deposit transaction for the fan to sign.
+// GameResult is created only after on-chain confirmation (handled separately or by frontend polling).
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -35,25 +40,54 @@ export async function POST(
   });
 
   if (existing) {
-    return NextResponse.json(existing);
+    const isLateJoin = session.status === "live" && canLateJoin(session);
+    const joinedAtRound = isLateJoin ? getCurrentRound(session) : 1;
+    return NextResponse.json({ ...existing, joinedAtRound, alreadyJoined: true });
   }
 
-  const isLateJoin = session.status === "live" && canLateJoin(session);
-  const joinedAtRound = isLateJoin ? getCurrentRound(session) : 1;
+  if (!user.walletAddress) {
+    return NextResponse.json({ error: "Wallet not connected" }, { status: 400 });
+  }
 
-  const gameResult = await prisma.gameResult.create({
-    data: {
-      userId: user.id,
-      sessionId: id,
-      walletAddress: user.walletAddress,
-      lateJoin: isLateJoin,
-    },
-  });
+  // Build unsigned fan_deposit transaction for fan to sign
+  try {
+    const unsignedTx = await buildFanDepositTx({
+      fanWalletAddress: user.walletAddress,
+      sessionWeekNumber: session.weekNumber,
+      amountUsdc: ENTRY_FEE_USDC,
+    });
 
-  // Fire-and-forget: track loyalty action via Torque
-  if (user.walletAddress) {
+    const isLateJoin = session.status === "live" && canLateJoin(session);
+    const joinedAtRound = isLateJoin ? getCurrentRound(session) : 1;
+
+    // Fire-and-forget: track loyalty action via Torque
     trackAction(user.walletAddress, "session_join");
-  }
 
-  return NextResponse.json({ ...gameResult, joinedAtRound }, { status: 201 });
+    return NextResponse.json(
+      {
+        unsignedTx,
+        entryFeeUsdc: ENTRY_FEE_USDC,
+        sessionId: id,
+        joinedAtRound,
+        requiresSignature: true,
+      },
+      { status: 200 }
+    );
+  } catch (err) {
+    console.error("[join] buildFanDepositTx failed:", err);
+    // Fallback: create GameResult without on-chain deposit (dev/test mode)
+    const isLateJoin = session.status === "live" && canLateJoin(session);
+    const joinedAtRound = isLateJoin ? getCurrentRound(session) : 1;
+
+    const gameResult = await prisma.gameResult.create({
+      data: {
+        userId: user.id,
+        sessionId: id,
+        walletAddress: user.walletAddress,
+        lateJoin: isLateJoin,
+      },
+    });
+
+    return NextResponse.json({ ...gameResult, joinedAtRound }, { status: 201 });
+  }
 }

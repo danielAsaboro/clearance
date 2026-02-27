@@ -60,7 +60,7 @@ The Clearance bridges this gap by creating a structured, time-bound campaign whe
 | Structured path to earn debt relief through content creation | Gamified voting experience with real stakes |
 | Amplified reach via the `#theclearanceNG` hashtag campaign | Earn Blind Box NFTs with real USDC value based on voting accuracy |
 | Referral tools to mobilize fan support | Tradable NFT assets (unopened blind boxes) |
-| | Risk/reward dynamic: $3.50 entry, up to $3.50 reward |
+| | Raffle-based reward: $3.50 entry, tiered blind box reveal with up to $3.50 payout |
 
 ---
 
@@ -146,14 +146,14 @@ When a fan clicks **"Join Now"**, before entering Game Mode they go through a br
 1. Fan is prompted to **connect their wallet** via Privy (embedded wallet or Phantom).
 2. Platform checks the fan's USDC balance.
 3. If balance ≥ $3.50 USDC:
-   - A clear **entry confirmation screen** is shown: _"Joining this session costs $3.50 USDC, which is added to the reward pool. You may win up to $3.50 USDC back based on your voting accuracy."_
+   - A clear **entry confirmation screen** is shown: _"Joining this session costs $3.50 USDC, which is added to the reward pool. You may win up to $3.50 USDC back. Your voting accuracy determines your Blind Box tier; a raffle at reveal determines your exact reward."_
    - Fan confirms. $3.50 USDC is deducted from their wallet and added to the **session reward pool**.
    - Fan enters Game Mode.
 4. If balance < $3.50 USDC:
    - A **friendly, styled notification** is shown: _"You don't have enough USDC to join this session. You need at least $3.50 USDC. Head to the Mint Page to get some test USDC."_
    - A prominent **"Get USDC →"** button links to the Mint Page.
 
-> **Note:** The $3.50 entry fee is a core mechanic — it equals the Gold Blind Box reward value, meaning a perfect-scoring fan breaks even, and a Base Blind Box winner receives $1.75 USDC back on a $3.50 stake.
+> **Note:** The $3.50 entry fee is a core mechanic. Gold Box holders have a 10% chance of breaking even ($3.50 back) and a 90% chance of getting $1.75 back. Base Box holders have a 10% chance of getting $1.75 back.
 
 #### 3.3.3 Step 3 — Session Participation (Game Mode)
 
@@ -179,13 +179,17 @@ Fans predict which videos will be selected as winning entries by the platform ju
 
 #### 3.3.4 Step 4 — Results & Blind Box NFT Rewards
 
-At the end of the session, results are calculated and each participating fan receives one **Blind Box NFT** based on voting accuracy:
+At the end of the session, results are calculated and each participating fan receives one **Blind Box NFT** based on voting accuracy. Earning a tier is only the first step — the actual USDC payout is determined by a **raffle at reveal**:
 
-| Accuracy Threshold | Reward Tier | USDC Value |
-| :----------------- | :---------- | :--------- |
-| ≥ 21 out of 28 correct (75%) | **Gold Blind Box** | **$3.50 USDC** |
-| ≥ 10 out of 28 correct (~36%) | **Base Blind Box** | **$1.75 USDC** |
-| < 10 correct | **Participation NFT** | $0 — Proof of attendance only |
+| Accuracy | Tier Earned | Reveal Outcome (Raffle) | Payout |
+| :------- | :---------- | :---------------------- | :----- |
+| ≥ 21/28 (75%) | **Gold Blind Box** | 10% chance | $3.50 USDC |
+| ≥ 21/28 (75%) | **Gold Blind Box** | 90% chance | $1.75 USDC |
+| ≥ 10/28 (36%) | **Base Blind Box** | 10% chance | $1.75 USDC |
+| ≥ 10/28 (36%) | **Base Blind Box** | 90% chance | $0 (Participation) |
+| < 10/28 | **Participation NFT** | — | $0 |
+
+> Earning a Gold or Base Blind Box does not guarantee a fixed payout. The tier earned determines probabilities — the actual value is revealed when the fan opens their box. This is the core "blind box" mechanic.
 
 The results screen shows a full **accuracy breakdown** and the fan's **Blind Box tier reveal**.
 
@@ -196,7 +200,7 @@ After results are calculated:
 1. Fans are prompted to **mint their Blind Box** as an NFT (wallet must be connected via Privy or Phantom).
 2. **Unopened Blind Boxes** can be listed and traded on supported external NFT marketplaces (e.g., Magic Eden).
 3. Once **opened ("revealed")**, the NFT:
-   - Shows the reward USDC amount.
+   - Shows the raffle-determined USDC amount based on the fan's tier.
    - Becomes **soulbound (non-transferable)**.
    - Unlocks the **USDC claim flow** (on-chain SPL token transfer from the treasury).
 4. Opened NFTs remain in the user's wallet as permanent proof of participation.
@@ -304,7 +308,7 @@ The platform uses a **platform-issued fake USDC token** for the MVP. This is a s
 | **NFT Program** | Metaplex Core |
 | **Blind Box Types** | Gold Blind Box, Base Blind Box, Participation NFT |
 | **Soulbound Logic** | Applied on reveal — NFT becomes non-transferable after opening |
-| **Reveal Mechanism** | Admin-triggered post-session (MVP). On-chain randomness post-MVP. |
+| **Reveal Mechanism** | Admin-triggered post-session (MVP). On-chain randomness post-MVP. Reveal applies raffle probabilities per tier: Gold Box — 10% receive $3.50 / 90% receive $1.75; Base Box — 10% receive $1.75 / 90% receive $0. |
 | **USDC Distribution** | On-chain SPL token transfer from pre-funded treasury wallet on claim |
 
 ### 6.4 Session Economics
@@ -312,10 +316,21 @@ The platform uses a **platform-issued fake USDC token** for the MVP. This is a s
 | Parameter | Value |
 | :-------- | :---- |
 | **Fan Entry Fee** | $3.50 USDC per session |
-| **Gold Blind Box Value** | $3.50 USDC (break-even for a fan with 75%+ accuracy) |
-| **Base Blind Box Value** | $1.75 USDC |
-| **Participation NFT Value** | $0 (no monetary value) |
 | **Treasury Funding** | Admin pre-loads USDC into the contract treasury before each session |
+
+**Raffle Distribution Table:**
+
+| Tier | Raffle Split | Payout |
+| :--- | :----------- | :----- |
+| Gold Blind Box | 10% of Gold winners | $3.50 USDC |
+| Gold Blind Box | 90% of Gold winners | $1.75 USDC |
+| Base Blind Box | 10% of Base winners | $1.75 USDC |
+| Base Blind Box | 90% of Base winners | $0 |
+| Participation NFT | — | $0 |
+
+**Expected Values:**
+- Gold Box: (0.10 × $3.50) + (0.90 × $1.75) = $0.35 + $1.575 = **$1.925**
+- Base Box: (0.10 × $1.75) + (0.90 × $0) = **$0.175**
 
 ---
 
@@ -336,6 +351,7 @@ The platform uses a **platform-issued fake USDC token** for the MVP. This is a s
 | 11 | Fan entry mechanism not defined | Fans pay $3.50 USDC on session join. Fee added to reward pool. Insufficient balance triggers a friendly notification with a link to the Mint Page. |
 | 12 | Test USDC token not defined | Platform-issued fake USDC on Solana. Mint Authority: `DYbPcr6TNCbsdwdKZEJQqNUEFthyPZoigrT17MNdJieL`. Mint Address: `Gn5mJ41R8PFTP35t1nB2hJW5hqnLFX4WcocA9hBs6c96`. Keys stored in `anchor/keys/`. |
 | 13 | No faucet for fans to obtain test USDC | Mint Page added: a dedicated UI where fans can mint test USDC directly to their connected wallet. |
+| 14 | Pool reward distribution method not defined | Raffle-within-tier mechanic. Gold Box: 10% get $3.50 / 90% get $1.75. Base Box: 10% get $1.75 / 90% get $0. |
 
 ---
 

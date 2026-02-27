@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Eye, Menu, X } from 'lucide-react'
 import { ThemeSelect } from '@/components/theme-select'
 import { ClusterUiSelect } from './cluster/cluster-ui'
+import { WalletButton } from './solana/solana-provider'
 
 export function AppHeader({ links = [] }: { links: { label: string; path: string }[] }) {
   const pathname = usePathname()
@@ -45,6 +46,7 @@ export function AppHeader({ links = [] }: { links: { label: string; path: string
         </button>
 
         <div className="hidden md:flex items-center gap-2">
+          <WalletButton />
           <ClusterUiSelect />
           <ThemeSelect />
         </div>
@@ -65,6 +67,7 @@ export function AppHeader({ links = [] }: { links: { label: string; path: string
                   </li>
                 ))}
               </ul>
+              <WalletButton />
               <div className="flex items-center gap-2">
                 <ClusterUiSelect />
                 <ThemeSelect />

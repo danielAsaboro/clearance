@@ -122,18 +122,18 @@ describe("Session Engine", () => {
 
   describe("calculateTier", () => {
     it("returns gold for 21+ correct votes", () => {
-      expect(calculateTier(21)).toEqual({ tier: "gold", reward: 3.5 });
-      expect(calculateTier(28)).toEqual({ tier: "gold", reward: 3.5 });
+      expect(calculateTier(21)).toEqual({ tier: "gold" });
+      expect(calculateTier(28)).toEqual({ tier: "gold" });
     });
 
     it("returns base for 10-20 correct votes", () => {
-      expect(calculateTier(10)).toEqual({ tier: "base", reward: 1.75 });
-      expect(calculateTier(20)).toEqual({ tier: "base", reward: 1.75 });
+      expect(calculateTier(10)).toEqual({ tier: "base" });
+      expect(calculateTier(20)).toEqual({ tier: "base" });
     });
 
     it("returns participation for <10 correct votes", () => {
-      expect(calculateTier(0)).toEqual({ tier: "participation", reward: 0 });
-      expect(calculateTier(9)).toEqual({ tier: "participation", reward: 0 });
+      expect(calculateTier(0)).toEqual({ tier: "participation" });
+      expect(calculateTier(9)).toEqual({ tier: "participation" });
     });
   });
 

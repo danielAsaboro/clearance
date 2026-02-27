@@ -45,11 +45,14 @@ export function canLateJoin(session: WeeklySession): boolean {
 
 export function calculateTier(correctVotes: number): {
   tier: "participation" | "base" | "gold";
-  reward: number;
 } {
-  if (correctVotes >= 21) return { tier: "gold", reward: 3.5 };
-  if (correctVotes >= 10) return { tier: "base", reward: 1.75 };
-  return { tier: "participation", reward: 0 };
+  if (correctVotes >= 21) {
+    return { tier: "gold" };
+  }
+  if (correctVotes >= 10) {
+    return { tier: "base" };
+  }
+  return { tier: "participation" };
 }
 
 export function generateCalendarICS(session: {

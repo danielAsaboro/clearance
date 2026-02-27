@@ -92,19 +92,7 @@ export default function BlindBoxCard({
             {tier === "gold" ? "Gold Tier" : "Base Tier"}
           </p>
 
-          {!revealed && (
-            <button
-              onClick={handleReveal}
-              disabled={isRevealing}
-              className={`px-8 py-3 rounded-xl font-bold text-sm transition-all ${
-                tier === "gold"
-                  ? "bg-yellow-400 text-black hover:shadow-[0_0_20px_rgba(250,204,21,0.4)]"
-                  : "btn-yellow"
-              } ${isRevealing ? "animate-pulse" : ""}`}
-            >
-              {isRevealing ? "Revealing..." : "Tap to Reveal"}
-            </button>
-          )}
+          {/* Internal reveal button hidden — rewards page controls reveal flow via raffle */}
         </div>
 
         {/* Back — Revealed */}

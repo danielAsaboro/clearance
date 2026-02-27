@@ -5,6 +5,7 @@ import { getUmi, getMintAuthority } from "@/lib/solana";
 import { revealBlindBox } from "@/lib/nft";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { trackAction } from "@/lib/torque";
+import { fetchRaffleRecordOnChain } from "@/lib/vault-claim";
 
 // POST /api/nft/reveal — Reveal a Blind Box NFT
 export async function POST(req: NextRequest) {
@@ -40,6 +41,33 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "NFT already revealed" }, { status: 409 });
   }
 
+  const walletAddress = user.walletAddress ?? gameResult.walletAddress;
+
+  // Fetch RaffleRecord from chain — reward is determined by VRF, not Prisma
+  let rewardAmount = gameResult.rewardAmount;
+  if (walletAddress) {
+    try {
+      const raffleRecord = await fetchRaffleRecordOnChain({
+        fanWalletAddress: walletAddress,
+        sessionWeekNumber: gameResult.session.weekNumber,
+      });
+
+      if (raffleRecord && !raffleRecord.resolved) {
+        return NextResponse.json(
+          { error: "Raffle not yet resolved" },
+          { status: 400 }
+        );
+      }
+
+      if (raffleRecord?.resolved) {
+        rewardAmount = raffleRecord.rewardAmount / 1_000_000;
+      }
+    } catch (err) {
+      console.error("Failed to fetch raffle record:", err);
+      // Fall through — use Prisma rewardAmount as fallback
+    }
+  }
+
   try {
     const umi = getUmi();
     getMintAuthority(); // ensure signer is initialized
@@ -55,7 +83,7 @@ export async function POST(req: NextRequest) {
 
     await prisma.gameResult.update({
       where: { id: gameResultId },
-      data: { nftRevealed: true },
+      data: { nftRevealed: true, rewardAmount },
     });
 
     // Fire-and-forget: track loyalty action via Torque
@@ -66,7 +94,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       revealed: true,
       tier: gameResult.tier,
-      rewardAmount: gameResult.rewardAmount,
+      rewardAmount,
       tokenId: gameResult.nftTokenId,
     });
   } catch (error) {

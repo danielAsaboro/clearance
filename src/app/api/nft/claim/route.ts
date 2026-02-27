@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAuthUser } from "@/lib/auth-helpers";
 import { claimUsdcSchema } from "@/lib/validators";
-import { buildClaimWithNftTx } from "@/lib/vault-claim";
+import { buildClaimWithRaffleTx } from "@/lib/vault-claim";
 import { checkRateLimit } from "@/lib/rate-limit";
 
-// POST /api/nft/claim — Build a partially-signed vault claim_with_nft tx
+// POST /api/nft/claim — Build a partially-signed vault claim_with_raffle tx
 export async function POST(req: NextRequest) {
   const user = await getAuthUser(req);
   if (!user) {
@@ -73,11 +73,10 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const transaction = await buildClaimWithNftTx({
+    const transaction = await buildClaimWithRaffleTx({
       userWalletAddress: walletAddress,
       nftAssetAddress: gameResult.nftTokenId,
       sessionWeekNumber: gameResult.session.weekNumber,
-      amountUsdc: gameResult.rewardAmount,
     });
 
     return NextResponse.json({
