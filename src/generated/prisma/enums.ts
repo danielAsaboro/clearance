@@ -60,3 +60,12 @@ export const RewardTier = {
 } as const
 
 export type RewardTier = (typeof RewardTier)[keyof typeof RewardTier]
+
+
+export const CampaignStatus = {
+  upcoming: 'upcoming',
+  active: 'active',
+  completed: 'completed'
+} as const
+
+export type CampaignStatus = (typeof CampaignStatus)[keyof typeof CampaignStatus]

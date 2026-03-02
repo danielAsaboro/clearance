@@ -42,6 +42,12 @@ enum RewardTier {
   gold
 }
 
+enum CampaignStatus {
+  upcoming
+  active
+  completed
+}
+
 model User {
   id               String   @id @default(cuid())
   email            String?  @unique
@@ -60,11 +66,14 @@ model User {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
+  categories       Json?
+
   tasks            Task[]
   votes            Vote[]
   gameResults      GameResult[]
   referralsMade    Referral[] @relation("Referrer")
   referralReceived Referral?  @relation("Referred")
+  enrollments      CampaignEnrollment[]
 }
 
 model Task {
@@ -96,6 +105,8 @@ model WeeklySession {
   lateJoinCutoff    DateTime?
   collectionAddress String?
   vaultAddress      String?
+  campaignId        String?
+  campaign          Campaign?     @relation(fields: [campaignId], references: [id])
 
   rounds         SessionRound[]
   gameResults    GameResult[]
@@ -161,4 +172,36 @@ model Referral {
   referredUser   User     @relation("Referred", fields: [referredUserId], references: [id])
   code           String
   createdAt      DateTime @default(now())
+}
+
+model Campaign {
+  id                      String          @id @default(cuid())
+  cycleNumber             Int             @unique
+  title                   String
+  startDate               DateTime
+  endDate                 DateTime
+  status                  CampaignStatus  @default(upcoming)
+  durationWeeks           Int
+  sessionsPerCycle        Int
+  videosPerSession        Int
+  votingRoundDurationSecs Int             @default(30)
+  tasksPerWeekPerCreator  Int
+  submissionDeadlineHours Int
+  createdAt               DateTime        @default(now())
+  updatedAt               DateTime        @updatedAt
+
+  sessions    WeeklySession[]
+  enrollments CampaignEnrollment[]
+}
+
+model CampaignEnrollment {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id])
+  role       UserRole
+  enrolledAt DateTime @default(now())
+
+  @@unique([userId, campaignId])
 }

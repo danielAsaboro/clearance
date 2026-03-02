@@ -40,13 +40,13 @@ export default async function ReferralPage({
 
       <div className="w-full max-w-sm space-y-3">
         <a
-          href="/onboarding/step1?role=creator"
+          href="/onboarding/categories?role=creator"
           className="btn-yellow w-full rounded-xl py-4 font-bold text-base flex items-center justify-center"
         >
           Join as Creator
         </a>
         <a
-          href="/arena"
+          href="/onboarding/categories?role=fan"
           className="w-full bg-[#1A1A1A] rounded-xl py-4 font-bold text-base text-white border border-[#2A2A2A] flex items-center justify-center"
         >
           Join as Fan

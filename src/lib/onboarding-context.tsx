@@ -3,6 +3,8 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
 export interface OnboardingData {
+  categories: string[];
+  email: string;
   debtSources: string[];
   willingToDeclare: boolean | null;
   displayName: string;
@@ -12,6 +14,8 @@ export interface OnboardingData {
 }
 
 const defaultData: OnboardingData = {
+  categories: [],
+  email: "",
   debtSources: [],
   willingToDeclare: null,
   displayName: "",

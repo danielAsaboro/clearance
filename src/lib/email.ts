@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { campaignConfig } from "@/lib/campaign-config";
 
 let _resend: Resend | null = null;
 function getResend(): Resend {
@@ -66,7 +67,8 @@ export async function sendResultsReady(
   week: number,
   correctVotes: number,
   tier: string,
-  rewardAmount: number
+  rewardAmount: number,
+  totalRounds: number = campaignConfig.videosPerLiveSession
 ): Promise<boolean> {
   try {
     const tierLabel = tier === "gold" ? "Gold" : tier === "base" ? "Base" : "Participation";
@@ -85,7 +87,7 @@ export async function sendResultsReady(
           <p style="color:#888;text-align:center;margin:0 0 32px;font-size:14px;">${title} — Week ${week}</p>
           <div style="background:#1A1A1A;border-radius:16px;padding:24px;margin-bottom:24px;text-align:center;">
             <p style="color:#888;font-size:12px;text-transform:uppercase;letter-spacing:1px;margin:0 0 8px;">Correct Votes</p>
-            <p style="color:#F5E642;font-size:36px;font-weight:bold;margin:0 0 16px;">${correctVotes}/28</p>
+            <p style="color:#F5E642;font-size:36px;font-weight:bold;margin:0 0 16px;">${correctVotes}/${totalRounds}</p>
             <div style="display:inline-block;background:${tierColor}20;border:1px solid ${tierColor}50;border-radius:8px;padding:8px 16px;">
               <span style="color:${tierColor};font-weight:bold;font-size:14px;">${tierLabel} Tier</span>
             </div>

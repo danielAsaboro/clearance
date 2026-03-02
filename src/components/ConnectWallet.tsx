@@ -49,7 +49,8 @@ export default function ConnectWallet() {
 
   const shortAddress = `${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}`;
 
-  const walletType = solanaWallet?.walletClientType;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const walletType = (solanaWallet as any)?.walletClientType as string | undefined;
   const walletName =
     walletType === "privy"
       ? "Privy Wallet"

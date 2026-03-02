@@ -18,12 +18,10 @@ export default function OnboardingLayout({
     if (!ready) return;
 
     if (!authenticated) {
-      // Not logged in — send back to home to sign in first
       router.replace("/");
       return;
     }
 
-    // Check if this user already completed onboarding
     getAccessToken()
       .then((token) =>
         fetch("/api/users", {
@@ -33,8 +31,12 @@ export default function OnboardingLayout({
       .then((res) => (res.ok ? res.json() : null))
       .then((profile) => {
         if (profile?.consentAccepted) {
-          // Already onboarded — skip straight to hub
-          router.replace("/creator-hub");
+          // Already onboarded — route based on role
+          if (profile.role === "creator") {
+            router.replace("/creator-hub");
+          } else {
+            router.replace("/arena");
+          }
         } else {
           setChecking(false);
         }

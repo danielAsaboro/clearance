@@ -77,6 +77,7 @@ export type UserCountAggregateOutputType = {
   referredBy: number
   createdAt: number
   updatedAt: number
+  categories: number
   _all: number
 }
 
@@ -134,6 +135,7 @@ export type UserCountAggregateInputType = {
   referredBy?: true
   createdAt?: true
   updatedAt?: true
+  categories?: true
   _all?: true
 }
 
@@ -226,6 +228,7 @@ export type UserGroupByOutputType = {
   referredBy: string | null
   createdAt: Date
   updatedAt: Date
+  categories: runtime.JsonValue | null
   _count: UserCountAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
   _max: UserMaxAggregateOutputType | null
@@ -266,11 +269,13 @@ export type UserWhereInput = {
   referredBy?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  categories?: Prisma.JsonNullableFilter<"User">
   tasks?: Prisma.TaskListRelationFilter
   votes?: Prisma.VoteListRelationFilter
   gameResults?: Prisma.GameResultListRelationFilter
   referralsMade?: Prisma.ReferralListRelationFilter
   referralReceived?: Prisma.XOR<Prisma.ReferralNullableScalarRelationFilter, Prisma.ReferralWhereInput> | null
+  enrollments?: Prisma.CampaignEnrollmentListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -290,11 +295,13 @@ export type UserOrderByWithRelationInput = {
   referredBy?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  categories?: Prisma.SortOrderInput | Prisma.SortOrder
   tasks?: Prisma.TaskOrderByRelationAggregateInput
   votes?: Prisma.VoteOrderByRelationAggregateInput
   gameResults?: Prisma.GameResultOrderByRelationAggregateInput
   referralsMade?: Prisma.ReferralOrderByRelationAggregateInput
   referralReceived?: Prisma.ReferralOrderByWithRelationInput
+  enrollments?: Prisma.CampaignEnrollmentOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -317,11 +324,13 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   referredBy?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  categories?: Prisma.JsonNullableFilter<"User">
   tasks?: Prisma.TaskListRelationFilter
   votes?: Prisma.VoteListRelationFilter
   gameResults?: Prisma.GameResultListRelationFilter
   referralsMade?: Prisma.ReferralListRelationFilter
   referralReceived?: Prisma.XOR<Prisma.ReferralNullableScalarRelationFilter, Prisma.ReferralWhereInput> | null
+  enrollments?: Prisma.CampaignEnrollmentListRelationFilter
 }, "id" | "email" | "privyId" | "referralCode">
 
 export type UserOrderByWithAggregationInput = {
@@ -341,6 +350,7 @@ export type UserOrderByWithAggregationInput = {
   referredBy?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  categories?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
   _min?: Prisma.UserMinOrderByAggregateInput
@@ -366,6 +376,7 @@ export type UserScalarWhereWithAggregatesInput = {
   referredBy?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
+  categories?: Prisma.JsonNullableWithAggregatesFilter<"User">
 }
 
 export type UserCreateInput = {
@@ -385,11 +396,13 @@ export type UserCreateInput = {
   referredBy?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tasks?: Prisma.TaskCreateNestedManyWithoutCreatorInput
   votes?: Prisma.VoteCreateNestedManyWithoutUserInput
   gameResults?: Prisma.GameResultCreateNestedManyWithoutUserInput
   referralsMade?: Prisma.ReferralCreateNestedManyWithoutReferrerInput
   referralReceived?: Prisma.ReferralCreateNestedOneWithoutReferredUserInput
+  enrollments?: Prisma.CampaignEnrollmentCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -409,11 +422,13 @@ export type UserUncheckedCreateInput = {
   referredBy?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatorInput
   votes?: Prisma.VoteUncheckedCreateNestedManyWithoutUserInput
   gameResults?: Prisma.GameResultUncheckedCreateNestedManyWithoutUserInput
   referralsMade?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferrerInput
   referralReceived?: Prisma.ReferralUncheckedCreateNestedOneWithoutReferredUserInput
+  enrollments?: Prisma.CampaignEnrollmentUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -433,11 +448,13 @@ export type UserUpdateInput = {
   referredBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tasks?: Prisma.TaskUpdateManyWithoutCreatorNestedInput
   votes?: Prisma.VoteUpdateManyWithoutUserNestedInput
   gameResults?: Prisma.GameResultUpdateManyWithoutUserNestedInput
   referralsMade?: Prisma.ReferralUpdateManyWithoutReferrerNestedInput
   referralReceived?: Prisma.ReferralUpdateOneWithoutReferredUserNestedInput
+  enrollments?: Prisma.CampaignEnrollmentUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -457,11 +474,13 @@ export type UserUncheckedUpdateInput = {
   referredBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatorNestedInput
   votes?: Prisma.VoteUncheckedUpdateManyWithoutUserNestedInput
   gameResults?: Prisma.GameResultUncheckedUpdateManyWithoutUserNestedInput
   referralsMade?: Prisma.ReferralUncheckedUpdateManyWithoutReferrerNestedInput
   referralReceived?: Prisma.ReferralUncheckedUpdateOneWithoutReferredUserNestedInput
+  enrollments?: Prisma.CampaignEnrollmentUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -481,6 +500,7 @@ export type UserCreateManyInput = {
   referredBy?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type UserUpdateManyMutationInput = {
@@ -500,6 +520,7 @@ export type UserUpdateManyMutationInput = {
   referredBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type UserUncheckedUpdateManyInput = {
@@ -519,6 +540,7 @@ export type UserUncheckedUpdateManyInput = {
   referredBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type UserCountOrderByAggregateInput = {
@@ -538,6 +560,7 @@ export type UserCountOrderByAggregateInput = {
   referredBy?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  categories?: Prisma.SortOrder
 }
 
 export type UserMaxOrderByAggregateInput = {
@@ -675,6 +698,20 @@ export type UserUpdateOneRequiredWithoutReferralReceivedNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutReferralReceivedInput, Prisma.UserUpdateWithoutReferralReceivedInput>, Prisma.UserUncheckedUpdateWithoutReferralReceivedInput>
 }
 
+export type UserCreateNestedOneWithoutEnrollmentsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutEnrollmentsInput, Prisma.UserUncheckedCreateWithoutEnrollmentsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutEnrollmentsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutEnrollmentsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutEnrollmentsInput, Prisma.UserUncheckedCreateWithoutEnrollmentsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutEnrollmentsInput
+  upsert?: Prisma.UserUpsertWithoutEnrollmentsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutEnrollmentsInput, Prisma.UserUpdateWithoutEnrollmentsInput>, Prisma.UserUncheckedUpdateWithoutEnrollmentsInput>
+}
+
 export type UserCreateWithoutTasksInput = {
   id?: string
   email?: string | null
@@ -692,10 +729,12 @@ export type UserCreateWithoutTasksInput = {
   referredBy?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   votes?: Prisma.VoteCreateNestedManyWithoutUserInput
   gameResults?: Prisma.GameResultCreateNestedManyWithoutUserInput
   referralsMade?: Prisma.ReferralCreateNestedManyWithoutReferrerInput
   referralReceived?: Prisma.ReferralCreateNestedOneWithoutReferredUserInput
+  enrollments?: Prisma.CampaignEnrollmentCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTasksInput = {
@@ -715,10 +754,12 @@ export type UserUncheckedCreateWithoutTasksInput = {
   referredBy?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   votes?: Prisma.VoteUncheckedCreateNestedManyWithoutUserInput
   gameResults?: Prisma.GameResultUncheckedCreateNestedManyWithoutUserInput
   referralsMade?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferrerInput
   referralReceived?: Prisma.ReferralUncheckedCreateNestedOneWithoutReferredUserInput
+  enrollments?: Prisma.CampaignEnrollmentUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTasksInput = {
@@ -754,10 +795,12 @@ export type UserUpdateWithoutTasksInput = {
   referredBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   votes?: Prisma.VoteUpdateManyWithoutUserNestedInput
   gameResults?: Prisma.GameResultUpdateManyWithoutUserNestedInput
   referralsMade?: Prisma.ReferralUpdateManyWithoutReferrerNestedInput
   referralReceived?: Prisma.ReferralUpdateOneWithoutReferredUserNestedInput
+  enrollments?: Prisma.CampaignEnrollmentUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTasksInput = {
@@ -777,10 +820,12 @@ export type UserUncheckedUpdateWithoutTasksInput = {
   referredBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   votes?: Prisma.VoteUncheckedUpdateManyWithoutUserNestedInput
   gameResults?: Prisma.GameResultUncheckedUpdateManyWithoutUserNestedInput
   referralsMade?: Prisma.ReferralUncheckedUpdateManyWithoutReferrerNestedInput
   referralReceived?: Prisma.ReferralUncheckedUpdateOneWithoutReferredUserNestedInput
+  enrollments?: Prisma.CampaignEnrollmentUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutVotesInput = {
@@ -800,10 +845,12 @@ export type UserCreateWithoutVotesInput = {
   referredBy?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tasks?: Prisma.TaskCreateNestedManyWithoutCreatorInput
   gameResults?: Prisma.GameResultCreateNestedManyWithoutUserInput
   referralsMade?: Prisma.ReferralCreateNestedManyWithoutReferrerInput
   referralReceived?: Prisma.ReferralCreateNestedOneWithoutReferredUserInput
+  enrollments?: Prisma.CampaignEnrollmentCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutVotesInput = {
@@ -823,10 +870,12 @@ export type UserUncheckedCreateWithoutVotesInput = {
   referredBy?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatorInput
   gameResults?: Prisma.GameResultUncheckedCreateNestedManyWithoutUserInput
   referralsMade?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferrerInput
   referralReceived?: Prisma.ReferralUncheckedCreateNestedOneWithoutReferredUserInput
+  enrollments?: Prisma.CampaignEnrollmentUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutVotesInput = {
@@ -862,10 +911,12 @@ export type UserUpdateWithoutVotesInput = {
   referredBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tasks?: Prisma.TaskUpdateManyWithoutCreatorNestedInput
   gameResults?: Prisma.GameResultUpdateManyWithoutUserNestedInput
   referralsMade?: Prisma.ReferralUpdateManyWithoutReferrerNestedInput
   referralReceived?: Prisma.ReferralUpdateOneWithoutReferredUserNestedInput
+  enrollments?: Prisma.CampaignEnrollmentUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutVotesInput = {
@@ -885,10 +936,12 @@ export type UserUncheckedUpdateWithoutVotesInput = {
   referredBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatorNestedInput
   gameResults?: Prisma.GameResultUncheckedUpdateManyWithoutUserNestedInput
   referralsMade?: Prisma.ReferralUncheckedUpdateManyWithoutReferrerNestedInput
   referralReceived?: Prisma.ReferralUncheckedUpdateOneWithoutReferredUserNestedInput
+  enrollments?: Prisma.CampaignEnrollmentUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutGameResultsInput = {
@@ -908,10 +961,12 @@ export type UserCreateWithoutGameResultsInput = {
   referredBy?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tasks?: Prisma.TaskCreateNestedManyWithoutCreatorInput
   votes?: Prisma.VoteCreateNestedManyWithoutUserInput
   referralsMade?: Prisma.ReferralCreateNestedManyWithoutReferrerInput
   referralReceived?: Prisma.ReferralCreateNestedOneWithoutReferredUserInput
+  enrollments?: Prisma.CampaignEnrollmentCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutGameResultsInput = {
@@ -931,10 +986,12 @@ export type UserUncheckedCreateWithoutGameResultsInput = {
   referredBy?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatorInput
   votes?: Prisma.VoteUncheckedCreateNestedManyWithoutUserInput
   referralsMade?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferrerInput
   referralReceived?: Prisma.ReferralUncheckedCreateNestedOneWithoutReferredUserInput
+  enrollments?: Prisma.CampaignEnrollmentUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutGameResultsInput = {
@@ -970,10 +1027,12 @@ export type UserUpdateWithoutGameResultsInput = {
   referredBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tasks?: Prisma.TaskUpdateManyWithoutCreatorNestedInput
   votes?: Prisma.VoteUpdateManyWithoutUserNestedInput
   referralsMade?: Prisma.ReferralUpdateManyWithoutReferrerNestedInput
   referralReceived?: Prisma.ReferralUpdateOneWithoutReferredUserNestedInput
+  enrollments?: Prisma.CampaignEnrollmentUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutGameResultsInput = {
@@ -993,10 +1052,12 @@ export type UserUncheckedUpdateWithoutGameResultsInput = {
   referredBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatorNestedInput
   votes?: Prisma.VoteUncheckedUpdateManyWithoutUserNestedInput
   referralsMade?: Prisma.ReferralUncheckedUpdateManyWithoutReferrerNestedInput
   referralReceived?: Prisma.ReferralUncheckedUpdateOneWithoutReferredUserNestedInput
+  enrollments?: Prisma.CampaignEnrollmentUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutReferralsMadeInput = {
@@ -1016,10 +1077,12 @@ export type UserCreateWithoutReferralsMadeInput = {
   referredBy?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tasks?: Prisma.TaskCreateNestedManyWithoutCreatorInput
   votes?: Prisma.VoteCreateNestedManyWithoutUserInput
   gameResults?: Prisma.GameResultCreateNestedManyWithoutUserInput
   referralReceived?: Prisma.ReferralCreateNestedOneWithoutReferredUserInput
+  enrollments?: Prisma.CampaignEnrollmentCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutReferralsMadeInput = {
@@ -1039,10 +1102,12 @@ export type UserUncheckedCreateWithoutReferralsMadeInput = {
   referredBy?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatorInput
   votes?: Prisma.VoteUncheckedCreateNestedManyWithoutUserInput
   gameResults?: Prisma.GameResultUncheckedCreateNestedManyWithoutUserInput
   referralReceived?: Prisma.ReferralUncheckedCreateNestedOneWithoutReferredUserInput
+  enrollments?: Prisma.CampaignEnrollmentUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutReferralsMadeInput = {
@@ -1067,10 +1132,12 @@ export type UserCreateWithoutReferralReceivedInput = {
   referredBy?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tasks?: Prisma.TaskCreateNestedManyWithoutCreatorInput
   votes?: Prisma.VoteCreateNestedManyWithoutUserInput
   gameResults?: Prisma.GameResultCreateNestedManyWithoutUserInput
   referralsMade?: Prisma.ReferralCreateNestedManyWithoutReferrerInput
+  enrollments?: Prisma.CampaignEnrollmentCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutReferralReceivedInput = {
@@ -1090,10 +1157,12 @@ export type UserUncheckedCreateWithoutReferralReceivedInput = {
   referredBy?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatorInput
   votes?: Prisma.VoteUncheckedCreateNestedManyWithoutUserInput
   gameResults?: Prisma.GameResultUncheckedCreateNestedManyWithoutUserInput
   referralsMade?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferrerInput
+  enrollments?: Prisma.CampaignEnrollmentUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutReferralReceivedInput = {
@@ -1129,10 +1198,12 @@ export type UserUpdateWithoutReferralsMadeInput = {
   referredBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tasks?: Prisma.TaskUpdateManyWithoutCreatorNestedInput
   votes?: Prisma.VoteUpdateManyWithoutUserNestedInput
   gameResults?: Prisma.GameResultUpdateManyWithoutUserNestedInput
   referralReceived?: Prisma.ReferralUpdateOneWithoutReferredUserNestedInput
+  enrollments?: Prisma.CampaignEnrollmentUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReferralsMadeInput = {
@@ -1152,10 +1223,12 @@ export type UserUncheckedUpdateWithoutReferralsMadeInput = {
   referredBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatorNestedInput
   votes?: Prisma.VoteUncheckedUpdateManyWithoutUserNestedInput
   gameResults?: Prisma.GameResultUncheckedUpdateManyWithoutUserNestedInput
   referralReceived?: Prisma.ReferralUncheckedUpdateOneWithoutReferredUserNestedInput
+  enrollments?: Prisma.CampaignEnrollmentUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutReferralReceivedInput = {
@@ -1186,10 +1259,12 @@ export type UserUpdateWithoutReferralReceivedInput = {
   referredBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tasks?: Prisma.TaskUpdateManyWithoutCreatorNestedInput
   votes?: Prisma.VoteUpdateManyWithoutUserNestedInput
   gameResults?: Prisma.GameResultUpdateManyWithoutUserNestedInput
   referralsMade?: Prisma.ReferralUpdateManyWithoutReferrerNestedInput
+  enrollments?: Prisma.CampaignEnrollmentUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReferralReceivedInput = {
@@ -1209,10 +1284,128 @@ export type UserUncheckedUpdateWithoutReferralReceivedInput = {
   referredBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   tasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatorNestedInput
   votes?: Prisma.VoteUncheckedUpdateManyWithoutUserNestedInput
   gameResults?: Prisma.GameResultUncheckedUpdateManyWithoutUserNestedInput
   referralsMade?: Prisma.ReferralUncheckedUpdateManyWithoutReferrerNestedInput
+  enrollments?: Prisma.CampaignEnrollmentUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutEnrollmentsInput = {
+  id?: string
+  email?: string | null
+  phone?: string | null
+  displayName?: string | null
+  profilePhoto?: string | null
+  tiktokUsername?: string | null
+  role?: $Enums.UserRole
+  debtSources?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  willingToDeclare?: boolean | null
+  consentAccepted?: boolean
+  privyId: string
+  walletAddress?: string | null
+  referralCode: string
+  referredBy?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  tasks?: Prisma.TaskCreateNestedManyWithoutCreatorInput
+  votes?: Prisma.VoteCreateNestedManyWithoutUserInput
+  gameResults?: Prisma.GameResultCreateNestedManyWithoutUserInput
+  referralsMade?: Prisma.ReferralCreateNestedManyWithoutReferrerInput
+  referralReceived?: Prisma.ReferralCreateNestedOneWithoutReferredUserInput
+}
+
+export type UserUncheckedCreateWithoutEnrollmentsInput = {
+  id?: string
+  email?: string | null
+  phone?: string | null
+  displayName?: string | null
+  profilePhoto?: string | null
+  tiktokUsername?: string | null
+  role?: $Enums.UserRole
+  debtSources?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  willingToDeclare?: boolean | null
+  consentAccepted?: boolean
+  privyId: string
+  walletAddress?: string | null
+  referralCode: string
+  referredBy?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  tasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatorInput
+  votes?: Prisma.VoteUncheckedCreateNestedManyWithoutUserInput
+  gameResults?: Prisma.GameResultUncheckedCreateNestedManyWithoutUserInput
+  referralsMade?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferrerInput
+  referralReceived?: Prisma.ReferralUncheckedCreateNestedOneWithoutReferredUserInput
+}
+
+export type UserCreateOrConnectWithoutEnrollmentsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutEnrollmentsInput, Prisma.UserUncheckedCreateWithoutEnrollmentsInput>
+}
+
+export type UserUpsertWithoutEnrollmentsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutEnrollmentsInput, Prisma.UserUncheckedUpdateWithoutEnrollmentsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutEnrollmentsInput, Prisma.UserUncheckedCreateWithoutEnrollmentsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutEnrollmentsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutEnrollmentsInput, Prisma.UserUncheckedUpdateWithoutEnrollmentsInput>
+}
+
+export type UserUpdateWithoutEnrollmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profilePhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tiktokUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  debtSources?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  willingToDeclare?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  consentAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  privyId?: Prisma.StringFieldUpdateOperationsInput | string
+  walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  referralCode?: Prisma.StringFieldUpdateOperationsInput | string
+  referredBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  tasks?: Prisma.TaskUpdateManyWithoutCreatorNestedInput
+  votes?: Prisma.VoteUpdateManyWithoutUserNestedInput
+  gameResults?: Prisma.GameResultUpdateManyWithoutUserNestedInput
+  referralsMade?: Prisma.ReferralUpdateManyWithoutReferrerNestedInput
+  referralReceived?: Prisma.ReferralUpdateOneWithoutReferredUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutEnrollmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profilePhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tiktokUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  debtSources?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  willingToDeclare?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  consentAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  privyId?: Prisma.StringFieldUpdateOperationsInput | string
+  walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  referralCode?: Prisma.StringFieldUpdateOperationsInput | string
+  referredBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  tasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatorNestedInput
+  votes?: Prisma.VoteUncheckedUpdateManyWithoutUserNestedInput
+  gameResults?: Prisma.GameResultUncheckedUpdateManyWithoutUserNestedInput
+  referralsMade?: Prisma.ReferralUncheckedUpdateManyWithoutReferrerNestedInput
+  referralReceived?: Prisma.ReferralUncheckedUpdateOneWithoutReferredUserNestedInput
 }
 
 
@@ -1225,6 +1418,7 @@ export type UserCountOutputType = {
   votes: number
   gameResults: number
   referralsMade: number
+  enrollments: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1232,6 +1426,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   votes?: boolean | UserCountOutputTypeCountVotesArgs
   gameResults?: boolean | UserCountOutputTypeCountGameResultsArgs
   referralsMade?: boolean | UserCountOutputTypeCountReferralsMadeArgs
+  enrollments?: boolean | UserCountOutputTypeCountEnrollmentsArgs
 }
 
 /**
@@ -1272,6 +1467,13 @@ export type UserCountOutputTypeCountReferralsMadeArgs<ExtArgs extends runtime.Ty
   where?: Prisma.ReferralWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountEnrollmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CampaignEnrollmentWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1290,11 +1492,13 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   referredBy?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  categories?: boolean
   tasks?: boolean | Prisma.User$tasksArgs<ExtArgs>
   votes?: boolean | Prisma.User$votesArgs<ExtArgs>
   gameResults?: boolean | Prisma.User$gameResultsArgs<ExtArgs>
   referralsMade?: boolean | Prisma.User$referralsMadeArgs<ExtArgs>
   referralReceived?: boolean | Prisma.User$referralReceivedArgs<ExtArgs>
+  enrollments?: boolean | Prisma.User$enrollmentsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1315,6 +1519,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   referredBy?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  categories?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1334,6 +1539,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   referredBy?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  categories?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectScalar = {
@@ -1353,15 +1559,17 @@ export type UserSelectScalar = {
   referredBy?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  categories?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "phone" | "displayName" | "profilePhoto" | "tiktokUsername" | "role" | "debtSources" | "willingToDeclare" | "consentAccepted" | "privyId" | "walletAddress" | "referralCode" | "referredBy" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "phone" | "displayName" | "profilePhoto" | "tiktokUsername" | "role" | "debtSources" | "willingToDeclare" | "consentAccepted" | "privyId" | "walletAddress" | "referralCode" | "referredBy" | "createdAt" | "updatedAt" | "categories", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tasks?: boolean | Prisma.User$tasksArgs<ExtArgs>
   votes?: boolean | Prisma.User$votesArgs<ExtArgs>
   gameResults?: boolean | Prisma.User$gameResultsArgs<ExtArgs>
   referralsMade?: boolean | Prisma.User$referralsMadeArgs<ExtArgs>
   referralReceived?: boolean | Prisma.User$referralReceivedArgs<ExtArgs>
+  enrollments?: boolean | Prisma.User$enrollmentsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1375,6 +1583,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     gameResults: Prisma.$GameResultPayload<ExtArgs>[]
     referralsMade: Prisma.$ReferralPayload<ExtArgs>[]
     referralReceived: Prisma.$ReferralPayload<ExtArgs> | null
+    enrollments: Prisma.$CampaignEnrollmentPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1393,6 +1602,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     referredBy: string | null
     createdAt: Date
     updatedAt: Date
+    categories: runtime.JsonValue | null
   }, ExtArgs["result"]["user"]>
   composites: {}
 }
@@ -1792,6 +2002,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   gameResults<T extends Prisma.User$gameResultsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$gameResultsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GameResultPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   referralsMade<T extends Prisma.User$referralsMadeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$referralsMadeArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReferralPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   referralReceived<T extends Prisma.User$referralReceivedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$referralReceivedArgs<ExtArgs>>): Prisma.Prisma__ReferralClient<runtime.Types.Result.GetResult<Prisma.$ReferralPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  enrollments<T extends Prisma.User$enrollmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$enrollmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CampaignEnrollmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1837,6 +2048,7 @@ export interface UserFieldRefs {
   readonly referredBy: Prisma.FieldRef<"User", 'String'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
+  readonly categories: Prisma.FieldRef<"User", 'Json'>
 }
     
 
@@ -2337,6 +2549,30 @@ export type User$referralReceivedArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   include?: Prisma.ReferralInclude<ExtArgs> | null
   where?: Prisma.ReferralWhereInput
+}
+
+/**
+ * User.enrollments
+ */
+export type User$enrollmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CampaignEnrollment
+   */
+  select?: Prisma.CampaignEnrollmentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CampaignEnrollment
+   */
+  omit?: Prisma.CampaignEnrollmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CampaignEnrollmentInclude<ExtArgs> | null
+  where?: Prisma.CampaignEnrollmentWhereInput
+  orderBy?: Prisma.CampaignEnrollmentOrderByWithRelationInput | Prisma.CampaignEnrollmentOrderByWithRelationInput[]
+  cursor?: Prisma.CampaignEnrollmentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CampaignEnrollmentScalarFieldEnum | Prisma.CampaignEnrollmentScalarFieldEnum[]
 }
 
 /**

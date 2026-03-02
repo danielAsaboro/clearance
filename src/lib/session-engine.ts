@@ -1,4 +1,5 @@
 import type { WeeklySession } from "@/generated/prisma/client";
+import { campaignConfig } from "@/lib/campaign-config";
 
 export type SessionState = "future" | "today-waiting" | "live" | "ended";
 
@@ -22,13 +23,16 @@ export function getSessionState(session: WeeklySession): SessionState {
 
 export function getCurrentRound(
   session: WeeklySession,
-  roundDuration: number = 30
+  roundDuration: number = campaignConfig.votingRoundDurationSeconds
 ): number {
   if (session.status !== "live") return 0;
   const now = new Date();
   const start = new Date(session.scheduledAt);
   const elapsed = Math.floor((now.getTime() - start.getTime()) / 1000);
-  return Math.min(Math.floor(elapsed / roundDuration) + 1, 28);
+  return Math.min(
+    Math.floor(elapsed / roundDuration) + 1,
+    campaignConfig.videosPerLiveSession
+  );
 }
 
 export function canLateJoin(session: WeeklySession): boolean {
@@ -43,13 +47,19 @@ export function canLateJoin(session: WeeklySession): boolean {
   return elapsed < 3600;
 }
 
-export function calculateTier(correctVotes: number): {
+export function calculateTier(
+  correctVotes: number,
+  totalRounds: number = campaignConfig.videosPerLiveSession
+): {
   tier: "participation" | "base" | "gold";
 } {
-  if (correctVotes >= 21) {
+  const goldThreshold = Math.ceil(totalRounds * 0.75);
+  const baseThreshold = Math.ceil(totalRounds * 0.36);
+
+  if (correctVotes >= goldThreshold) {
     return { tier: "gold" };
   }
-  if (correctVotes >= 10) {
+  if (correctVotes >= baseThreshold) {
     return { tier: "base" };
   }
   return { tier: "participation" };
@@ -60,7 +70,12 @@ export function generateCalendarICS(session: {
   scheduledAt: Date;
 }): string {
   const start = new Date(session.scheduledAt);
-  const end = new Date(start.getTime() + 28 * 30 * 1000); // 28 rounds * 30s
+  const end = new Date(
+    start.getTime() +
+      campaignConfig.videosPerLiveSession *
+        campaignConfig.votingRoundDurationSeconds *
+        1000
+  );
 
   const fmt = (d: Date) =>
     d
