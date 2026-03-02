@@ -7,6 +7,7 @@ import {
   SystemProgram,
   Transaction,
   sendAndConfirmTransaction,
+  SYSVAR_SLOT_HASHES_PUBKEY,
 } from '@solana/web3.js'
 import {
   TOKEN_PROGRAM_ID,
@@ -19,6 +20,13 @@ import type { Clearance } from '../target/types/clearance'
 export { Clearance, ClearanceIDL }
 
 export const CLEARANCE_PROGRAM_ID = new PublicKey(ClearanceIDL.address)
+
+const VRF_PROGRAM_ID = new PublicKey('Vrf1RNUjXmQGjmQrQLvJHs9SNkvDJEsRVFPkfSQUwGz')
+const VRF_DEFAULT_QUEUE = new PublicKey('Cuj97ggrhhidhbu39TijNVqE74xvKJ69gDervRUXAxGh')
+const [PROGRAM_IDENTITY_PDA] = PublicKey.findProgramAddressSync(
+  [Buffer.from('identity')],
+  CLEARANCE_PROGRAM_ID,
+)
 
 export const MPL_CORE_PROGRAM_ID = new PublicKey(
   'CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d',
@@ -208,6 +216,7 @@ export async function buildRequestRaffleTransaction({
   fanPublicKey,
   sessionId,
   tier,
+  blockhash,
 }: {
   connection: Connection
   program: Program<Clearance>
@@ -215,6 +224,8 @@ export async function buildRequestRaffleTransaction({
   fanPublicKey: PublicKey
   sessionId: number
   tier: number
+  /** Optional pre-fetched blockhash; avoids an extra getLatestBlockhash RPC call. */
+  blockhash?: string
 }): Promise<Transaction> {
   const [vaultPda] = getVaultAddress(sessionId)
   const [raffleRecordPda] = getRaffleRecordAddress(vaultPda, fanPublicKey)
@@ -226,16 +237,21 @@ export async function buildRequestRaffleTransaction({
       admin: admin.publicKey,
       vault: vaultPda,
       raffleRecord: raffleRecordPda,
-      oracleQueue: admin.publicKey, // placeholder — production uses real oracle queue
-      programIdentity: admin.publicKey, // placeholder — production uses program identity PDA
-      slotHashes: admin.publicKey, // placeholder — production uses slot hashes sysvar
+      oracleQueue: VRF_DEFAULT_QUEUE,
+      programIdentity: PROGRAM_IDENTITY_PDA,
+      slotHashes: SYSVAR_SLOT_HASHES_PUBKEY,
       systemProgram: SystemProgram.programId,
     })
+    // The VRF program must be in the outer transaction's account list so the
+    // runtime can resolve it when invoke_signed CPIs into it.
+    .remainingAccounts([
+      { pubkey: VRF_PROGRAM_ID, isWritable: false, isSigner: false },
+    ])
     .instruction()
 
   const tx = new Transaction().add(ix)
   tx.feePayer = fanPublicKey
-  tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
+  tx.recentBlockhash = blockhash ?? (await connection.getLatestBlockhash()).blockhash
 
   // Admin partially signs (fan must sign before submitting)
   tx.partialSign(admin)
@@ -256,6 +272,7 @@ export async function buildClaimWithRaffleTransaction({
   sessionId,
   nftAsset,
   usdcMint,
+  blockhash,
 }: {
   connection: Connection
   program: Program<Clearance>
@@ -264,6 +281,8 @@ export async function buildClaimWithRaffleTransaction({
   sessionId: number
   nftAsset: PublicKey
   usdcMint: PublicKey
+  /** Optional pre-fetched blockhash; avoids an extra getLatestBlockhash RPC call. */
+  blockhash?: string
 }): Promise<Transaction> {
   const [vaultPda] = getVaultAddress(sessionId)
   const [raffleRecordPda] = getRaffleRecordAddress(vaultPda, fanPublicKey)
@@ -291,7 +310,7 @@ export async function buildClaimWithRaffleTransaction({
 
   const tx = new Transaction().add(ix)
   tx.feePayer = admin.publicKey
-  tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
+  tx.recentBlockhash = blockhash ?? (await connection.getLatestBlockhash()).blockhash
 
   // Admin partially signs (fan must sign before submitting)
   tx.partialSign(admin)
