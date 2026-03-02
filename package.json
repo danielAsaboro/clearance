@@ -10,6 +10,8 @@
     "dev": "next dev --turbopack",
     "dev:local": "bash scripts/dev-local.sh",
     "setup-demo": "npx tsx --env-file=.env.local scripts/setup-demo.ts",
+    "smoke:devnet": "CLUSTER=devnet npx tsx --env-file=.env.local scripts/devnet-raffle-smoke.ts",
+    "smoke:localnet": "CLUSTER=localnet npx tsx --env-file=.env.local scripts/devnet-raffle-smoke.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint",

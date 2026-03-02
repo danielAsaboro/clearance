@@ -8,6 +8,9 @@ skip-lint = false
 [programs.localnet]
 clearance = "D3pfeCb4sgYoHWXcYbeKtQbUSJBoDPorp6kETv1SexxU"
 
+[programs.devnet]
+clearance = "D3pfeCb4sgYoHWXcYbeKtQbUSJBoDPorp6kETv1SexxU"
+
 [registry]
 url = "https://api.apr.dev"
 
