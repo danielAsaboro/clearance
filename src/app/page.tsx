@@ -44,20 +44,32 @@ export default function Home() {
       .finally(() => setLoadingProfile(false));
   }, [authenticated, getAccessToken]);
 
-  // Determine where Creator button should go:
-  // - If not authenticated → start onboarding
-  // - If authenticated and already onboarded → go straight to creator-hub
-  // - If authenticated but not onboarded yet → continue onboarding
+  // Determine where Creator button should go
   const creatorHref = !authenticated
-    ? "/onboarding/step1?role=creator"
-    : profile?.consentAccepted
+    ? "/onboarding/categories?role=creator"
+    : profile?.consentAccepted && profile?.role === "creator"
     ? "/creator-hub"
-    : "/onboarding/step1?role=creator";
+    : "/onboarding/categories?role=creator";
 
   const creatorSubtext = !authenticated
     ? "Upload content & earn prizes"
-    : profile?.consentAccepted
+    : profile?.consentAccepted && profile?.role === "creator"
     ? "Go to Creator Hub"
+    : "Complete your registration";
+
+  // Determine where Fan button should go
+  const fanHref = !authenticated
+    ? "/onboarding/categories?role=fan"
+    : profile?.consentAccepted && profile?.role === "fan"
+    ? "/arena"
+    : profile?.consentAccepted
+    ? "/arena"
+    : "/onboarding/categories?role=fan";
+
+  const fanSubtext = !authenticated
+    ? "Vote on content & win NFTs"
+    : profile?.consentAccepted
+    ? "Go to Arena"
     : "Complete your registration";
 
   // Role is locked once onboarding is complete
@@ -109,14 +121,14 @@ export default function Home() {
 
         {/* Fan button — hidden if user is locked as creator */}
         {!isCreator && (
-          <Link href="/arena">
+          <Link href={loadingProfile ? "#" : fanHref}>
             <div className="bg-[#1A1A1A] rounded-2xl p-5 flex items-center gap-4 cursor-pointer border border-[#2A2A2A] card-hover">
               <div className="w-10 h-10 bg-[#2A2A2A] rounded-xl flex items-center justify-center">
                 <Eye className="w-5 h-5 text-[#F5E642]" />
               </div>
               <div>
                 <h3 className="font-bold text-lg text-white">Fan</h3>
-                <p className="text-sm text-[#888]">Vote on content & win NFTs</p>
+                <p className="text-sm text-[#888]">{fanSubtext}</p>
               </div>
             </div>
           </Link>

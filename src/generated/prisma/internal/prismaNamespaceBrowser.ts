@@ -57,7 +57,9 @@ export const ModelName = {
   SessionRound: 'SessionRound',
   Vote: 'Vote',
   GameResult: 'GameResult',
-  Referral: 'Referral'
+  Referral: 'Referral',
+  Campaign: 'Campaign',
+  CampaignEnrollment: 'CampaignEnrollment'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -92,7 +94,8 @@ export const UserScalarFieldEnum = {
   referralCode: 'referralCode',
   referredBy: 'referredBy',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  categories: 'categories'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -126,7 +129,8 @@ export const WeeklySessionScalarFieldEnum = {
   status: 'status',
   lateJoinCutoff: 'lateJoinCutoff',
   collectionAddress: 'collectionAddress',
-  vaultAddress: 'vaultAddress'
+  vaultAddress: 'vaultAddress',
+  campaignId: 'campaignId'
 } as const
 
 export type WeeklySessionScalarFieldEnum = (typeof WeeklySessionScalarFieldEnum)[keyof typeof WeeklySessionScalarFieldEnum]
@@ -188,6 +192,37 @@ export const ReferralScalarFieldEnum = {
 } as const
 
 export type ReferralScalarFieldEnum = (typeof ReferralScalarFieldEnum)[keyof typeof ReferralScalarFieldEnum]
+
+
+export const CampaignScalarFieldEnum = {
+  id: 'id',
+  cycleNumber: 'cycleNumber',
+  title: 'title',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  status: 'status',
+  durationWeeks: 'durationWeeks',
+  sessionsPerCycle: 'sessionsPerCycle',
+  videosPerSession: 'videosPerSession',
+  votingRoundDurationSecs: 'votingRoundDurationSecs',
+  tasksPerWeekPerCreator: 'tasksPerWeekPerCreator',
+  submissionDeadlineHours: 'submissionDeadlineHours',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CampaignScalarFieldEnum = (typeof CampaignScalarFieldEnum)[keyof typeof CampaignScalarFieldEnum]
+
+
+export const CampaignEnrollmentScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  campaignId: 'campaignId',
+  role: 'role',
+  enrolledAt: 'enrolledAt'
+} as const
+
+export type CampaignEnrollmentScalarFieldEnum = (typeof CampaignEnrollmentScalarFieldEnum)[keyof typeof CampaignEnrollmentScalarFieldEnum]
 
 
 export const SortOrder = {

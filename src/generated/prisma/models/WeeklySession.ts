@@ -43,6 +43,7 @@ export type WeeklySessionMinAggregateOutputType = {
   lateJoinCutoff: Date | null
   collectionAddress: string | null
   vaultAddress: string | null
+  campaignId: string | null
 }
 
 export type WeeklySessionMaxAggregateOutputType = {
@@ -54,6 +55,7 @@ export type WeeklySessionMaxAggregateOutputType = {
   lateJoinCutoff: Date | null
   collectionAddress: string | null
   vaultAddress: string | null
+  campaignId: string | null
 }
 
 export type WeeklySessionCountAggregateOutputType = {
@@ -65,6 +67,7 @@ export type WeeklySessionCountAggregateOutputType = {
   lateJoinCutoff: number
   collectionAddress: number
   vaultAddress: number
+  campaignId: number
   _all: number
 }
 
@@ -86,6 +89,7 @@ export type WeeklySessionMinAggregateInputType = {
   lateJoinCutoff?: true
   collectionAddress?: true
   vaultAddress?: true
+  campaignId?: true
 }
 
 export type WeeklySessionMaxAggregateInputType = {
@@ -97,6 +101,7 @@ export type WeeklySessionMaxAggregateInputType = {
   lateJoinCutoff?: true
   collectionAddress?: true
   vaultAddress?: true
+  campaignId?: true
 }
 
 export type WeeklySessionCountAggregateInputType = {
@@ -108,6 +113,7 @@ export type WeeklySessionCountAggregateInputType = {
   lateJoinCutoff?: true
   collectionAddress?: true
   vaultAddress?: true
+  campaignId?: true
   _all?: true
 }
 
@@ -206,6 +212,7 @@ export type WeeklySessionGroupByOutputType = {
   lateJoinCutoff: Date | null
   collectionAddress: string | null
   vaultAddress: string | null
+  campaignId: string | null
   _count: WeeklySessionCountAggregateOutputType | null
   _avg: WeeklySessionAvgAggregateOutputType | null
   _sum: WeeklySessionSumAggregateOutputType | null
@@ -240,6 +247,8 @@ export type WeeklySessionWhereInput = {
   lateJoinCutoff?: Prisma.DateTimeNullableFilter<"WeeklySession"> | Date | string | null
   collectionAddress?: Prisma.StringNullableFilter<"WeeklySession"> | string | null
   vaultAddress?: Prisma.StringNullableFilter<"WeeklySession"> | string | null
+  campaignId?: Prisma.StringNullableFilter<"WeeklySession"> | string | null
+  campaign?: Prisma.XOR<Prisma.CampaignNullableScalarRelationFilter, Prisma.CampaignWhereInput> | null
   rounds?: Prisma.SessionRoundListRelationFilter
   gameResults?: Prisma.GameResultListRelationFilter
 }
@@ -253,6 +262,8 @@ export type WeeklySessionOrderByWithRelationInput = {
   lateJoinCutoff?: Prisma.SortOrderInput | Prisma.SortOrder
   collectionAddress?: Prisma.SortOrderInput | Prisma.SortOrder
   vaultAddress?: Prisma.SortOrderInput | Prisma.SortOrder
+  campaignId?: Prisma.SortOrderInput | Prisma.SortOrder
+  campaign?: Prisma.CampaignOrderByWithRelationInput
   rounds?: Prisma.SessionRoundOrderByRelationAggregateInput
   gameResults?: Prisma.GameResultOrderByRelationAggregateInput
 }
@@ -269,6 +280,8 @@ export type WeeklySessionWhereUniqueInput = Prisma.AtLeast<{
   lateJoinCutoff?: Prisma.DateTimeNullableFilter<"WeeklySession"> | Date | string | null
   collectionAddress?: Prisma.StringNullableFilter<"WeeklySession"> | string | null
   vaultAddress?: Prisma.StringNullableFilter<"WeeklySession"> | string | null
+  campaignId?: Prisma.StringNullableFilter<"WeeklySession"> | string | null
+  campaign?: Prisma.XOR<Prisma.CampaignNullableScalarRelationFilter, Prisma.CampaignWhereInput> | null
   rounds?: Prisma.SessionRoundListRelationFilter
   gameResults?: Prisma.GameResultListRelationFilter
 }, "id" | "weekNumber">
@@ -282,6 +295,7 @@ export type WeeklySessionOrderByWithAggregationInput = {
   lateJoinCutoff?: Prisma.SortOrderInput | Prisma.SortOrder
   collectionAddress?: Prisma.SortOrderInput | Prisma.SortOrder
   vaultAddress?: Prisma.SortOrderInput | Prisma.SortOrder
+  campaignId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.WeeklySessionCountOrderByAggregateInput
   _avg?: Prisma.WeeklySessionAvgOrderByAggregateInput
   _max?: Prisma.WeeklySessionMaxOrderByAggregateInput
@@ -301,6 +315,7 @@ export type WeeklySessionScalarWhereWithAggregatesInput = {
   lateJoinCutoff?: Prisma.DateTimeNullableWithAggregatesFilter<"WeeklySession"> | Date | string | null
   collectionAddress?: Prisma.StringNullableWithAggregatesFilter<"WeeklySession"> | string | null
   vaultAddress?: Prisma.StringNullableWithAggregatesFilter<"WeeklySession"> | string | null
+  campaignId?: Prisma.StringNullableWithAggregatesFilter<"WeeklySession"> | string | null
 }
 
 export type WeeklySessionCreateInput = {
@@ -312,6 +327,7 @@ export type WeeklySessionCreateInput = {
   lateJoinCutoff?: Date | string | null
   collectionAddress?: string | null
   vaultAddress?: string | null
+  campaign?: Prisma.CampaignCreateNestedOneWithoutSessionsInput
   rounds?: Prisma.SessionRoundCreateNestedManyWithoutSessionInput
   gameResults?: Prisma.GameResultCreateNestedManyWithoutSessionInput
 }
@@ -325,6 +341,7 @@ export type WeeklySessionUncheckedCreateInput = {
   lateJoinCutoff?: Date | string | null
   collectionAddress?: string | null
   vaultAddress?: string | null
+  campaignId?: string | null
   rounds?: Prisma.SessionRoundUncheckedCreateNestedManyWithoutSessionInput
   gameResults?: Prisma.GameResultUncheckedCreateNestedManyWithoutSessionInput
 }
@@ -338,6 +355,7 @@ export type WeeklySessionUpdateInput = {
   lateJoinCutoff?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vaultAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  campaign?: Prisma.CampaignUpdateOneWithoutSessionsNestedInput
   rounds?: Prisma.SessionRoundUpdateManyWithoutSessionNestedInput
   gameResults?: Prisma.GameResultUpdateManyWithoutSessionNestedInput
 }
@@ -351,6 +369,7 @@ export type WeeklySessionUncheckedUpdateInput = {
   lateJoinCutoff?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vaultAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  campaignId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rounds?: Prisma.SessionRoundUncheckedUpdateManyWithoutSessionNestedInput
   gameResults?: Prisma.GameResultUncheckedUpdateManyWithoutSessionNestedInput
 }
@@ -364,6 +383,7 @@ export type WeeklySessionCreateManyInput = {
   lateJoinCutoff?: Date | string | null
   collectionAddress?: string | null
   vaultAddress?: string | null
+  campaignId?: string | null
 }
 
 export type WeeklySessionUpdateManyMutationInput = {
@@ -386,6 +406,7 @@ export type WeeklySessionUncheckedUpdateManyInput = {
   lateJoinCutoff?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vaultAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  campaignId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type WeeklySessionCountOrderByAggregateInput = {
@@ -397,6 +418,7 @@ export type WeeklySessionCountOrderByAggregateInput = {
   lateJoinCutoff?: Prisma.SortOrder
   collectionAddress?: Prisma.SortOrder
   vaultAddress?: Prisma.SortOrder
+  campaignId?: Prisma.SortOrder
 }
 
 export type WeeklySessionAvgOrderByAggregateInput = {
@@ -412,6 +434,7 @@ export type WeeklySessionMaxOrderByAggregateInput = {
   lateJoinCutoff?: Prisma.SortOrder
   collectionAddress?: Prisma.SortOrder
   vaultAddress?: Prisma.SortOrder
+  campaignId?: Prisma.SortOrder
 }
 
 export type WeeklySessionMinOrderByAggregateInput = {
@@ -423,6 +446,7 @@ export type WeeklySessionMinOrderByAggregateInput = {
   lateJoinCutoff?: Prisma.SortOrder
   collectionAddress?: Prisma.SortOrder
   vaultAddress?: Prisma.SortOrder
+  campaignId?: Prisma.SortOrder
 }
 
 export type WeeklySessionSumOrderByAggregateInput = {
@@ -432,6 +456,16 @@ export type WeeklySessionSumOrderByAggregateInput = {
 export type WeeklySessionScalarRelationFilter = {
   is?: Prisma.WeeklySessionWhereInput
   isNot?: Prisma.WeeklySessionWhereInput
+}
+
+export type WeeklySessionListRelationFilter = {
+  every?: Prisma.WeeklySessionWhereInput
+  some?: Prisma.WeeklySessionWhereInput
+  none?: Prisma.WeeklySessionWhereInput
+}
+
+export type WeeklySessionOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type EnumSessionStatusFieldUpdateOperationsInput = {
@@ -466,6 +500,48 @@ export type WeeklySessionUpdateOneRequiredWithoutGameResultsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.WeeklySessionUpdateToOneWithWhereWithoutGameResultsInput, Prisma.WeeklySessionUpdateWithoutGameResultsInput>, Prisma.WeeklySessionUncheckedUpdateWithoutGameResultsInput>
 }
 
+export type WeeklySessionCreateNestedManyWithoutCampaignInput = {
+  create?: Prisma.XOR<Prisma.WeeklySessionCreateWithoutCampaignInput, Prisma.WeeklySessionUncheckedCreateWithoutCampaignInput> | Prisma.WeeklySessionCreateWithoutCampaignInput[] | Prisma.WeeklySessionUncheckedCreateWithoutCampaignInput[]
+  connectOrCreate?: Prisma.WeeklySessionCreateOrConnectWithoutCampaignInput | Prisma.WeeklySessionCreateOrConnectWithoutCampaignInput[]
+  createMany?: Prisma.WeeklySessionCreateManyCampaignInputEnvelope
+  connect?: Prisma.WeeklySessionWhereUniqueInput | Prisma.WeeklySessionWhereUniqueInput[]
+}
+
+export type WeeklySessionUncheckedCreateNestedManyWithoutCampaignInput = {
+  create?: Prisma.XOR<Prisma.WeeklySessionCreateWithoutCampaignInput, Prisma.WeeklySessionUncheckedCreateWithoutCampaignInput> | Prisma.WeeklySessionCreateWithoutCampaignInput[] | Prisma.WeeklySessionUncheckedCreateWithoutCampaignInput[]
+  connectOrCreate?: Prisma.WeeklySessionCreateOrConnectWithoutCampaignInput | Prisma.WeeklySessionCreateOrConnectWithoutCampaignInput[]
+  createMany?: Prisma.WeeklySessionCreateManyCampaignInputEnvelope
+  connect?: Prisma.WeeklySessionWhereUniqueInput | Prisma.WeeklySessionWhereUniqueInput[]
+}
+
+export type WeeklySessionUpdateManyWithoutCampaignNestedInput = {
+  create?: Prisma.XOR<Prisma.WeeklySessionCreateWithoutCampaignInput, Prisma.WeeklySessionUncheckedCreateWithoutCampaignInput> | Prisma.WeeklySessionCreateWithoutCampaignInput[] | Prisma.WeeklySessionUncheckedCreateWithoutCampaignInput[]
+  connectOrCreate?: Prisma.WeeklySessionCreateOrConnectWithoutCampaignInput | Prisma.WeeklySessionCreateOrConnectWithoutCampaignInput[]
+  upsert?: Prisma.WeeklySessionUpsertWithWhereUniqueWithoutCampaignInput | Prisma.WeeklySessionUpsertWithWhereUniqueWithoutCampaignInput[]
+  createMany?: Prisma.WeeklySessionCreateManyCampaignInputEnvelope
+  set?: Prisma.WeeklySessionWhereUniqueInput | Prisma.WeeklySessionWhereUniqueInput[]
+  disconnect?: Prisma.WeeklySessionWhereUniqueInput | Prisma.WeeklySessionWhereUniqueInput[]
+  delete?: Prisma.WeeklySessionWhereUniqueInput | Prisma.WeeklySessionWhereUniqueInput[]
+  connect?: Prisma.WeeklySessionWhereUniqueInput | Prisma.WeeklySessionWhereUniqueInput[]
+  update?: Prisma.WeeklySessionUpdateWithWhereUniqueWithoutCampaignInput | Prisma.WeeklySessionUpdateWithWhereUniqueWithoutCampaignInput[]
+  updateMany?: Prisma.WeeklySessionUpdateManyWithWhereWithoutCampaignInput | Prisma.WeeklySessionUpdateManyWithWhereWithoutCampaignInput[]
+  deleteMany?: Prisma.WeeklySessionScalarWhereInput | Prisma.WeeklySessionScalarWhereInput[]
+}
+
+export type WeeklySessionUncheckedUpdateManyWithoutCampaignNestedInput = {
+  create?: Prisma.XOR<Prisma.WeeklySessionCreateWithoutCampaignInput, Prisma.WeeklySessionUncheckedCreateWithoutCampaignInput> | Prisma.WeeklySessionCreateWithoutCampaignInput[] | Prisma.WeeklySessionUncheckedCreateWithoutCampaignInput[]
+  connectOrCreate?: Prisma.WeeklySessionCreateOrConnectWithoutCampaignInput | Prisma.WeeklySessionCreateOrConnectWithoutCampaignInput[]
+  upsert?: Prisma.WeeklySessionUpsertWithWhereUniqueWithoutCampaignInput | Prisma.WeeklySessionUpsertWithWhereUniqueWithoutCampaignInput[]
+  createMany?: Prisma.WeeklySessionCreateManyCampaignInputEnvelope
+  set?: Prisma.WeeklySessionWhereUniqueInput | Prisma.WeeklySessionWhereUniqueInput[]
+  disconnect?: Prisma.WeeklySessionWhereUniqueInput | Prisma.WeeklySessionWhereUniqueInput[]
+  delete?: Prisma.WeeklySessionWhereUniqueInput | Prisma.WeeklySessionWhereUniqueInput[]
+  connect?: Prisma.WeeklySessionWhereUniqueInput | Prisma.WeeklySessionWhereUniqueInput[]
+  update?: Prisma.WeeklySessionUpdateWithWhereUniqueWithoutCampaignInput | Prisma.WeeklySessionUpdateWithWhereUniqueWithoutCampaignInput[]
+  updateMany?: Prisma.WeeklySessionUpdateManyWithWhereWithoutCampaignInput | Prisma.WeeklySessionUpdateManyWithWhereWithoutCampaignInput[]
+  deleteMany?: Prisma.WeeklySessionScalarWhereInput | Prisma.WeeklySessionScalarWhereInput[]
+}
+
 export type WeeklySessionCreateWithoutRoundsInput = {
   id?: string
   weekNumber: number
@@ -475,6 +551,7 @@ export type WeeklySessionCreateWithoutRoundsInput = {
   lateJoinCutoff?: Date | string | null
   collectionAddress?: string | null
   vaultAddress?: string | null
+  campaign?: Prisma.CampaignCreateNestedOneWithoutSessionsInput
   gameResults?: Prisma.GameResultCreateNestedManyWithoutSessionInput
 }
 
@@ -487,6 +564,7 @@ export type WeeklySessionUncheckedCreateWithoutRoundsInput = {
   lateJoinCutoff?: Date | string | null
   collectionAddress?: string | null
   vaultAddress?: string | null
+  campaignId?: string | null
   gameResults?: Prisma.GameResultUncheckedCreateNestedManyWithoutSessionInput
 }
 
@@ -515,6 +593,7 @@ export type WeeklySessionUpdateWithoutRoundsInput = {
   lateJoinCutoff?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vaultAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  campaign?: Prisma.CampaignUpdateOneWithoutSessionsNestedInput
   gameResults?: Prisma.GameResultUpdateManyWithoutSessionNestedInput
 }
 
@@ -527,6 +606,7 @@ export type WeeklySessionUncheckedUpdateWithoutRoundsInput = {
   lateJoinCutoff?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vaultAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  campaignId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gameResults?: Prisma.GameResultUncheckedUpdateManyWithoutSessionNestedInput
 }
 
@@ -539,6 +619,7 @@ export type WeeklySessionCreateWithoutGameResultsInput = {
   lateJoinCutoff?: Date | string | null
   collectionAddress?: string | null
   vaultAddress?: string | null
+  campaign?: Prisma.CampaignCreateNestedOneWithoutSessionsInput
   rounds?: Prisma.SessionRoundCreateNestedManyWithoutSessionInput
 }
 
@@ -551,6 +632,7 @@ export type WeeklySessionUncheckedCreateWithoutGameResultsInput = {
   lateJoinCutoff?: Date | string | null
   collectionAddress?: string | null
   vaultAddress?: string | null
+  campaignId?: string | null
   rounds?: Prisma.SessionRoundUncheckedCreateNestedManyWithoutSessionInput
 }
 
@@ -579,6 +661,7 @@ export type WeeklySessionUpdateWithoutGameResultsInput = {
   lateJoinCutoff?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vaultAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  campaign?: Prisma.CampaignUpdateOneWithoutSessionsNestedInput
   rounds?: Prisma.SessionRoundUpdateManyWithoutSessionNestedInput
 }
 
@@ -591,7 +674,123 @@ export type WeeklySessionUncheckedUpdateWithoutGameResultsInput = {
   lateJoinCutoff?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vaultAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  campaignId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rounds?: Prisma.SessionRoundUncheckedUpdateManyWithoutSessionNestedInput
+}
+
+export type WeeklySessionCreateWithoutCampaignInput = {
+  id?: string
+  weekNumber: number
+  title: string
+  scheduledAt: Date | string
+  status?: $Enums.SessionStatus
+  lateJoinCutoff?: Date | string | null
+  collectionAddress?: string | null
+  vaultAddress?: string | null
+  rounds?: Prisma.SessionRoundCreateNestedManyWithoutSessionInput
+  gameResults?: Prisma.GameResultCreateNestedManyWithoutSessionInput
+}
+
+export type WeeklySessionUncheckedCreateWithoutCampaignInput = {
+  id?: string
+  weekNumber: number
+  title: string
+  scheduledAt: Date | string
+  status?: $Enums.SessionStatus
+  lateJoinCutoff?: Date | string | null
+  collectionAddress?: string | null
+  vaultAddress?: string | null
+  rounds?: Prisma.SessionRoundUncheckedCreateNestedManyWithoutSessionInput
+  gameResults?: Prisma.GameResultUncheckedCreateNestedManyWithoutSessionInput
+}
+
+export type WeeklySessionCreateOrConnectWithoutCampaignInput = {
+  where: Prisma.WeeklySessionWhereUniqueInput
+  create: Prisma.XOR<Prisma.WeeklySessionCreateWithoutCampaignInput, Prisma.WeeklySessionUncheckedCreateWithoutCampaignInput>
+}
+
+export type WeeklySessionCreateManyCampaignInputEnvelope = {
+  data: Prisma.WeeklySessionCreateManyCampaignInput | Prisma.WeeklySessionCreateManyCampaignInput[]
+  skipDuplicates?: boolean
+}
+
+export type WeeklySessionUpsertWithWhereUniqueWithoutCampaignInput = {
+  where: Prisma.WeeklySessionWhereUniqueInput
+  update: Prisma.XOR<Prisma.WeeklySessionUpdateWithoutCampaignInput, Prisma.WeeklySessionUncheckedUpdateWithoutCampaignInput>
+  create: Prisma.XOR<Prisma.WeeklySessionCreateWithoutCampaignInput, Prisma.WeeklySessionUncheckedCreateWithoutCampaignInput>
+}
+
+export type WeeklySessionUpdateWithWhereUniqueWithoutCampaignInput = {
+  where: Prisma.WeeklySessionWhereUniqueInput
+  data: Prisma.XOR<Prisma.WeeklySessionUpdateWithoutCampaignInput, Prisma.WeeklySessionUncheckedUpdateWithoutCampaignInput>
+}
+
+export type WeeklySessionUpdateManyWithWhereWithoutCampaignInput = {
+  where: Prisma.WeeklySessionScalarWhereInput
+  data: Prisma.XOR<Prisma.WeeklySessionUpdateManyMutationInput, Prisma.WeeklySessionUncheckedUpdateManyWithoutCampaignInput>
+}
+
+export type WeeklySessionScalarWhereInput = {
+  AND?: Prisma.WeeklySessionScalarWhereInput | Prisma.WeeklySessionScalarWhereInput[]
+  OR?: Prisma.WeeklySessionScalarWhereInput[]
+  NOT?: Prisma.WeeklySessionScalarWhereInput | Prisma.WeeklySessionScalarWhereInput[]
+  id?: Prisma.StringFilter<"WeeklySession"> | string
+  weekNumber?: Prisma.IntFilter<"WeeklySession"> | number
+  title?: Prisma.StringFilter<"WeeklySession"> | string
+  scheduledAt?: Prisma.DateTimeFilter<"WeeklySession"> | Date | string
+  status?: Prisma.EnumSessionStatusFilter<"WeeklySession"> | $Enums.SessionStatus
+  lateJoinCutoff?: Prisma.DateTimeNullableFilter<"WeeklySession"> | Date | string | null
+  collectionAddress?: Prisma.StringNullableFilter<"WeeklySession"> | string | null
+  vaultAddress?: Prisma.StringNullableFilter<"WeeklySession"> | string | null
+  campaignId?: Prisma.StringNullableFilter<"WeeklySession"> | string | null
+}
+
+export type WeeklySessionCreateManyCampaignInput = {
+  id?: string
+  weekNumber: number
+  title: string
+  scheduledAt: Date | string
+  status?: $Enums.SessionStatus
+  lateJoinCutoff?: Date | string | null
+  collectionAddress?: string | null
+  vaultAddress?: string | null
+}
+
+export type WeeklySessionUpdateWithoutCampaignInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  weekNumber?: Prisma.IntFieldUpdateOperationsInput | number
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  scheduledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
+  lateJoinCutoff?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vaultAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rounds?: Prisma.SessionRoundUpdateManyWithoutSessionNestedInput
+  gameResults?: Prisma.GameResultUpdateManyWithoutSessionNestedInput
+}
+
+export type WeeklySessionUncheckedUpdateWithoutCampaignInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  weekNumber?: Prisma.IntFieldUpdateOperationsInput | number
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  scheduledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
+  lateJoinCutoff?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vaultAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rounds?: Prisma.SessionRoundUncheckedUpdateManyWithoutSessionNestedInput
+  gameResults?: Prisma.GameResultUncheckedUpdateManyWithoutSessionNestedInput
+}
+
+export type WeeklySessionUncheckedUpdateManyWithoutCampaignInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  weekNumber?: Prisma.IntFieldUpdateOperationsInput | number
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  scheduledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
+  lateJoinCutoff?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vaultAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -643,6 +842,8 @@ export type WeeklySessionSelect<ExtArgs extends runtime.Types.Extensions.Interna
   lateJoinCutoff?: boolean
   collectionAddress?: boolean
   vaultAddress?: boolean
+  campaignId?: boolean
+  campaign?: boolean | Prisma.WeeklySession$campaignArgs<ExtArgs>
   rounds?: boolean | Prisma.WeeklySession$roundsArgs<ExtArgs>
   gameResults?: boolean | Prisma.WeeklySession$gameResultsArgs<ExtArgs>
   _count?: boolean | Prisma.WeeklySessionCountOutputTypeDefaultArgs<ExtArgs>
@@ -657,6 +858,8 @@ export type WeeklySessionSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   lateJoinCutoff?: boolean
   collectionAddress?: boolean
   vaultAddress?: boolean
+  campaignId?: boolean
+  campaign?: boolean | Prisma.WeeklySession$campaignArgs<ExtArgs>
 }, ExtArgs["result"]["weeklySession"]>
 
 export type WeeklySessionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -668,6 +871,8 @@ export type WeeklySessionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   lateJoinCutoff?: boolean
   collectionAddress?: boolean
   vaultAddress?: boolean
+  campaignId?: boolean
+  campaign?: boolean | Prisma.WeeklySession$campaignArgs<ExtArgs>
 }, ExtArgs["result"]["weeklySession"]>
 
 export type WeeklySessionSelectScalar = {
@@ -679,20 +884,27 @@ export type WeeklySessionSelectScalar = {
   lateJoinCutoff?: boolean
   collectionAddress?: boolean
   vaultAddress?: boolean
+  campaignId?: boolean
 }
 
-export type WeeklySessionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "weekNumber" | "title" | "scheduledAt" | "status" | "lateJoinCutoff" | "collectionAddress" | "vaultAddress", ExtArgs["result"]["weeklySession"]>
+export type WeeklySessionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "weekNumber" | "title" | "scheduledAt" | "status" | "lateJoinCutoff" | "collectionAddress" | "vaultAddress" | "campaignId", ExtArgs["result"]["weeklySession"]>
 export type WeeklySessionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  campaign?: boolean | Prisma.WeeklySession$campaignArgs<ExtArgs>
   rounds?: boolean | Prisma.WeeklySession$roundsArgs<ExtArgs>
   gameResults?: boolean | Prisma.WeeklySession$gameResultsArgs<ExtArgs>
   _count?: boolean | Prisma.WeeklySessionCountOutputTypeDefaultArgs<ExtArgs>
 }
-export type WeeklySessionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
-export type WeeklySessionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type WeeklySessionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  campaign?: boolean | Prisma.WeeklySession$campaignArgs<ExtArgs>
+}
+export type WeeklySessionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  campaign?: boolean | Prisma.WeeklySession$campaignArgs<ExtArgs>
+}
 
 export type $WeeklySessionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "WeeklySession"
   objects: {
+    campaign: Prisma.$CampaignPayload<ExtArgs> | null
     rounds: Prisma.$SessionRoundPayload<ExtArgs>[]
     gameResults: Prisma.$GameResultPayload<ExtArgs>[]
   }
@@ -705,6 +917,7 @@ export type $WeeklySessionPayload<ExtArgs extends runtime.Types.Extensions.Inter
     lateJoinCutoff: Date | null
     collectionAddress: string | null
     vaultAddress: string | null
+    campaignId: string | null
   }, ExtArgs["result"]["weeklySession"]>
   composites: {}
 }
@@ -1099,6 +1312,7 @@ readonly fields: WeeklySessionFieldRefs;
  */
 export interface Prisma__WeeklySessionClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  campaign<T extends Prisma.WeeklySession$campaignArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WeeklySession$campaignArgs<ExtArgs>>): Prisma.Prisma__CampaignClient<runtime.Types.Result.GetResult<Prisma.$CampaignPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   rounds<T extends Prisma.WeeklySession$roundsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WeeklySession$roundsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionRoundPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   gameResults<T extends Prisma.WeeklySession$gameResultsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WeeklySession$gameResultsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GameResultPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -1138,6 +1352,7 @@ export interface WeeklySessionFieldRefs {
   readonly lateJoinCutoff: Prisma.FieldRef<"WeeklySession", 'DateTime'>
   readonly collectionAddress: Prisma.FieldRef<"WeeklySession", 'String'>
   readonly vaultAddress: Prisma.FieldRef<"WeeklySession", 'String'>
+  readonly campaignId: Prisma.FieldRef<"WeeklySession", 'String'>
 }
     
 
@@ -1387,6 +1602,10 @@ export type WeeklySessionCreateManyAndReturnArgs<ExtArgs extends runtime.Types.E
    */
   data: Prisma.WeeklySessionCreateManyInput | Prisma.WeeklySessionCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WeeklySessionIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1457,6 +1676,10 @@ export type WeeklySessionUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.E
    * Limit how many WeeklySessions to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WeeklySessionIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1523,6 +1746,25 @@ export type WeeklySessionDeleteManyArgs<ExtArgs extends runtime.Types.Extensions
    * Limit how many WeeklySessions to delete.
    */
   limit?: number
+}
+
+/**
+ * WeeklySession.campaign
+ */
+export type WeeklySession$campaignArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Campaign
+   */
+  select?: Prisma.CampaignSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Campaign
+   */
+  omit?: Prisma.CampaignOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CampaignInclude<ExtArgs> | null
+  where?: Prisma.CampaignWhereInput
 }
 
 /**

@@ -1,13 +1,17 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, Eye, CheckCircle, XCircle } from "lucide-react";
 import Link from "next/link";
 import ProgressBar from "@/components/ProgressBar";
 import { useOnboarding } from "@/lib/onboarding-context";
 
-export default function Step2() {
+export default function CommitmentStep() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const role = searchParams.get("role") ?? "creator";
+  const totalSteps = 7;
+
   const { data, updateData } = useOnboarding();
 
   const canContinue = data.willingToDeclare !== null;
@@ -16,7 +20,7 @@ export default function Step2() {
     <div className="flex-1 bg-black flex flex-col px-6 py-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <Link href="/onboarding/step1">
+        <Link href={`/onboarding/debt?role=${role}`}>
           <div className="w-10 h-10 rounded-full border border-[#333] flex items-center justify-center hover:border-[#F5E642]/50 transition-colors">
             <ArrowLeft className="w-5 h-5 text-white" />
           </div>
@@ -24,10 +28,10 @@ export default function Step2() {
         <div className="w-8 h-8 bg-[#F5E642] rounded-full flex items-center justify-center">
           <Eye className="w-4 h-4 text-black" />
         </div>
-        <span className="text-[#888] text-xs tracking-wider">STEP 2 OF 5</span>
+        <span className="text-[#888] text-xs tracking-wider">STEP 5 OF {totalSteps}</span>
       </div>
 
-      <ProgressBar currentStep={2} totalSteps={5} />
+      <ProgressBar currentStep={5} totalSteps={totalSteps} />
 
       <div className="mt-8">
         <h1 className="text-2xl font-bold text-white">Your Commitment</h1>
@@ -36,7 +40,6 @@ export default function Step2() {
         </p>
 
         <div className="space-y-4 mt-8">
-          {/* Yes Card */}
           <button
             onClick={() => updateData({ willingToDeclare: true })}
             className={`w-full p-5 rounded-2xl border text-left transition-all ${
@@ -60,7 +63,6 @@ export default function Step2() {
             </div>
           </button>
 
-          {/* No Card */}
           <button
             onClick={() => updateData({ willingToDeclare: false })}
             className={`w-full p-5 rounded-2xl border text-left transition-all ${
@@ -98,7 +100,7 @@ export default function Step2() {
       <div className="flex-1" />
 
       <button
-        onClick={() => router.push("/onboarding/step3")}
+        onClick={() => router.push(`/onboarding/tiktok?role=${role}`)}
         disabled={!canContinue}
         className={`w-full rounded-xl py-4 text-base font-medium flex items-center justify-center gap-2 mt-8 ${
           canContinue

@@ -74,3 +74,13 @@ export type GameResult = Prisma.GameResultModel
  * 
  */
 export type Referral = Prisma.ReferralModel
+/**
+ * Model Campaign
+ * 
+ */
+export type Campaign = Prisma.CampaignModel
+/**
+ * Model CampaignEnrollment
+ * 
+ */
+export type CampaignEnrollment = Prisma.CampaignEnrollmentModel

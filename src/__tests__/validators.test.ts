@@ -1,5 +1,5 @@
 import {
-  onboardCreatorSchema,
+  onboardSchema,
   submitTaskSchema,
   createSessionSchema,
   submitVoteSchema,
@@ -9,55 +9,77 @@ import {
 } from "@/lib/validators";
 
 describe("Validators", () => {
-  describe("onboardCreatorSchema", () => {
-    const validData = {
+  describe("onboardSchema", () => {
+    const validCreatorData = {
+      role: "creator" as const,
+      categories: ["Afrobeats", "Nollywood", "Comedy Skits", "Fashion", "Tech"],
+      displayName: "Test Creator",
+      consentAccepted: true as const,
       debtSources: ["student-loan"],
       willingToDeclare: true,
-      displayName: "Test Creator",
       tiktokUsername: "testcreator",
+    };
+
+    const validFanData = {
+      role: "fan" as const,
+      categories: ["Afrobeats", "Nollywood", "Comedy Skits", "Fashion", "Tech"],
+      displayName: "Test Fan",
       consentAccepted: true as const,
     };
 
-    it("accepts valid onboarding data", () => {
-      const result = onboardCreatorSchema.safeParse(validData);
+    it("accepts valid creator onboarding data", () => {
+      const result = onboardSchema.safeParse(validCreatorData);
+      expect(result.success).toBe(true);
+    });
+
+    it("accepts valid fan onboarding data", () => {
+      const result = onboardSchema.safeParse(validFanData);
       expect(result.success).toBe(true);
     });
 
     it("accepts data with optional profile photo", () => {
-      const result = onboardCreatorSchema.safeParse({
-        ...validData,
+      const result = onboardSchema.safeParse({
+        ...validCreatorData,
         profilePhoto: "https://example.com/photo.jpg",
       });
       expect(result.success).toBe(true);
     });
 
-    it("rejects empty debt sources", () => {
-      const result = onboardCreatorSchema.safeParse({
-        ...validData,
-        debtSources: [],
+    it("accepts data with optional email", () => {
+      const result = onboardSchema.safeParse({
+        ...validFanData,
+        email: "test@example.com",
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it("rejects wrong number of categories", () => {
+      const result = onboardSchema.safeParse({
+        ...validFanData,
+        categories: ["Afrobeats", "Tech"],
       });
       expect(result.success).toBe(false);
     });
 
     it("rejects missing display name", () => {
-      const result = onboardCreatorSchema.safeParse({
-        ...validData,
+      const result = onboardSchema.safeParse({
+        ...validCreatorData,
         displayName: "",
       });
       expect(result.success).toBe(false);
     });
 
     it("rejects invalid TikTok username", () => {
-      const result = onboardCreatorSchema.safeParse({
-        ...validData,
+      const result = onboardSchema.safeParse({
+        ...validCreatorData,
         tiktokUsername: "invalid username!",
       });
       expect(result.success).toBe(false);
     });
 
     it("rejects consentAccepted: false", () => {
-      const result = onboardCreatorSchema.safeParse({
-        ...validData,
+      const result = onboardSchema.safeParse({
+        ...validCreatorData,
         consentAccepted: false,
       });
       expect(result.success).toBe(false);

@@ -16,6 +16,7 @@ type MockSession = {
   lateJoinCutoff: Date | null;
   collectionAddress: string | null;
   vaultAddress: string | null;
+  campaignId: string | null;
 };
 
 function makeSession(overrides: Partial<MockSession> = {}): MockSession {
@@ -28,6 +29,7 @@ function makeSession(overrides: Partial<MockSession> = {}): MockSession {
     lateJoinCutoff: null,
     collectionAddress: null,
     vaultAddress: null,
+    campaignId: null,
     ...overrides,
   };
 }
@@ -121,19 +123,27 @@ describe("Session Engine", () => {
   });
 
   describe("calculateTier", () => {
-    it("returns gold for 21+ correct votes", () => {
+    // Default 28 rounds: gold >= ceil(28*0.75)=21, base >= ceil(28*0.36)=11
+    it("returns gold for 75%+ correct votes", () => {
       expect(calculateTier(21)).toEqual({ tier: "gold" });
       expect(calculateTier(28)).toEqual({ tier: "gold" });
     });
 
-    it("returns base for 10-20 correct votes", () => {
-      expect(calculateTier(10)).toEqual({ tier: "base" });
+    it("returns base for 36%-74% correct votes", () => {
+      expect(calculateTier(11)).toEqual({ tier: "base" });
       expect(calculateTier(20)).toEqual({ tier: "base" });
     });
 
-    it("returns participation for <10 correct votes", () => {
+    it("returns participation for <36% correct votes", () => {
       expect(calculateTier(0)).toEqual({ tier: "participation" });
-      expect(calculateTier(9)).toEqual({ tier: "participation" });
+      expect(calculateTier(10)).toEqual({ tier: "participation" });
+    });
+
+    it("scales thresholds with custom totalRounds", () => {
+      // 10 rounds: gold >= ceil(10*0.75)=8, base >= ceil(10*0.36)=4
+      expect(calculateTier(8, 10)).toEqual({ tier: "gold" });
+      expect(calculateTier(4, 10)).toEqual({ tier: "base" });
+      expect(calculateTier(3, 10)).toEqual({ tier: "participation" });
     });
   });
 

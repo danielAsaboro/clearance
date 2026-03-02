@@ -38,9 +38,34 @@ export async function getAuthUser(req: NextRequest) {
   }
 }
 
+export async function getActiveCampaign() {
+  return prisma.campaign.findFirst({
+    where: { status: "active" },
+  });
+}
+
+export async function getUserCampaignRole(userId: string, campaignId: string) {
+  const enrollment = await prisma.campaignEnrollment.findUnique({
+    where: {
+      userId_campaignId: { userId, campaignId },
+    },
+  });
+  return enrollment?.role ?? null;
+}
+
 export async function requireRole(req: NextRequest, role: "creator" | "fan" | "admin") {
   const user = await getAuthUser(req);
   if (!user) throw new Error("Unauthorized");
+
+  // Check active campaign enrollment first
+  const activeCampaign = await getActiveCampaign();
+  if (activeCampaign) {
+    const campaignRole = await getUserCampaignRole(user.id, activeCampaign.id);
+    if (campaignRole && campaignRole !== role) throw new Error("Forbidden");
+    if (campaignRole === role) return user;
+  }
+
+  // Fall back to user's default role
   if (user.role !== role) throw new Error("Forbidden");
   return user;
 }
