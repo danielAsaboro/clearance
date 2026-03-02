@@ -10,11 +10,29 @@ export async function GET(req: NextRequest) {
   }
 
   const weekParam = req.nextUrl.searchParams.get("week");
+  const statusParam = req.nextUrl.searchParams.get("status");
 
   if (user.role === "admin") {
+    const where: Record<string, unknown> = {};
+    if (weekParam) where.weekNumber = parseInt(weekParam);
+    if (statusParam) where.status = statusParam;
+
     const tasks = await prisma.task.findMany({
-      where: weekParam ? { weekNumber: parseInt(weekParam) } : undefined,
-      include: { creator: { select: { displayName: true, tiktokUsername: true } } },
+      where,
+      select: {
+        id: true,
+        creatorId: true,
+        weekNumber: true,
+        taskNumber: true,
+        description: true,
+        tiktokUrl: true,
+        status: true,
+        deadline: true,
+        submittedAt: true,
+        createdAt: true,
+        rejectionNote: true,
+        creator: { select: { displayName: true, tiktokUsername: true } },
+      },
       orderBy: [{ weekNumber: "desc" }, { taskNumber: "asc" }],
     });
     return NextResponse.json(tasks);
