@@ -1,18 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, Eye, Mail, Wallet, Check } from "lucide-react";
 import Link from "next/link";
 import ProgressBar from "@/components/ProgressBar";
 import { useOnboarding } from "@/lib/onboarding-context";
 import { usePrivy } from "@privy-io/react-auth";
 
+const TOTAL_STEPS = 4;
+
 export default function ContactStep() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const role = searchParams.get("role") ?? "fan";
-  const totalSteps = role === "creator" ? 7 : 4;
   const { user, linkEmail, linkWallet } = usePrivy();
   const { data, updateData } = useOnboarding();
   const [emailInput, setEmailInput] = useState(data.email);
@@ -21,7 +20,6 @@ export default function ContactStep() {
   const hasEmail = !!user?.email?.address;
   const hasWallet = !!user?.wallet?.address;
 
-  // Determine what we need to collect
   const needsEmail = !hasEmail;
   const needsWallet = !hasWallet;
   const bothPresent = hasEmail && hasWallet;
@@ -53,22 +51,20 @@ export default function ContactStep() {
     updateData({ email: e.target.value });
   };
 
-  // Can always continue — email/wallet collection is optional
   const canContinue = true;
 
   const handleContinue = () => {
-    // If user has email from Privy, store it
     if (hasEmail && !data.email) {
       updateData({ email: user!.email!.address });
     }
-    router.push(`/onboarding/profile?role=${role}`);
+    router.push("/onboarding/profile");
   };
 
   return (
     <div className="flex-1 bg-black flex flex-col px-6 py-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <Link href={`/onboarding/categories?role=${role}`}>
+        <Link href="/onboarding/categories">
           <div className="w-10 h-10 rounded-full border border-[#333] flex items-center justify-center hover:border-[#F5E642]/50 transition-colors">
             <ArrowLeft className="w-5 h-5 text-white" />
           </div>
@@ -77,11 +73,11 @@ export default function ContactStep() {
           <Eye className="w-4 h-4 text-black" />
         </div>
         <span className="text-[#888] text-xs tracking-wider">
-          STEP 2 OF {totalSteps}
+          STEP 2 OF {TOTAL_STEPS}
         </span>
       </div>
 
-      <ProgressBar currentStep={2} totalSteps={totalSteps} />
+      <ProgressBar currentStep={2} totalSteps={TOTAL_STEPS} />
 
       <div className="mt-8">
         <h1 className="text-2xl font-bold text-white">Contact Info</h1>

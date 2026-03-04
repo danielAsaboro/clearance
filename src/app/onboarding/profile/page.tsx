@@ -1,18 +1,17 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { usePrivy } from "@privy-io/react-auth";
 import { ArrowLeft, Eye, Upload, X, Loader2 } from "lucide-react";
 import Link from "next/link";
 import ProgressBar from "@/components/ProgressBar";
 import { useOnboarding } from "@/lib/onboarding-context";
 
+const TOTAL_STEPS = 4;
+
 export default function ProfileStep() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const role = searchParams.get("role") ?? "fan";
-  const totalSteps = role === "creator" ? 7 : 4;
   const { getAccessToken } = usePrivy();
   const { data, updateData } = useOnboarding();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -85,19 +84,14 @@ export default function ProfileStep() {
   };
 
   const handleContinue = () => {
-    if (role === "creator") {
-      router.push(`/onboarding/debt?role=${role}`);
-    } else {
-      // Fans skip debt/commitment/tiktok → go straight to complete
-      router.push(`/onboarding/complete?role=${role}`);
-    }
+    router.push("/onboarding/complete");
   };
 
   return (
     <div className="flex-1 bg-black flex flex-col px-6 py-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <Link href={`/onboarding/contact?role=${role}`}>
+        <Link href="/onboarding/contact">
           <div className="w-10 h-10 rounded-full border border-[#333] flex items-center justify-center hover:border-[#F5E642]/50 transition-colors">
             <ArrowLeft className="w-5 h-5 text-white" />
           </div>
@@ -106,11 +100,11 @@ export default function ProfileStep() {
           <Eye className="w-4 h-4 text-black" />
         </div>
         <span className="text-[#888] text-xs tracking-wider">
-          STEP 3 OF {totalSteps}
+          STEP 3 OF {TOTAL_STEPS}
         </span>
       </div>
 
-      <ProgressBar currentStep={3} totalSteps={totalSteps} />
+      <ProgressBar currentStep={3} totalSteps={TOTAL_STEPS} />
 
       <div className="mt-8">
         <h1 className="text-2xl font-bold text-white">Set Up Your Profile</h1>

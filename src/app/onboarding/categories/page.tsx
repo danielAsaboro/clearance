@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, Eye } from "lucide-react";
 import Link from "next/link";
 import ProgressBar from "@/components/ProgressBar";
@@ -24,11 +24,10 @@ const CATEGORIES = [
   "Fitness",
 ];
 
+const TOTAL_STEPS = 4;
+
 export default function CategoriesStep() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const role = searchParams.get("role") ?? "fan";
-  const totalSteps = role === "creator" ? 7 : 4;
   const { data, updateData } = useOnboarding();
 
   const toggleCategory = (category: string) => {
@@ -56,11 +55,11 @@ export default function CategoriesStep() {
           <Eye className="w-4 h-4 text-black" />
         </div>
         <span className="text-[#888] text-xs tracking-wider">
-          STEP 1 OF {totalSteps}
+          STEP 1 OF {TOTAL_STEPS}
         </span>
       </div>
 
-      <ProgressBar currentStep={1} totalSteps={totalSteps} />
+      <ProgressBar currentStep={1} totalSteps={TOTAL_STEPS} />
 
       <div className="mt-8">
         <h1 className="text-2xl font-bold text-white">Pick Your Interests</h1>
@@ -108,9 +107,7 @@ export default function CategoriesStep() {
       <div className="flex-1" />
 
       <button
-        onClick={() =>
-          router.push(`/onboarding/contact?role=${role}`)
-        }
+        onClick={() => router.push("/onboarding/contact")}
         disabled={!canContinue}
         className={`w-full rounded-xl py-4 text-base font-medium flex items-center justify-center gap-2 mt-8 ${
           canContinue

@@ -31,12 +31,8 @@ export default function OnboardingLayout({
       .then((res) => (res.ok ? res.json() : null))
       .then((profile) => {
         if (profile?.consentAccepted) {
-          // Already onboarded — route based on role
-          if (profile.role === "creator") {
-            router.replace("/creator-hub");
-          } else {
-            router.replace("/arena");
-          }
+          // Already onboarded — always go to arena
+          router.replace("/arena");
         } else {
           setChecking(false);
         }

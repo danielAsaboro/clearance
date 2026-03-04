@@ -385,9 +385,9 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 export const ModelName = {
   User: 'User',
-  Task: 'Task',
+  Video: 'Video',
   WeeklySession: 'WeeklySession',
-  SessionRound: 'SessionRound',
+  Matchup: 'Matchup',
   Vote: 'Vote',
   GameResult: 'GameResult',
   Referral: 'Referral',
@@ -408,7 +408,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "task" | "weeklySession" | "sessionRound" | "vote" | "gameResult" | "referral" | "campaign" | "campaignEnrollment"
+    modelProps: "user" | "video" | "weeklySession" | "matchup" | "vote" | "gameResult" | "referral" | "campaign" | "campaignEnrollment"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -486,77 +486,77 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
-    Task: {
-      payload: Prisma.$TaskPayload<ExtArgs>
-      fields: Prisma.TaskFieldRefs
+    Video: {
+      payload: Prisma.$VideoPayload<ExtArgs>
+      fields: Prisma.VideoFieldRefs
       operations: {
         findUnique: {
-          args: Prisma.TaskFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskPayload> | null
+          args: Prisma.VideoFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VideoPayload> | null
         }
         findUniqueOrThrow: {
-          args: Prisma.TaskFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskPayload>
+          args: Prisma.VideoFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VideoPayload>
         }
         findFirst: {
-          args: Prisma.TaskFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskPayload> | null
+          args: Prisma.VideoFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VideoPayload> | null
         }
         findFirstOrThrow: {
-          args: Prisma.TaskFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskPayload>
+          args: Prisma.VideoFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VideoPayload>
         }
         findMany: {
-          args: Prisma.TaskFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskPayload>[]
+          args: Prisma.VideoFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VideoPayload>[]
         }
         create: {
-          args: Prisma.TaskCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskPayload>
+          args: Prisma.VideoCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VideoPayload>
         }
         createMany: {
-          args: Prisma.TaskCreateManyArgs<ExtArgs>
+          args: Prisma.VideoCreateManyArgs<ExtArgs>
           result: BatchPayload
         }
         createManyAndReturn: {
-          args: Prisma.TaskCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskPayload>[]
+          args: Prisma.VideoCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VideoPayload>[]
         }
         delete: {
-          args: Prisma.TaskDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskPayload>
+          args: Prisma.VideoDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VideoPayload>
         }
         update: {
-          args: Prisma.TaskUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskPayload>
+          args: Prisma.VideoUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VideoPayload>
         }
         deleteMany: {
-          args: Prisma.TaskDeleteManyArgs<ExtArgs>
+          args: Prisma.VideoDeleteManyArgs<ExtArgs>
           result: BatchPayload
         }
         updateMany: {
-          args: Prisma.TaskUpdateManyArgs<ExtArgs>
+          args: Prisma.VideoUpdateManyArgs<ExtArgs>
           result: BatchPayload
         }
         updateManyAndReturn: {
-          args: Prisma.TaskUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskPayload>[]
+          args: Prisma.VideoUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VideoPayload>[]
         }
         upsert: {
-          args: Prisma.TaskUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskPayload>
+          args: Prisma.VideoUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VideoPayload>
         }
         aggregate: {
-          args: Prisma.TaskAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateTask>
+          args: Prisma.VideoAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateVideo>
         }
         groupBy: {
-          args: Prisma.TaskGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.TaskGroupByOutputType>[]
+          args: Prisma.VideoGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.VideoGroupByOutputType>[]
         }
         count: {
-          args: Prisma.TaskCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.TaskCountAggregateOutputType> | number
+          args: Prisma.VideoCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.VideoCountAggregateOutputType> | number
         }
       }
     }
@@ -634,77 +634,77 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
-    SessionRound: {
-      payload: Prisma.$SessionRoundPayload<ExtArgs>
-      fields: Prisma.SessionRoundFieldRefs
+    Matchup: {
+      payload: Prisma.$MatchupPayload<ExtArgs>
+      fields: Prisma.MatchupFieldRefs
       operations: {
         findUnique: {
-          args: Prisma.SessionRoundFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionRoundPayload> | null
+          args: Prisma.MatchupFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MatchupPayload> | null
         }
         findUniqueOrThrow: {
-          args: Prisma.SessionRoundFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionRoundPayload>
+          args: Prisma.MatchupFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MatchupPayload>
         }
         findFirst: {
-          args: Prisma.SessionRoundFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionRoundPayload> | null
+          args: Prisma.MatchupFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MatchupPayload> | null
         }
         findFirstOrThrow: {
-          args: Prisma.SessionRoundFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionRoundPayload>
+          args: Prisma.MatchupFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MatchupPayload>
         }
         findMany: {
-          args: Prisma.SessionRoundFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionRoundPayload>[]
+          args: Prisma.MatchupFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MatchupPayload>[]
         }
         create: {
-          args: Prisma.SessionRoundCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionRoundPayload>
+          args: Prisma.MatchupCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MatchupPayload>
         }
         createMany: {
-          args: Prisma.SessionRoundCreateManyArgs<ExtArgs>
+          args: Prisma.MatchupCreateManyArgs<ExtArgs>
           result: BatchPayload
         }
         createManyAndReturn: {
-          args: Prisma.SessionRoundCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionRoundPayload>[]
+          args: Prisma.MatchupCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MatchupPayload>[]
         }
         delete: {
-          args: Prisma.SessionRoundDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionRoundPayload>
+          args: Prisma.MatchupDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MatchupPayload>
         }
         update: {
-          args: Prisma.SessionRoundUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionRoundPayload>
+          args: Prisma.MatchupUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MatchupPayload>
         }
         deleteMany: {
-          args: Prisma.SessionRoundDeleteManyArgs<ExtArgs>
+          args: Prisma.MatchupDeleteManyArgs<ExtArgs>
           result: BatchPayload
         }
         updateMany: {
-          args: Prisma.SessionRoundUpdateManyArgs<ExtArgs>
+          args: Prisma.MatchupUpdateManyArgs<ExtArgs>
           result: BatchPayload
         }
         updateManyAndReturn: {
-          args: Prisma.SessionRoundUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionRoundPayload>[]
+          args: Prisma.MatchupUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MatchupPayload>[]
         }
         upsert: {
-          args: Prisma.SessionRoundUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionRoundPayload>
+          args: Prisma.MatchupUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MatchupPayload>
         }
         aggregate: {
-          args: Prisma.SessionRoundAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateSessionRound>
+          args: Prisma.MatchupAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMatchup>
         }
         groupBy: {
-          args: Prisma.SessionRoundGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.SessionRoundGroupByOutputType>[]
+          args: Prisma.MatchupGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MatchupGroupByOutputType>[]
         }
         count: {
-          args: Prisma.SessionRoundCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.SessionRoundCountAggregateOutputType> | number
+          args: Prisma.MatchupCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MatchupCountAggregateOutputType> | number
         }
       }
     }
@@ -1123,10 +1123,7 @@ export const UserScalarFieldEnum = {
   phone: 'phone',
   displayName: 'displayName',
   profilePhoto: 'profilePhoto',
-  tiktokUsername: 'tiktokUsername',
   role: 'role',
-  debtSources: 'debtSources',
-  willingToDeclare: 'willingToDeclare',
   consentAccepted: 'consentAccepted',
   privyId: 'privyId',
   walletAddress: 'walletAddress',
@@ -1140,24 +1137,17 @@ export const UserScalarFieldEnum = {
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
 
 
-export const TaskScalarFieldEnum = {
+export const VideoScalarFieldEnum = {
   id: 'id',
-  creatorId: 'creatorId',
-  weekNumber: 'weekNumber',
-  taskNumber: 'taskNumber',
-  description: 'description',
-  hashtag: 'hashtag',
-  deadline: 'deadline',
-  tiktokUrl: 'tiktokUrl',
-  submittedAt: 'submittedAt',
-  status: 'status',
-  rejectionNote: 'rejectionNote',
-  verifiedAt: 'verifiedAt',
-  verifiedBy: 'verifiedBy',
+  title: 'title',
+  url: 'url',
+  thumbnailUrl: 'thumbnailUrl',
+  duration: 'duration',
+  uploadedById: 'uploadedById',
   createdAt: 'createdAt'
 } as const
 
-export type TaskScalarFieldEnum = (typeof TaskScalarFieldEnum)[keyof typeof TaskScalarFieldEnum]
+export type VideoScalarFieldEnum = (typeof VideoScalarFieldEnum)[keyof typeof VideoScalarFieldEnum]
 
 
 export const WeeklySessionScalarFieldEnum = {
@@ -1175,24 +1165,23 @@ export const WeeklySessionScalarFieldEnum = {
 export type WeeklySessionScalarFieldEnum = (typeof WeeklySessionScalarFieldEnum)[keyof typeof WeeklySessionScalarFieldEnum]
 
 
-export const SessionRoundScalarFieldEnum = {
+export const MatchupScalarFieldEnum = {
   id: 'id',
   sessionId: 'sessionId',
-  roundNumber: 'roundNumber',
-  taskId: 'taskId',
-  tiktokUrl: 'tiktokUrl',
-  tiktokEmbedData: 'tiktokEmbedData',
+  matchupNumber: 'matchupNumber',
+  videoAId: 'videoAId',
+  videoBId: 'videoBId',
   duration: 'duration',
-  adminVerdict: 'adminVerdict'
+  winningVideoId: 'winningVideoId'
 } as const
 
-export type SessionRoundScalarFieldEnum = (typeof SessionRoundScalarFieldEnum)[keyof typeof SessionRoundScalarFieldEnum]
+export type MatchupScalarFieldEnum = (typeof MatchupScalarFieldEnum)[keyof typeof MatchupScalarFieldEnum]
 
 
 export const VoteScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
-  roundId: 'roundId',
+  matchupId: 'matchupId',
   decision: 'decision',
   submittedAt: 'submittedAt'
 } as const
@@ -1244,8 +1233,7 @@ export const CampaignScalarFieldEnum = {
   sessionsPerCycle: 'sessionsPerCycle',
   videosPerSession: 'videosPerSession',
   votingRoundDurationSecs: 'votingRoundDurationSecs',
-  tasksPerWeekPerCreator: 'tasksPerWeekPerCreator',
-  submissionDeadlineHours: 'submissionDeadlineHours',
+  matchupsPerSession: 'matchupsPerSession',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1340,20 +1328,6 @@ export type ListEnumUserRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$Pri
 
 
 /**
- * Reference to a field of type 'Json'
- */
-export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
-    
-
-
-/**
- * Reference to a field of type 'QueryMode'
- */
-export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
-    
-
-
-/**
  * Reference to a field of type 'Boolean'
  */
 export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
@@ -1375,6 +1349,20 @@ export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaM
 
 
 /**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+/**
  * Reference to a field of type 'Int'
  */
 export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
@@ -1389,20 +1377,6 @@ export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel,
 
 
 /**
- * Reference to a field of type 'TaskStatus'
- */
-export type EnumTaskStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TaskStatus'>
-    
-
-
-/**
- * Reference to a field of type 'TaskStatus[]'
- */
-export type ListEnumTaskStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TaskStatus[]'>
-    
-
-
-/**
  * Reference to a field of type 'SessionStatus'
  */
 export type EnumSessionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SessionStatus'>
@@ -1413,20 +1387,6 @@ export type EnumSessionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$Pr
  * Reference to a field of type 'SessionStatus[]'
  */
 export type ListEnumSessionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SessionStatus[]'>
-    
-
-
-/**
- * Reference to a field of type 'RoundVerdict'
- */
-export type EnumRoundVerdictFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RoundVerdict'>
-    
-
-
-/**
- * Reference to a field of type 'RoundVerdict[]'
- */
-export type ListEnumRoundVerdictFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RoundVerdict[]'>
     
 
 
@@ -1581,9 +1541,9 @@ export type PrismaClientOptions = ({
 }
 export type GlobalOmitConfig = {
   user?: Prisma.UserOmit
-  task?: Prisma.TaskOmit
+  video?: Prisma.VideoOmit
   weeklySession?: Prisma.WeeklySessionOmit
-  sessionRound?: Prisma.SessionRoundOmit
+  matchup?: Prisma.MatchupOmit
   vote?: Prisma.VoteOmit
   gameResult?: Prisma.GameResultOmit
   referral?: Prisma.ReferralOmit

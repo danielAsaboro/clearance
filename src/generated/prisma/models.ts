@@ -9,9 +9,9 @@
  * 🟢 You can import this file directly.
  */
 export type * from './models/User'
-export type * from './models/Task'
+export type * from './models/Video'
 export type * from './models/WeeklySession'
-export type * from './models/SessionRound'
+export type * from './models/Matchup'
 export type * from './models/Vote'
 export type * from './models/GameResult'
 export type * from './models/Referral'

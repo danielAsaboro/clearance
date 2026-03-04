@@ -13,7 +13,6 @@ const links: { label: string; path: string }[] = [
   { label: 'Leaderboard', path: '/leaderboard' },
   { label: 'Rewards', path: '/rewards' },
   { label: 'Mint USDC', path: '/mint' },
-  { label: 'Creator Hub', path: '/creator-hub' },
 ]
 
 const inter = Inter({

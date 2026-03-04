@@ -5,10 +5,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from "react
 export interface OnboardingData {
   categories: string[];
   email: string;
-  debtSources: string[];
-  willingToDeclare: boolean | null;
   displayName: string;
-  tiktokUsername: string;
   profilePhoto: string;
   consentAccepted: boolean;
 }
@@ -16,10 +13,7 @@ export interface OnboardingData {
 const defaultData: OnboardingData = {
   categories: [],
   email: "",
-  debtSources: [],
-  willingToDeclare: null,
   displayName: "",
-  tiktokUsername: "",
   profilePhoto: "",
   consentAccepted: false,
 };

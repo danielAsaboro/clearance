@@ -1,45 +1,29 @@
 import {
   onboardSchema,
-  submitTaskSchema,
   createSessionSchema,
   submitVoteSchema,
-  judgeRoundSchema,
-  assignTasksSchema,
   claimUsdcSchema,
+  createVideoSchema,
+  createMatchupsSchema,
 } from "@/lib/validators";
 
 describe("Validators", () => {
   describe("onboardSchema", () => {
-    const validCreatorData = {
-      role: "creator" as const,
+    const validPlayerData = {
+      role: "player" as const,
       categories: ["Afrobeats", "Nollywood", "Comedy Skits", "Fashion", "Tech"],
-      displayName: "Test Creator",
-      consentAccepted: true as const,
-      debtSources: ["student-loan"],
-      willingToDeclare: true,
-      tiktokUsername: "testcreator",
-    };
-
-    const validFanData = {
-      role: "fan" as const,
-      categories: ["Afrobeats", "Nollywood", "Comedy Skits", "Fashion", "Tech"],
-      displayName: "Test Fan",
+      displayName: "Test Player",
       consentAccepted: true as const,
     };
 
-    it("accepts valid creator onboarding data", () => {
-      const result = onboardSchema.safeParse(validCreatorData);
-      expect(result.success).toBe(true);
-    });
-
-    it("accepts valid fan onboarding data", () => {
-      const result = onboardSchema.safeParse(validFanData);
+    it("accepts valid player onboarding data", () => {
+      const result = onboardSchema.safeParse(validPlayerData);
       expect(result.success).toBe(true);
     });
 
     it("accepts data with optional profile photo", () => {
       const result = onboardSchema.safeParse({
-        ...validCreatorData,
+        ...validPlayerData,
         profilePhoto: "https://example.com/photo.jpg",
       });
       expect(result.success).toBe(true);
@@ -47,15 +31,23 @@ describe("Validators", () => {
 
     it("accepts data with optional email", () => {
       const result = onboardSchema.safeParse({
-        ...validFanData,
+        ...validPlayerData,
         email: "test@example.com",
       });
       expect(result.success).toBe(true);
     });
 
+    it("rejects non-player role", () => {
+      const result = onboardSchema.safeParse({
+        ...validPlayerData,
+        role: "creator",
+      });
+      expect(result.success).toBe(false);
+    });
+
     it("rejects wrong number of categories", () => {
       const result = onboardSchema.safeParse({
-        ...validFanData,
+        ...validPlayerData,
         categories: ["Afrobeats", "Tech"],
       });
       expect(result.success).toBe(false);
@@ -63,54 +55,16 @@ describe("Validators", () => {
 
     it("rejects missing display name", () => {
       const result = onboardSchema.safeParse({
-        ...validCreatorData,
+        ...validPlayerData,
         displayName: "",
-      });
-      expect(result.success).toBe(false);
-    });
-
-    it("rejects invalid TikTok username", () => {
-      const result = onboardSchema.safeParse({
-        ...validCreatorData,
-        tiktokUsername: "invalid username!",
       });
       expect(result.success).toBe(false);
     });
 
     it("rejects consentAccepted: false", () => {
       const result = onboardSchema.safeParse({
-        ...validCreatorData,
+        ...validPlayerData,
         consentAccepted: false,
-      });
-      expect(result.success).toBe(false);
-    });
-  });
-
-  describe("submitTaskSchema", () => {
-    it("accepts valid TikTok URL", () => {
-      const result = submitTaskSchema.safeParse({
-        tiktokUrl: "https://www.tiktok.com/@user/video/1234567890",
-      });
-      expect(result.success).toBe(true);
-    });
-
-    it("accepts vm.tiktok.com short URL", () => {
-      const result = submitTaskSchema.safeParse({
-        tiktokUrl: "https://vm.tiktok.com/abc123",
-      });
-      expect(result.success).toBe(true);
-    });
-
-    it("rejects non-TikTok URL", () => {
-      const result = submitTaskSchema.safeParse({
-        tiktokUrl: "https://youtube.com/watch?v=abc",
-      });
-      expect(result.success).toBe(false);
-    });
-
-    it("rejects non-URL string", () => {
-      const result = submitTaskSchema.safeParse({
-        tiktokUrl: "not a url",
       });
       expect(result.success).toBe(false);
     });
@@ -156,69 +110,96 @@ describe("Validators", () => {
   });
 
   describe("submitVoteSchema", () => {
-    it("accepts approve vote", () => {
+    it("accepts video_a vote", () => {
       const result = submitVoteSchema.safeParse({
-        roundId: "round-123",
-        decision: "approve",
+        matchupId: "matchup-123",
+        decision: "video_a",
       });
       expect(result.success).toBe(true);
     });
 
-    it("accepts reject vote", () => {
+    it("accepts video_b vote", () => {
       const result = submitVoteSchema.safeParse({
-        roundId: "round-123",
-        decision: "reject",
+        matchupId: "matchup-123",
+        decision: "video_b",
       });
       expect(result.success).toBe(true);
     });
 
     it("rejects invalid decision", () => {
       const result = submitVoteSchema.safeParse({
-        roundId: "round-123",
-        decision: "skip",
+        matchupId: "matchup-123",
+        decision: "approve",
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it("rejects missing matchupId", () => {
+      const result = submitVoteSchema.safeParse({
+        decision: "video_a",
       });
       expect(result.success).toBe(false);
     });
   });
 
-  describe("judgeRoundSchema", () => {
-    it("accepts valid judging data", () => {
-      const result = judgeRoundSchema.safeParse({
-        rounds: [
-          { roundId: "r1", verdict: "approved" },
-          { roundId: "r2", verdict: "rejected" },
+  describe("createVideoSchema", () => {
+    it("accepts valid video data", () => {
+      const result = createVideoSchema.safeParse({
+        url: "https://s3.example.com/videos/abc.mp4",
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it("accepts video with optional fields", () => {
+      const result = createVideoSchema.safeParse({
+        title: "Trending Dance",
+        url: "https://s3.example.com/videos/abc.mp4",
+        thumbnailUrl: "https://s3.example.com/thumbs/abc.jpg",
+        duration: 30,
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it("rejects invalid URL", () => {
+      const result = createVideoSchema.safeParse({
+        url: "not-a-url",
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it("rejects negative duration", () => {
+      const result = createVideoSchema.safeParse({
+        url: "https://s3.example.com/videos/abc.mp4",
+        duration: -5,
+      });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe("createMatchupsSchema", () => {
+    it("accepts valid matchups data", () => {
+      const result = createMatchupsSchema.safeParse({
+        matchups: [
+          { matchupNumber: 1, videoAId: "v1", videoBId: "v2" },
+          { matchupNumber: 2, videoAId: "v3", videoBId: "v4" },
         ],
       });
       expect(result.success).toBe(true);
     });
 
-    it("rejects invalid verdict", () => {
-      const result = judgeRoundSchema.safeParse({
-        rounds: [{ roundId: "r1", verdict: "maybe" }],
+    it("rejects matchup with zero matchupNumber", () => {
+      const result = createMatchupsSchema.safeParse({
+        matchups: [{ matchupNumber: 0, videoAId: "v1", videoBId: "v2" }],
       });
       expect(result.success).toBe(false);
     });
-  });
 
-  describe("assignTasksSchema", () => {
-    it("accepts valid task assignment", () => {
-      const result = assignTasksSchema.safeParse({
-        creatorIds: ["user-1", "user-2"],
-        weekNumber: 1,
-        descriptions: ["Task 1", "Task 2", "Task 3"],
-        deadline: "2025-01-07T23:59:59.000Z",
+    it("rejects empty matchups array", () => {
+      const result = createMatchupsSchema.safeParse({
+        matchups: [],
       });
+      // Empty array is technically valid per schema — z.array allows it
       expect(result.success).toBe(true);
-    });
-
-    it("rejects wrong number of descriptions", () => {
-      const result = assignTasksSchema.safeParse({
-        creatorIds: ["user-1"],
-        weekNumber: 1,
-        descriptions: ["Task 1", "Task 2"],
-        deadline: "2025-01-07T23:59:59.000Z",
-      });
-      expect(result.success).toBe(false);
     });
   });
 

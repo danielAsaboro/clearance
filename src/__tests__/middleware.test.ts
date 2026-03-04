@@ -13,7 +13,7 @@ function makeRequest(
   return req;
 }
 
-describe("Role-based proxy guard", () => {
+describe("Proxy middleware", () => {
   it("allows public paths through without auth", () => {
     const res = proxy(makeRequest("/"));
     expect(res.status).toBe(200);
@@ -24,10 +24,26 @@ describe("Role-based proxy guard", () => {
     expect(res.status).toBe(200);
   });
 
+  it("allows auth pages (public)", () => {
+    const res = proxy(makeRequest("/auth/login"));
+    expect(res.status).toBe(200);
+  });
+
+  it("allows referral pages (public)", () => {
+    const res = proxy(makeRequest("/ref/abc123"));
+    expect(res.status).toBe(200);
+  });
+
   it("redirects unauthenticated users to login for protected pages", () => {
     const res = proxy(makeRequest("/rewards"));
     expect(res.status).toBe(307);
     expect(res.headers.get("location")).toContain("/auth/login");
+  });
+
+  it("includes redirect param when redirecting to login", () => {
+    const res = proxy(makeRequest("/leaderboard"));
+    expect(res.status).toBe(307);
+    expect(res.headers.get("location")).toContain("redirect=%2Fleaderboard");
   });
 
   it("allows authenticated users through protected pages", () => {
@@ -37,64 +53,27 @@ describe("Role-based proxy guard", () => {
     expect(res.status).toBe(200);
   });
 
-  it("redirects creators away from /arena/game", () => {
+  it("allows authenticated users to access game page", () => {
     const res = proxy(
       makeRequest("/arena/game?session=abc", {
         "privy-token": "test-token",
-        clearance_role: "creator",
-        clearance_onboarded: "1",
-      })
-    );
-    expect(res.status).toBe(307);
-    expect(res.headers.get("location")).toContain("/creator-hub");
-  });
-
-  it("redirects fans away from /creator-hub", () => {
-    const res = proxy(
-      makeRequest("/creator-hub", {
-        "privy-token": "test-token",
-        clearance_role: "fan",
-        clearance_onboarded: "1",
-      })
-    );
-    expect(res.status).toBe(307);
-    expect(res.headers.get("location")).toContain("/arena");
-  });
-
-  it("allows creators to access /creator-hub", () => {
-    const res = proxy(
-      makeRequest("/creator-hub", {
-        "privy-token": "test-token",
-        clearance_role: "creator",
-        clearance_onboarded: "1",
       })
     );
     expect(res.status).toBe(200);
   });
 
-  it("allows fans to access /arena/game", () => {
-    const res = proxy(
-      makeRequest("/arena/game?session=abc", {
-        "privy-token": "test-token",
-        clearance_role: "fan",
-        clearance_onboarded: "1",
-      })
-    );
-    expect(res.status).toBe(200);
-  });
-
-  it("allows API routes through without role check", () => {
+  it("allows API routes through without auth check", () => {
     const res = proxy(makeRequest("/api/users"));
     expect(res.status).toBe(200);
   });
 
-  it("does not enforce roles when not onboarded", () => {
-    const res = proxy(
-      makeRequest("/arena/game?session=abc", {
-        "privy-token": "test-token",
-        clearance_role: "creator",
-      })
-    );
+  it("allows static asset paths through", () => {
+    const res = proxy(makeRequest("/_next/static/chunk.js"));
+    expect(res.status).toBe(200);
+  });
+
+  it("allows file paths with extensions through", () => {
+    const res = proxy(makeRequest("/icon-512x512.png"));
     expect(res.status).toBe(200);
   });
 });

@@ -13,9 +13,12 @@ export async function GET(
   const session = await prisma.weeklySession.findUnique({
     where: { id },
     include: {
-      rounds: {
-        orderBy: { roundNumber: "asc" },
-        include: { task: { include: { creator: { select: { displayName: true, tiktokUsername: true } } } } },
+      matchups: {
+        orderBy: { matchupNumber: "asc" },
+        include: {
+          videoA: true,
+          videoB: true,
+        },
       },
       _count: { select: { gameResults: true } },
     },
@@ -60,18 +63,18 @@ export async function PATCH(
 
   // Send reminder emails when session goes live
   if (body.status === "live" && current.status !== "live") {
-    // Fire-and-forget: send reminders to all fans with emails
-    const fans = await prisma.user.findMany({
-      where: { role: "fan", email: { not: null } },
+    // Fire-and-forget: send reminders to all players with emails
+    const players = await prisma.user.findMany({
+      where: { role: "player", email: { not: null } },
       select: { email: true },
     });
 
     Promise.allSettled(
-      fans
-        .filter((f) => f.email)
-        .map((f) =>
+      players
+        .filter((p) => p.email)
+        .map((p) =>
           sendSessionReminder(
-            f.email!,
+            p.email!,
             session.title,
             session.scheduledAt,
             session.weekNumber
@@ -79,7 +82,7 @@ export async function PATCH(
         )
     ).then((results) => {
       const sent = results.filter((r) => r.status === "fulfilled" && r.value).length;
-      console.log(`[Reminders] Sent ${sent}/${fans.length} session reminder emails`);
+      console.log(`[Reminders] Sent ${sent}/${players.length} session reminder emails`);
     });
   }
 

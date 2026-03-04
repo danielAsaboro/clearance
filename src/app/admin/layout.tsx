@@ -6,19 +6,17 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
-  Users,
-  ListTodo,
   Radio,
   Trophy,
   Eye,
   LogOut,
   ShieldX,
+  Film,
 } from "lucide-react";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/creators", label: "Creators", icon: Users },
-  { href: "/admin/tasks", label: "Tasks", icon: ListTodo },
+  { href: "/admin/videos", label: "Videos", icon: Film },
   { href: "/admin/sessions", label: "Sessions", icon: Radio },
   { href: "/admin/results", label: "Results", icon: Trophy },
 ];
@@ -112,7 +110,7 @@ export default function AdminLayout({
       </div>
 
       {/* Content */}
-      <div className="flex-1 px-6 py-6">{children}</div>
+      <div className="flex-1 px-6 py-6 overflow-y-auto">{children}</div>
 
       {/* Bottom Nav */}
       <div className="border-t border-[#2A2A2A] px-2 py-2 flex justify-around">

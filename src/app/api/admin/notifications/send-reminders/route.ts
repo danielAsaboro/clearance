@@ -22,14 +22,14 @@ export async function POST(req: NextRequest) {
   });
 
   if (sessions.length === 0) {
-    return NextResponse.json({ sent: 0, sessions: 0, fans: 0 });
+    return NextResponse.json({ sent: 0, sessions: 0, players: 0 });
   }
 
-  // Get all fans with email addresses
-  const fans = await prisma.user.findMany({
+  // Get all players with email addresses
+  const players = await prisma.user.findMany({
     where: {
       email: { not: null },
-      role: "fan",
+      role: "player",
     },
     select: { email: true },
   });
@@ -37,10 +37,10 @@ export async function POST(req: NextRequest) {
   let sent = 0;
 
   for (const session of sessions) {
-    for (const fan of fans) {
-      if (!fan.email) continue;
+    for (const player of players) {
+      if (!player.email) continue;
       const ok = await sendSessionReminder(
-        fan.email,
+        player.email,
         session.title,
         session.scheduledAt,
         session.weekNumber
@@ -52,6 +52,6 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     sent,
     sessions: sessions.length,
-    fans: fans.length,
+    players: players.length,
   });
 }

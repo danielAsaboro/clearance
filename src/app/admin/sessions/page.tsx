@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import Link from "next/link";
-import { Plus, Radio, Calendar, Box } from "lucide-react";
+import { Plus, Radio, Calendar, Box, CheckCircle } from "lucide-react";
 
 interface Session {
   id: string;
@@ -12,13 +12,14 @@ interface Session {
   scheduledAt: string;
   status: string;
   collectionAddress: string | null;
-  _count: { rounds: number; gameResults: number };
+  _count: { matchups: number; gameResults: number };
 }
 
 export default function AdminSessions() {
   const { getAccessToken } = usePrivy();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [showCreate, setShowCreate] = useState(false);
+  const [finalizing, setFinalizing] = useState<string | null>(null);
   const [form, setForm] = useState({
     weekNumber: "",
     title: "",
@@ -84,6 +85,26 @@ export default function AdminSessions() {
       body: JSON.stringify({ status }),
     });
     fetchSessions();
+  };
+
+  const handleFinalize = async (id: string) => {
+    setFinalizing(id);
+    try {
+      const token = await getAccessToken();
+      const res = await fetch(`/api/admin/sessions/${id}/finalize`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        alert(`Finalized: ${data.matchupsFinalized} matchups, ${data.resultsUpdated} results updated`);
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to finalize");
+      }
+    } finally {
+      setFinalizing(null);
+    }
   };
 
   return (
@@ -164,7 +185,7 @@ export default function AdminSessions() {
             </div>
 
             <div className="flex items-center gap-2 text-xs text-[#888] mb-3">
-              <span>{session._count.rounds}/28 rounds</span>
+              <span>{session._count.matchups}/28 matchups</span>
               <span>|</span>
               <span>{session._count.gameResults} participants</span>
               {session.collectionAddress && (
@@ -195,36 +216,30 @@ export default function AdminSessions() {
                     <Radio className="w-3 h-3" /> Go Live
                   </button>
                   <Link
-                    href={`/admin/sessions/${session.id}/judge`}
+                    href={`/admin/sessions/${session.id}/matchups`}
                     className="flex-1 py-2 rounded-lg bg-[#2A2A2A] text-[#888] text-xs font-medium flex items-center justify-center"
                   >
-                    Configure
+                    Build Matchups
                   </Link>
                 </>
               )}
               {session.status === "live" && (
-                <>
-                  <button
-                    onClick={() => handleStatusChange(session.id, "ended")}
-                    className="flex-1 py-2 rounded-lg bg-[#F5E642]/10 text-[#F5E642] text-xs font-medium"
-                  >
-                    End Session
-                  </button>
-                  <Link
-                    href={`/admin/sessions/${session.id}/judge`}
-                    className="flex-1 py-2 rounded-lg bg-[#2A2A2A] text-[#888] text-xs font-medium flex items-center justify-center"
-                  >
-                    Judge
-                  </Link>
-                </>
+                <button
+                  onClick={() => handleStatusChange(session.id, "ended")}
+                  className="flex-1 py-2 rounded-lg bg-[#F5E642]/10 text-[#F5E642] text-xs font-medium"
+                >
+                  End Session
+                </button>
               )}
               {session.status === "ended" && (
-                <Link
-                  href={`/admin/sessions/${session.id}/judge`}
-                  className="flex-1 py-2 rounded-lg bg-[#2A2A2A] text-[#888] text-xs font-medium flex items-center justify-center"
+                <button
+                  onClick={() => handleFinalize(session.id)}
+                  disabled={finalizing === session.id}
+                  className="flex-1 py-2 rounded-lg bg-green-500/10 text-green-400 text-xs font-medium flex items-center justify-center gap-1 disabled:opacity-50"
                 >
-                  View Judging
-                </Link>
+                  <CheckCircle className="w-3 h-3" />
+                  {finalizing === session.id ? "Finalizing..." : "Finalize Results"}
+                </button>
               )}
             </div>
           </div>

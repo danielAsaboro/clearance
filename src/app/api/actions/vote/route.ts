@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
 
   let title = "Vote on The Clearance";
   let description =
-    "Cast your vote on the latest session. Approve or reject creator content and earn rewards!";
+    "Cast your vote on the latest session. Pick which video will trend and earn rewards!";
 
   if (sessionId) {
     const session = await prisma.weeklySession.findUnique({
@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
         description = `Week ${session.weekNumber} — This session has ended. Check your results on The Clearance!`;
       } else {
         title = `Vote: ${session.title}`;
-        description = `Week ${session.weekNumber} — Cast your vote on creator content in The Clearance. Score 21+ correct for Gold Tier rewards!`;
+        description = `Week ${session.weekNumber} — Predict which videos will trend in The Clearance. Score 75%+ correct for Gold Tier rewards!`;
       }
     }
   }
@@ -53,13 +53,13 @@ export async function GET(req: NextRequest) {
       actions: [
         {
           type: "transaction" as const,
-          label: "Approve",
-          href: `${new URL(req.url).origin}/api/actions/vote?decision=approve${sessionId ? `&session=${sessionId}` : ""}`,
+          label: "Video A",
+          href: `${new URL(req.url).origin}/api/actions/vote?decision=video_a${sessionId ? `&session=${sessionId}` : ""}`,
         },
         {
           type: "transaction" as const,
-          label: "Reject",
-          href: `${new URL(req.url).origin}/api/actions/vote?decision=reject${sessionId ? `&session=${sessionId}` : ""}`,
+          label: "Video B",
+          href: `${new URL(req.url).origin}/api/actions/vote?decision=video_b${sessionId ? `&session=${sessionId}` : ""}`,
         },
       ],
     },
@@ -77,7 +77,7 @@ export async function OPTIONS() {
 export async function POST(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const decision = searchParams.get("decision") || "approve";
+    const decision = searchParams.get("decision") || "video_a";
     const sessionId = searchParams.get("session");
 
     const body = await req.json();
@@ -118,17 +118,17 @@ export async function POST(req: NextRequest) {
         where: { walletAddress: accountPubkey.toBase58() },
       });
       if (user) {
-        const currentRound = await prisma.sessionRound.findFirst({
+        const currentMatchup = await prisma.matchup.findFirst({
           where: { sessionId },
-          orderBy: { roundNumber: "asc" },
+          orderBy: { matchupNumber: "asc" },
         });
-        if (currentRound) {
+        if (currentMatchup) {
           await prisma.vote
             .create({
               data: {
                 userId: user.id,
-                roundId: currentRound.id,
-                decision: decision as "approve" | "reject",
+                matchupId: currentMatchup.id,
+                decision: decision as "video_a" | "video_b",
               },
             })
             .catch(() => {
@@ -142,7 +142,7 @@ export async function POST(req: NextRequest) {
       fields: {
         type: "transaction",
         transaction: tx,
-        message: `Vote recorded: ${decision.toUpperCase()}! Head to The Clearance for live voting.`,
+        message: `Vote recorded: ${decision === "video_a" ? "Video A" : "Video B"}! Head to The Clearance for live voting.`,
       },
     });
 

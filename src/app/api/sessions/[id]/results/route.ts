@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAuthUser } from "@/lib/auth-helpers";
-import { calculateTier } from "@/lib/session-engine";
+import { calculateTier, calculateMajorityWinners } from "@/lib/session-engine";
 
 // GET /api/sessions/:id/results — Get user's results for a session
 export async function GET(
@@ -24,34 +24,53 @@ export async function GET(
     return NextResponse.json({ error: "No results found" }, { status: 404 });
   }
 
-  // If results haven't been calculated yet, calculate them
+  // If results haven't been calculated yet, calculate them via majority vote
   if (gameResult.tier === null) {
-    // Count votes for this user in this session
-    const votes = await prisma.vote.findMany({
-      where: {
-        userId: user.id,
-        round: { sessionId: id },
+    // Get all matchups with their votes for this session
+    const matchups = await prisma.matchup.findMany({
+      where: { sessionId: id },
+      include: {
+        votes: { select: { decision: true } },
       },
-      include: { round: true },
     });
 
-    const correctVotes = votes.filter((v) => {
-      if (!v.round.adminVerdict) return false;
+    // Calculate majority winners
+    const winnerMap = calculateMajorityWinners(
+      matchups.map((m) => ({
+        id: m.id,
+        videoAId: m.videoAId,
+        videoBId: m.videoBId,
+        votes: m.votes.map((v) => ({ decision: v.decision as "video_a" | "video_b" })),
+      }))
+    );
+
+    // Get this user's votes
+    const userVotes = await prisma.vote.findMany({
+      where: {
+        userId: user.id,
+        matchup: { sessionId: id },
+      },
+      include: { matchup: true },
+    });
+
+    const correctVotes = userVotes.filter((v) => {
+      const winner = winnerMap.get(v.matchupId);
+      if (!winner) return false;
       return (
-        (v.decision === "approve" && v.round.adminVerdict === "approved") ||
-        (v.decision === "reject" && v.round.adminVerdict === "rejected")
+        (v.decision === "video_a" && winner === v.matchup.videoAId) ||
+        (v.decision === "video_b" && winner === v.matchup.videoBId)
       );
     }).length;
 
-    const { tier } = calculateTier(correctVotes);
+    const { tier } = calculateTier(correctVotes, matchups.length);
 
     gameResult = await prisma.gameResult.update({
       where: { id: gameResult.id },
       data: {
-        totalVotes: votes.length,
+        totalVotes: userVotes.length,
         correctVotes,
         tier,
-        rewardAmount: 0,
+        rewardAmount: tier === "gold" ? 3.5 : tier === "base" ? 1.75 : 0,
       },
     });
   }

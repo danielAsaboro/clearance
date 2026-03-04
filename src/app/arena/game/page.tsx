@@ -5,17 +5,23 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { usePrivy } from "@privy-io/react-auth";
 import { AlertCircle, Coins, ChevronRight, X } from "lucide-react";
 import Link from "next/link";
-import TikTokEmbed from "@/components/TikTokEmbed";
-import VoteButtons from "@/components/VoteButtons";
+import MatchupPicker from "@/components/MatchupPicker";
 import ScoreTracker from "@/components/ScoreTracker";
 import ProgressBar from "@/components/ProgressBar";
 
-interface Round {
+interface MatchupVideo {
   id: string;
-  roundNumber: number;
-  tiktokUrl: string;
-  tiktokEmbedData: { thumbnail_url?: string; author_name?: string } | null;
+  url: string;
+  thumbnailUrl: string | null;
+  title: string | null;
+}
+
+interface Matchup {
+  id: string;
+  matchupNumber: number;
   duration: number;
+  videoA: MatchupVideo;
+  videoB: MatchupVideo;
 }
 
 interface RoundState {
@@ -64,25 +70,24 @@ function EntryConfirmModal({
         </div>
 
         <div className="bg-[#0d0d0d] rounded-xl p-4 text-sm text-[#888] space-y-2">
-          <p className="text-[#F5E642] font-semibold">How Rewards Work</p>
+          <p className="text-[#F5E642] font-semibold">How It Works</p>
           <p>
-            Your voting accuracy determines your{" "}
+            Each matchup shows two videos. Pick which one will trend — the majority
+            vote determines the correct answer.
+          </p>
+          <p>
+            Your accuracy determines your{" "}
             <span className="text-white font-medium">Blind Box tier</span>:
           </p>
           <ul className="space-y-1 pl-2">
             <li>
-              🥇 <span className="text-white">Gold</span> — ≥21 correct votes
+              🥇 <span className="text-white">Gold</span> — ≥75% correct
             </li>
             <li>
-              🥈 <span className="text-white">Base</span> — 10–20 correct votes
+              🥈 <span className="text-white">Base</span> — ≥36% correct
             </li>
-            <li>🎟 Participation — &lt;10 correct votes</li>
+            <li>🎟 Participation — &lt;36% correct</li>
           </ul>
-          <p className="pt-1">
-            A <span className="text-white font-medium">raffle</span> at reveal
-            determines your exact reward — keep it a mystery until you open your
-            Blind Box.
-          </p>
         </div>
 
         <button
@@ -138,7 +143,7 @@ function InsufficientBalanceScreen() {
 }
 
 // ---------------------------------------------------------------------------
-// Synchronized countdown timer (reads from SSE state)
+// Synchronized countdown timer
 // ---------------------------------------------------------------------------
 function SyncedTimer({
   secondsRemaining,
@@ -188,20 +193,19 @@ function GameContent() {
   const { getAccessToken } = usePrivy();
 
   const [phase, setPhase] = useState<GamePhase>("confirming");
-  const [rounds, setRounds] = useState<Round[]>([]);
+  const [matchups, setMatchups] = useState<Matchup[]>([]);
   const [roundState, setRoundState] = useState<RoundState | null>(null);
-  const [voted, setVoted] = useState<"approve" | "reject" | null>(null);
-  const [correctCount, setCorrectCount] = useState(0);
+  const [voted, setVoted] = useState<"video_a" | "video_b" | null>(null);
   const [totalVoted, setTotalVoted] = useState(0);
   const [loading, setLoading] = useState(false);
   const [gameOver, setGameOver] = useState(false);
 
-  // Track which SSE round we last voted on to handle auto-advance
+  // Track which SSE round we last voted on
   const lastVotedRound = useRef<number>(0);
   const prevRound = useRef<number>(0);
 
-  // Fetch rounds list
-  const fetchRounds = useCallback(async () => {
+  // Fetch matchups list
+  const fetchMatchups = useCallback(async () => {
     if (!sessionId) return;
     setLoading(true);
     const token = await getAccessToken();
@@ -210,7 +214,7 @@ function GameContent() {
     });
     if (res.ok) {
       const data = await res.json();
-      setRounds(data);
+      setMatchups(data);
     }
     setLoading(false);
   }, [sessionId, getAccessToken]);
@@ -249,20 +253,6 @@ function GameContent() {
     }
   }, [roundState]);
 
-  // Handle missed vote when timer runs out (server advanced the round)
-  useEffect(() => {
-    if (!roundState) return;
-    const serverRound = roundState.round;
-
-    if (
-      roundState.secondsRemaining === 0 &&
-      voted === null &&
-      serverRound === prevRound.current
-    ) {
-      setTotalVoted((prev) => prev + 1);
-    }
-  }, [roundState, voted]);
-
   const confirmJoin = async () => {
     if (!sessionId) return;
     setPhase("joining");
@@ -284,11 +274,11 @@ function GameContent() {
       }
     }
 
-    await fetchRounds();
+    await fetchMatchups();
     setPhase("playing");
   };
 
-  const handleVote = async (decision: "approve" | "reject") => {
+  const handleVote = async (decision: "video_a" | "video_b") => {
     if (voted !== null) return;
     const serverRound = roundState?.round ?? 1;
     if (lastVotedRound.current === serverRound) return;
@@ -297,29 +287,22 @@ function GameContent() {
     lastVotedRound.current = serverRound;
     setTotalVoted((prev) => prev + 1);
 
-    const currentRound = rounds[serverRound - 1];
-    if (!currentRound) return;
+    const currentMatchup = matchups[serverRound - 1];
+    if (!currentMatchup) return;
 
     try {
       const token = await getAccessToken();
-      const res = await fetch("/api/votes", {
+      await fetch("/api/votes", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          roundId: currentRound.id,
+          matchupId: currentMatchup.id,
           decision,
         }),
       });
-
-      if (res.ok) {
-        const data = await res.json();
-        if (data.correct) {
-          setCorrectCount((prev) => prev + 1);
-        }
-      }
     } catch {
       // Vote submission failed silently
     }
@@ -351,7 +334,7 @@ function GameContent() {
     );
   }
 
-  if (!sessionId || rounds.length === 0) {
+  if (!sessionId || matchups.length === 0) {
     return (
       <div className="flex-1 bg-black flex flex-col items-center justify-center px-6">
         <p className="text-[#888] text-sm mb-4">No active session found.</p>
@@ -365,11 +348,10 @@ function GameContent() {
     );
   }
 
-  // Use server-authoritative round, fallback to round 1 while stream connects
   const serverRound = roundState?.round ?? 1;
   const secondsRemaining = roundState?.secondsRemaining ?? 30;
-  const currentRound = rounds[serverRound - 1] ?? rounds[0];
-  const totalRounds = roundState?.totalRounds ?? rounds.length;
+  const currentMatchup = matchups[serverRound - 1] ?? matchups[0];
+  const totalRounds = roundState?.totalRounds ?? matchups.length;
 
   return (
     <div className="flex-1 bg-black flex flex-col">
@@ -377,9 +359,9 @@ function GameContent() {
       <div className="px-4 pt-4 pb-2">
         <div className="flex items-center justify-between mb-2">
           <span className="text-[#888] text-xs tracking-wider uppercase">
-            Round {serverRound} / {totalRounds}
+            Matchup {serverRound} / {totalRounds}
           </span>
-          <ScoreTracker correct={correctCount} total={totalVoted} />
+          <ScoreTracker correct={totalVoted} total={totalRounds} />
         </div>
         <div className="mb-3">
           <ProgressBar currentStep={serverRound} totalSteps={totalRounds} />
@@ -387,27 +369,15 @@ function GameContent() {
         <SyncedTimer secondsRemaining={secondsRemaining} active={voted === null} />
       </div>
 
-      {/* Video Area */}
-      <div className="flex-1 px-4 py-2">
-        <TikTokEmbed
-          url={currentRound.tiktokUrl}
-          thumbnailUrl={currentRound.tiktokEmbedData?.thumbnail_url}
-          key={currentRound.id}
+      {/* Matchup Area */}
+      <div className="flex-1 px-4 py-2 flex flex-col min-h-0">
+        <MatchupPicker
+          key={currentMatchup.id}
+          videoA={currentMatchup.videoA}
+          videoB={currentMatchup.videoB}
+          onPick={handleVote}
+          voted={voted}
         />
-      </div>
-
-      {/* Creator Info */}
-      {currentRound.tiktokEmbedData?.author_name && (
-        <div className="px-4 mb-2">
-          <p className="text-white font-bold text-sm">
-            @{currentRound.tiktokEmbedData.author_name}
-          </p>
-        </div>
-      )}
-
-      {/* Vote Buttons */}
-      <div className="px-4 pb-6">
-        <VoteButtons onVote={handleVote} voted={voted} />
       </div>
     </div>
   );

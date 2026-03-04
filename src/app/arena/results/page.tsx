@@ -61,7 +61,7 @@ function ResultsContent() {
         </div>
         <div>
           <h1 className="text-white font-bold text-lg">Session Results</h1>
-          <p className="text-[#888] text-xs">Your performance</p>
+          <p className="text-[#888] text-xs">Your predictions</p>
         </div>
       </div>
 
@@ -69,7 +69,7 @@ function ResultsContent() {
         <div className="flex-1 flex flex-col">
           <ResultsCard
             correctVotes={results.correctVotes}
-            totalRounds={28}
+            totalRounds={results.totalVotes || 28}
             tier={results.tier}
             reward={results.rewardAmount}
           />
@@ -90,7 +90,7 @@ function ResultsContent() {
               </p>
             ) : (
               <p className="text-[#888] text-sm">
-                Score 10+ correct to earn a Blind Box
+                Score higher to earn a Blind Box
               </p>
             )}
           </div>
@@ -113,7 +113,7 @@ function ResultsContent() {
               onClick={() => {
                 navigator.share?.({
                   title: "The Clearance Results",
-                  text: `I scored ${results.correctVotes}/28 on The Clearance! ${results.tier === "gold" ? "Gold Tier!" : ""}`,
+                  text: `I predicted ${results.correctVotes} matchups correctly on The Clearance! ${results.tier === "gold" ? "Gold Tier!" : ""}`,
                 });
               }}
               className="w-full bg-[#1A1A1A] rounded-xl py-4 text-sm text-white flex items-center justify-center gap-2 border border-[#2A2A2A]"

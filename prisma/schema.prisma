@@ -8,16 +8,8 @@ datasource db {
 }
 
 enum UserRole {
-  creator
-  fan
+  player
   admin
-}
-
-enum TaskStatus {
-  pending
-  submitted
-  verified
-  rejected
 }
 
 enum SessionStatus {
@@ -26,14 +18,9 @@ enum SessionStatus {
   ended
 }
 
-enum RoundVerdict {
-  approved
-  rejected
-}
-
 enum VoteDecision {
-  approve
-  reject
+  video_a
+  video_b
 }
 
 enum RewardTier {
@@ -54,10 +41,7 @@ model User {
   phone            String?
   displayName      String?
   profilePhoto     String?
-  tiktokUsername   String?
-  role             UserRole @default(fan)
-  debtSources      Json?
-  willingToDeclare Boolean?
+  role             UserRole @default(player)
   consentAccepted  Boolean  @default(false)
   privyId          String   @unique
   walletAddress    String?
@@ -68,7 +52,7 @@ model User {
 
   categories       Json?
 
-  tasks            Task[]
+  uploadedVideos   Video[]
   votes            Vote[]
   gameResults      GameResult[]
   referralsMade    Referral[] @relation("Referrer")
@@ -76,24 +60,19 @@ model User {
   enrollments      CampaignEnrollment[]
 }
 
-model Task {
-  id            String     @id @default(cuid())
-  creatorId     String
-  creator       User       @relation(fields: [creatorId], references: [id])
-  weekNumber    Int
-  taskNumber    Int
-  description   String
-  hashtag       String     @default("#theclearanceNG")
-  deadline      DateTime
-  tiktokUrl     String?
-  submittedAt   DateTime?
-  status        TaskStatus @default(pending)
-  rejectionNote String?
-  verifiedAt    DateTime?
-  verifiedBy    String?
-  createdAt     DateTime   @default(now())
+model Video {
+  id             String   @id @default(cuid())
+  title          String?
+  url            String
+  thumbnailUrl   String?
+  duration       Int?
+  uploadedById   String
+  uploadedBy     User     @relation(fields: [uploadedById], references: [id])
+  createdAt      DateTime @default(now())
 
-  sessionRound  SessionRound?
+  matchupsAsA    Matchup[] @relation("VideoA")
+  matchupsAsB    Matchup[] @relation("VideoB")
+  wonMatchups    Matchup[] @relation("WinningVideo")
 }
 
 model WeeklySession {
@@ -108,37 +87,38 @@ model WeeklySession {
   campaignId        String?
   campaign          Campaign?     @relation(fields: [campaignId], references: [id])
 
-  rounds         SessionRound[]
+  matchups       Matchup[]
   gameResults    GameResult[]
 }
 
-model SessionRound {
+model Matchup {
   id              String        @id @default(cuid())
   sessionId       String
   session         WeeklySession @relation(fields: [sessionId], references: [id])
-  roundNumber     Int
-  taskId          String        @unique
-  task            Task          @relation(fields: [taskId], references: [id])
-  tiktokUrl       String
-  tiktokEmbedData Json?
+  matchupNumber   Int
+  videoAId        String
+  videoA          Video         @relation("VideoA", fields: [videoAId], references: [id])
+  videoBId        String
+  videoB          Video         @relation("VideoB", fields: [videoBId], references: [id])
   duration        Int           @default(30)
-  adminVerdict    RoundVerdict?
+  winningVideoId  String?
+  winningVideo    Video?        @relation("WinningVideo", fields: [winningVideoId], references: [id])
 
   votes           Vote[]
 
-  @@unique([sessionId, roundNumber])
+  @@unique([sessionId, matchupNumber])
 }
 
 model Vote {
   id          String       @id @default(cuid())
   userId      String
   user        User         @relation(fields: [userId], references: [id])
-  roundId     String
-  round       SessionRound @relation(fields: [roundId], references: [id])
+  matchupId   String
+  matchup     Matchup      @relation(fields: [matchupId], references: [id])
   decision    VoteDecision
   submittedAt DateTime     @default(now())
 
-  @@unique([userId, roundId])
+  @@unique([userId, matchupId])
 }
 
 model GameResult {
@@ -185,8 +165,7 @@ model Campaign {
   sessionsPerCycle        Int
   videosPerSession        Int
   votingRoundDurationSecs Int             @default(30)
-  tasksPerWeekPerCreator  Int
-  submissionDeadlineHours Int
+  matchupsPerSession      Int             @default(28)
   createdAt               DateTime        @default(now())
   updatedAt               DateTime        @updatedAt
 

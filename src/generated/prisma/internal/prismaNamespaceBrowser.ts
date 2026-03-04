@@ -52,9 +52,9 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   User: 'User',
-  Task: 'Task',
+  Video: 'Video',
   WeeklySession: 'WeeklySession',
-  SessionRound: 'SessionRound',
+  Matchup: 'Matchup',
   Vote: 'Vote',
   GameResult: 'GameResult',
   Referral: 'Referral',
@@ -84,10 +84,7 @@ export const UserScalarFieldEnum = {
   phone: 'phone',
   displayName: 'displayName',
   profilePhoto: 'profilePhoto',
-  tiktokUsername: 'tiktokUsername',
   role: 'role',
-  debtSources: 'debtSources',
-  willingToDeclare: 'willingToDeclare',
   consentAccepted: 'consentAccepted',
   privyId: 'privyId',
   walletAddress: 'walletAddress',
@@ -101,24 +98,17 @@ export const UserScalarFieldEnum = {
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
 
 
-export const TaskScalarFieldEnum = {
+export const VideoScalarFieldEnum = {
   id: 'id',
-  creatorId: 'creatorId',
-  weekNumber: 'weekNumber',
-  taskNumber: 'taskNumber',
-  description: 'description',
-  hashtag: 'hashtag',
-  deadline: 'deadline',
-  tiktokUrl: 'tiktokUrl',
-  submittedAt: 'submittedAt',
-  status: 'status',
-  rejectionNote: 'rejectionNote',
-  verifiedAt: 'verifiedAt',
-  verifiedBy: 'verifiedBy',
+  title: 'title',
+  url: 'url',
+  thumbnailUrl: 'thumbnailUrl',
+  duration: 'duration',
+  uploadedById: 'uploadedById',
   createdAt: 'createdAt'
 } as const
 
-export type TaskScalarFieldEnum = (typeof TaskScalarFieldEnum)[keyof typeof TaskScalarFieldEnum]
+export type VideoScalarFieldEnum = (typeof VideoScalarFieldEnum)[keyof typeof VideoScalarFieldEnum]
 
 
 export const WeeklySessionScalarFieldEnum = {
@@ -136,24 +126,23 @@ export const WeeklySessionScalarFieldEnum = {
 export type WeeklySessionScalarFieldEnum = (typeof WeeklySessionScalarFieldEnum)[keyof typeof WeeklySessionScalarFieldEnum]
 
 
-export const SessionRoundScalarFieldEnum = {
+export const MatchupScalarFieldEnum = {
   id: 'id',
   sessionId: 'sessionId',
-  roundNumber: 'roundNumber',
-  taskId: 'taskId',
-  tiktokUrl: 'tiktokUrl',
-  tiktokEmbedData: 'tiktokEmbedData',
+  matchupNumber: 'matchupNumber',
+  videoAId: 'videoAId',
+  videoBId: 'videoBId',
   duration: 'duration',
-  adminVerdict: 'adminVerdict'
+  winningVideoId: 'winningVideoId'
 } as const
 
-export type SessionRoundScalarFieldEnum = (typeof SessionRoundScalarFieldEnum)[keyof typeof SessionRoundScalarFieldEnum]
+export type MatchupScalarFieldEnum = (typeof MatchupScalarFieldEnum)[keyof typeof MatchupScalarFieldEnum]
 
 
 export const VoteScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
-  roundId: 'roundId',
+  matchupId: 'matchupId',
   decision: 'decision',
   submittedAt: 'submittedAt'
 } as const
@@ -205,8 +194,7 @@ export const CampaignScalarFieldEnum = {
   sessionsPerCycle: 'sessionsPerCycle',
   videosPerSession: 'videosPerSession',
   votingRoundDurationSecs: 'votingRoundDurationSecs',
-  tasksPerWeekPerCreator: 'tasksPerWeekPerCreator',
-  submissionDeadlineHours: 'submissionDeadlineHours',
+  matchupsPerSession: 'matchupsPerSession',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
