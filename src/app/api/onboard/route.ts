@@ -4,7 +4,7 @@ import { getAuthUser } from "@/lib/auth-helpers";
 import { onboardSchema } from "@/lib/validators";
 import { checkRateLimit } from "@/lib/rate-limit";
 
-// POST /api/onboard — Complete onboarding for both creators and fans
+// POST /api/onboard — Complete onboarding for players
 export async function POST(req: NextRequest) {
   const authUser = await getAuthUser(req);
   if (!authUser) {
@@ -15,7 +15,8 @@ export async function POST(req: NextRequest) {
   if (limited) return limited;
 
   const body = await req.json();
-  const parsed = onboardSchema.safeParse(body);
+  // Always set role to player
+  const parsed = onboardSchema.safeParse({ ...body, role: "player" });
 
   if (!parsed.success) {
     return NextResponse.json(
@@ -25,42 +26,16 @@ export async function POST(req: NextRequest) {
   }
 
   const {
-    role,
     categories,
     email,
     displayName,
     profilePhoto,
     consentAccepted,
-    debtSources,
-    willingToDeclare,
-    tiktokUsername,
   } = parsed.data;
-
-  // Validate creator-specific fields
-  if (role === "creator") {
-    if (!debtSources || debtSources.length === 0) {
-      return NextResponse.json(
-        { error: "Creators must select at least one debt source" },
-        { status: 400 }
-      );
-    }
-    if (willingToDeclare === undefined) {
-      return NextResponse.json(
-        { error: "Creators must indicate willingness to declare" },
-        { status: 400 }
-      );
-    }
-    if (!tiktokUsername) {
-      return NextResponse.json(
-        { error: "Creators must provide a TikTok username" },
-        { status: 400 }
-      );
-    }
-  }
 
   // Update user with onboarding data
   const updateData: Record<string, unknown> = {
-    role,
+    role: "player",
     categories,
     displayName,
     profilePhoto: profilePhoto || null,
@@ -70,13 +45,6 @@ export async function POST(req: NextRequest) {
   // Store email if provided and user doesn't already have one
   if (email && !authUser.email) {
     updateData.email = email;
-  }
-
-  // Creator-specific fields
-  if (role === "creator") {
-    updateData.debtSources = debtSources;
-    updateData.willingToDeclare = willingToDeclare;
-    updateData.tiktokUsername = tiktokUsername;
   }
 
   // Find active campaign and create enrollment if one exists
@@ -98,11 +66,11 @@ export async function POST(req: NextRequest) {
           campaignId: activeCampaign.id,
         },
       },
-      update: { role },
+      update: { role: "player" },
       create: {
         userId: user.id,
         campaignId: activeCampaign.id,
-        role,
+        role: "player",
       },
     });
   }

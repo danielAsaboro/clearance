@@ -45,20 +45,20 @@ export { Prisma }
  */
 export type User = Prisma.UserModel
 /**
- * Model Task
+ * Model Video
  * 
  */
-export type Task = Prisma.TaskModel
+export type Video = Prisma.VideoModel
 /**
  * Model WeeklySession
  * 
  */
 export type WeeklySession = Prisma.WeeklySessionModel
 /**
- * Model SessionRound
+ * Model Matchup
  * 
  */
-export type SessionRound = Prisma.SessionRoundModel
+export type Matchup = Prisma.MatchupModel
 /**
  * Model Vote
  * 

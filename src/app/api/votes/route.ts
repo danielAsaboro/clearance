@@ -5,7 +5,7 @@ import { submitVoteSchema } from "@/lib/validators";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { trackAction } from "@/lib/torque";
 
-// POST /api/votes — Submit a vote
+// POST /api/votes — Submit a vote on a matchup
 export async function POST(req: NextRequest) {
   const user = await getAuthUser(req);
   if (!user) {
@@ -25,31 +25,31 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { roundId, decision } = parsed.data;
+  const { matchupId, decision } = parsed.data;
 
-  // Check round exists
-  const round = await prisma.sessionRound.findUnique({
-    where: { id: roundId },
+  // Check matchup exists
+  const matchup = await prisma.matchup.findUnique({
+    where: { id: matchupId },
     include: { session: true },
   });
 
-  if (!round) {
-    return NextResponse.json({ error: "Round not found" }, { status: 404 });
+  if (!matchup) {
+    return NextResponse.json({ error: "Matchup not found" }, { status: 404 });
   }
 
   // Check session is live
-  if (round.session.status !== "live") {
+  if (matchup.session.status !== "live") {
     return NextResponse.json({ error: "Session is not live" }, { status: 400 });
   }
 
   // Check for duplicate vote
   const existingVote = await prisma.vote.findUnique({
-    where: { userId_roundId: { userId: user.id, roundId } },
+    where: { userId_matchupId: { userId: user.id, matchupId } },
   });
 
   if (existingVote) {
     return NextResponse.json(
-      { error: "Already voted on this round" },
+      { error: "Already voted on this matchup" },
       { status: 409 }
     );
   }
@@ -57,23 +57,16 @@ export async function POST(req: NextRequest) {
   const vote = await prisma.vote.create({
     data: {
       userId: user.id,
-      roundId,
+      matchupId,
       decision,
     },
   });
-
-  // Check if vote is correct (if admin has already judged)
-  let correct = false;
-  if (round.adminVerdict) {
-    correct =
-      (decision === "approve" && round.adminVerdict === "approved") ||
-      (decision === "reject" && round.adminVerdict === "rejected");
-  }
 
   // Fire-and-forget: track loyalty action via Torque
   if (user.walletAddress) {
     trackAction(user.walletAddress, "session_vote");
   }
 
-  return NextResponse.json({ ...vote, correct }, { status: 201 });
+  // No real-time correctness — winner determined after session ends
+  return NextResponse.json(vote, { status: 201 });
 }

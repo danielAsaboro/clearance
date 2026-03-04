@@ -4,8 +4,8 @@ import { prisma } from "@/lib/db";
 const ROUND_DURATION_SECONDS = 30;
 const TICK_INTERVAL_MS = 1000;
 
-// GET /api/sessions/:id/stream — SSE endpoint for server-authoritative round state
-// Clients receive { round, secondsRemaining, totalRounds, status } every second.
+// GET /api/sessions/:id/stream — SSE endpoint for server-authoritative matchup state
+// Clients receive { matchup, secondsRemaining, totalMatchups, status } every second.
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -15,7 +15,7 @@ export async function GET(
   const session = await prisma.weeklySession.findUnique({
     where: { id },
     include: {
-      _count: { select: { rounds: true } },
+      _count: { select: { matchups: true } },
     },
   });
 
@@ -23,7 +23,7 @@ export async function GET(
     return new Response("Session not found", { status: 404 });
   }
 
-  const totalRounds = session._count.rounds;
+  const totalMatchups = session._count.matchups;
 
   const stream = new ReadableStream({
     start(controller) {
@@ -44,25 +44,25 @@ export async function GET(
             where: { id },
           });
           if (!refreshed) {
-            sendEvent({ status: "ended", round: 0, secondsRemaining: 0, totalRounds });
+            sendEvent({ status: "ended", round: 0, secondsRemaining: 0, totalRounds: totalMatchups });
             controller.close();
             clearInterval(intervalId);
             return;
           }
-          currentSession = { ...refreshed, _count: { rounds: totalRounds } };
+          currentSession = { ...refreshed, _count: { matchups: totalMatchups } };
         } catch {
           return;
         }
 
         if (currentSession.status === "ended") {
-          sendEvent({ status: "ended", round: 0, secondsRemaining: 0, totalRounds });
+          sendEvent({ status: "ended", round: 0, secondsRemaining: 0, totalRounds: totalMatchups });
           controller.close();
           clearInterval(intervalId);
           return;
         }
 
         if (currentSession.status !== "live") {
-          sendEvent({ status: currentSession.status, round: 0, secondsRemaining: 0, totalRounds });
+          sendEvent({ status: currentSession.status, round: 0, secondsRemaining: 0, totalRounds: totalMatchups });
           return;
         }
 
@@ -71,13 +71,13 @@ export async function GET(
         const elapsed = Math.max(0, Math.floor((now - start) / 1000));
         const currentRound = Math.min(
           Math.floor(elapsed / ROUND_DURATION_SECONDS) + 1,
-          totalRounds
+          totalMatchups
         );
         const secondsIntoRound = elapsed % ROUND_DURATION_SECONDS;
         const secondsRemaining = ROUND_DURATION_SECONDS - secondsIntoRound;
 
-        if (currentRound > totalRounds) {
-          sendEvent({ status: "ended", round: totalRounds, secondsRemaining: 0, totalRounds });
+        if (currentRound > totalMatchups) {
+          sendEvent({ status: "ended", round: totalMatchups, secondsRemaining: 0, totalRounds: totalMatchups });
           controller.close();
           clearInterval(intervalId);
           return;
@@ -87,7 +87,7 @@ export async function GET(
           status: "live",
           round: currentRound,
           secondsRemaining,
-          totalRounds,
+          totalRounds: totalMatchups,
         });
       };
 

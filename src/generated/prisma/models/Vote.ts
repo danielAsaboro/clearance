@@ -27,7 +27,7 @@ export type AggregateVote = {
 export type VoteMinAggregateOutputType = {
   id: string | null
   userId: string | null
-  roundId: string | null
+  matchupId: string | null
   decision: $Enums.VoteDecision | null
   submittedAt: Date | null
 }
@@ -35,7 +35,7 @@ export type VoteMinAggregateOutputType = {
 export type VoteMaxAggregateOutputType = {
   id: string | null
   userId: string | null
-  roundId: string | null
+  matchupId: string | null
   decision: $Enums.VoteDecision | null
   submittedAt: Date | null
 }
@@ -43,7 +43,7 @@ export type VoteMaxAggregateOutputType = {
 export type VoteCountAggregateOutputType = {
   id: number
   userId: number
-  roundId: number
+  matchupId: number
   decision: number
   submittedAt: number
   _all: number
@@ -53,7 +53,7 @@ export type VoteCountAggregateOutputType = {
 export type VoteMinAggregateInputType = {
   id?: true
   userId?: true
-  roundId?: true
+  matchupId?: true
   decision?: true
   submittedAt?: true
 }
@@ -61,7 +61,7 @@ export type VoteMinAggregateInputType = {
 export type VoteMaxAggregateInputType = {
   id?: true
   userId?: true
-  roundId?: true
+  matchupId?: true
   decision?: true
   submittedAt?: true
 }
@@ -69,7 +69,7 @@ export type VoteMaxAggregateInputType = {
 export type VoteCountAggregateInputType = {
   id?: true
   userId?: true
-  roundId?: true
+  matchupId?: true
   decision?: true
   submittedAt?: true
   _all?: true
@@ -150,7 +150,7 @@ export type VoteGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
 export type VoteGroupByOutputType = {
   id: string
   userId: string
-  roundId: string
+  matchupId: string
   decision: $Enums.VoteDecision
   submittedAt: Date
   _count: VoteCountAggregateOutputType | null
@@ -179,41 +179,41 @@ export type VoteWhereInput = {
   NOT?: Prisma.VoteWhereInput | Prisma.VoteWhereInput[]
   id?: Prisma.StringFilter<"Vote"> | string
   userId?: Prisma.StringFilter<"Vote"> | string
-  roundId?: Prisma.StringFilter<"Vote"> | string
+  matchupId?: Prisma.StringFilter<"Vote"> | string
   decision?: Prisma.EnumVoteDecisionFilter<"Vote"> | $Enums.VoteDecision
   submittedAt?: Prisma.DateTimeFilter<"Vote"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
-  round?: Prisma.XOR<Prisma.SessionRoundScalarRelationFilter, Prisma.SessionRoundWhereInput>
+  matchup?: Prisma.XOR<Prisma.MatchupScalarRelationFilter, Prisma.MatchupWhereInput>
 }
 
 export type VoteOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  roundId?: Prisma.SortOrder
+  matchupId?: Prisma.SortOrder
   decision?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
-  round?: Prisma.SessionRoundOrderByWithRelationInput
+  matchup?: Prisma.MatchupOrderByWithRelationInput
 }
 
 export type VoteWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  userId_roundId?: Prisma.VoteUserIdRoundIdCompoundUniqueInput
+  userId_matchupId?: Prisma.VoteUserIdMatchupIdCompoundUniqueInput
   AND?: Prisma.VoteWhereInput | Prisma.VoteWhereInput[]
   OR?: Prisma.VoteWhereInput[]
   NOT?: Prisma.VoteWhereInput | Prisma.VoteWhereInput[]
   userId?: Prisma.StringFilter<"Vote"> | string
-  roundId?: Prisma.StringFilter<"Vote"> | string
+  matchupId?: Prisma.StringFilter<"Vote"> | string
   decision?: Prisma.EnumVoteDecisionFilter<"Vote"> | $Enums.VoteDecision
   submittedAt?: Prisma.DateTimeFilter<"Vote"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
-  round?: Prisma.XOR<Prisma.SessionRoundScalarRelationFilter, Prisma.SessionRoundWhereInput>
-}, "id" | "userId_roundId">
+  matchup?: Prisma.XOR<Prisma.MatchupScalarRelationFilter, Prisma.MatchupWhereInput>
+}, "id" | "userId_matchupId">
 
 export type VoteOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  roundId?: Prisma.SortOrder
+  matchupId?: Prisma.SortOrder
   decision?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
   _count?: Prisma.VoteCountOrderByAggregateInput
@@ -227,7 +227,7 @@ export type VoteScalarWhereWithAggregatesInput = {
   NOT?: Prisma.VoteScalarWhereWithAggregatesInput | Prisma.VoteScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Vote"> | string
   userId?: Prisma.StringWithAggregatesFilter<"Vote"> | string
-  roundId?: Prisma.StringWithAggregatesFilter<"Vote"> | string
+  matchupId?: Prisma.StringWithAggregatesFilter<"Vote"> | string
   decision?: Prisma.EnumVoteDecisionWithAggregatesFilter<"Vote"> | $Enums.VoteDecision
   submittedAt?: Prisma.DateTimeWithAggregatesFilter<"Vote"> | Date | string
 }
@@ -237,13 +237,13 @@ export type VoteCreateInput = {
   decision: $Enums.VoteDecision
   submittedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutVotesInput
-  round: Prisma.SessionRoundCreateNestedOneWithoutVotesInput
+  matchup: Prisma.MatchupCreateNestedOneWithoutVotesInput
 }
 
 export type VoteUncheckedCreateInput = {
   id?: string
   userId: string
-  roundId: string
+  matchupId: string
   decision: $Enums.VoteDecision
   submittedAt?: Date | string
 }
@@ -253,13 +253,13 @@ export type VoteUpdateInput = {
   decision?: Prisma.EnumVoteDecisionFieldUpdateOperationsInput | $Enums.VoteDecision
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutVotesNestedInput
-  round?: Prisma.SessionRoundUpdateOneRequiredWithoutVotesNestedInput
+  matchup?: Prisma.MatchupUpdateOneRequiredWithoutVotesNestedInput
 }
 
 export type VoteUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  roundId?: Prisma.StringFieldUpdateOperationsInput | string
+  matchupId?: Prisma.StringFieldUpdateOperationsInput | string
   decision?: Prisma.EnumVoteDecisionFieldUpdateOperationsInput | $Enums.VoteDecision
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -267,7 +267,7 @@ export type VoteUncheckedUpdateInput = {
 export type VoteCreateManyInput = {
   id?: string
   userId: string
-  roundId: string
+  matchupId: string
   decision: $Enums.VoteDecision
   submittedAt?: Date | string
 }
@@ -281,7 +281,7 @@ export type VoteUpdateManyMutationInput = {
 export type VoteUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  roundId?: Prisma.StringFieldUpdateOperationsInput | string
+  matchupId?: Prisma.StringFieldUpdateOperationsInput | string
   decision?: Prisma.EnumVoteDecisionFieldUpdateOperationsInput | $Enums.VoteDecision
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -296,15 +296,15 @@ export type VoteOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
-export type VoteUserIdRoundIdCompoundUniqueInput = {
+export type VoteUserIdMatchupIdCompoundUniqueInput = {
   userId: string
-  roundId: string
+  matchupId: string
 }
 
 export type VoteCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  roundId?: Prisma.SortOrder
+  matchupId?: Prisma.SortOrder
   decision?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
 }
@@ -312,7 +312,7 @@ export type VoteCountOrderByAggregateInput = {
 export type VoteMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  roundId?: Prisma.SortOrder
+  matchupId?: Prisma.SortOrder
   decision?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
 }
@@ -320,7 +320,7 @@ export type VoteMaxOrderByAggregateInput = {
 export type VoteMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  roundId?: Prisma.SortOrder
+  matchupId?: Prisma.SortOrder
   decision?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
 }
@@ -367,45 +367,45 @@ export type VoteUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.VoteScalarWhereInput | Prisma.VoteScalarWhereInput[]
 }
 
-export type VoteCreateNestedManyWithoutRoundInput = {
-  create?: Prisma.XOR<Prisma.VoteCreateWithoutRoundInput, Prisma.VoteUncheckedCreateWithoutRoundInput> | Prisma.VoteCreateWithoutRoundInput[] | Prisma.VoteUncheckedCreateWithoutRoundInput[]
-  connectOrCreate?: Prisma.VoteCreateOrConnectWithoutRoundInput | Prisma.VoteCreateOrConnectWithoutRoundInput[]
-  createMany?: Prisma.VoteCreateManyRoundInputEnvelope
+export type VoteCreateNestedManyWithoutMatchupInput = {
+  create?: Prisma.XOR<Prisma.VoteCreateWithoutMatchupInput, Prisma.VoteUncheckedCreateWithoutMatchupInput> | Prisma.VoteCreateWithoutMatchupInput[] | Prisma.VoteUncheckedCreateWithoutMatchupInput[]
+  connectOrCreate?: Prisma.VoteCreateOrConnectWithoutMatchupInput | Prisma.VoteCreateOrConnectWithoutMatchupInput[]
+  createMany?: Prisma.VoteCreateManyMatchupInputEnvelope
   connect?: Prisma.VoteWhereUniqueInput | Prisma.VoteWhereUniqueInput[]
 }
 
-export type VoteUncheckedCreateNestedManyWithoutRoundInput = {
-  create?: Prisma.XOR<Prisma.VoteCreateWithoutRoundInput, Prisma.VoteUncheckedCreateWithoutRoundInput> | Prisma.VoteCreateWithoutRoundInput[] | Prisma.VoteUncheckedCreateWithoutRoundInput[]
-  connectOrCreate?: Prisma.VoteCreateOrConnectWithoutRoundInput | Prisma.VoteCreateOrConnectWithoutRoundInput[]
-  createMany?: Prisma.VoteCreateManyRoundInputEnvelope
+export type VoteUncheckedCreateNestedManyWithoutMatchupInput = {
+  create?: Prisma.XOR<Prisma.VoteCreateWithoutMatchupInput, Prisma.VoteUncheckedCreateWithoutMatchupInput> | Prisma.VoteCreateWithoutMatchupInput[] | Prisma.VoteUncheckedCreateWithoutMatchupInput[]
+  connectOrCreate?: Prisma.VoteCreateOrConnectWithoutMatchupInput | Prisma.VoteCreateOrConnectWithoutMatchupInput[]
+  createMany?: Prisma.VoteCreateManyMatchupInputEnvelope
   connect?: Prisma.VoteWhereUniqueInput | Prisma.VoteWhereUniqueInput[]
 }
 
-export type VoteUpdateManyWithoutRoundNestedInput = {
-  create?: Prisma.XOR<Prisma.VoteCreateWithoutRoundInput, Prisma.VoteUncheckedCreateWithoutRoundInput> | Prisma.VoteCreateWithoutRoundInput[] | Prisma.VoteUncheckedCreateWithoutRoundInput[]
-  connectOrCreate?: Prisma.VoteCreateOrConnectWithoutRoundInput | Prisma.VoteCreateOrConnectWithoutRoundInput[]
-  upsert?: Prisma.VoteUpsertWithWhereUniqueWithoutRoundInput | Prisma.VoteUpsertWithWhereUniqueWithoutRoundInput[]
-  createMany?: Prisma.VoteCreateManyRoundInputEnvelope
+export type VoteUpdateManyWithoutMatchupNestedInput = {
+  create?: Prisma.XOR<Prisma.VoteCreateWithoutMatchupInput, Prisma.VoteUncheckedCreateWithoutMatchupInput> | Prisma.VoteCreateWithoutMatchupInput[] | Prisma.VoteUncheckedCreateWithoutMatchupInput[]
+  connectOrCreate?: Prisma.VoteCreateOrConnectWithoutMatchupInput | Prisma.VoteCreateOrConnectWithoutMatchupInput[]
+  upsert?: Prisma.VoteUpsertWithWhereUniqueWithoutMatchupInput | Prisma.VoteUpsertWithWhereUniqueWithoutMatchupInput[]
+  createMany?: Prisma.VoteCreateManyMatchupInputEnvelope
   set?: Prisma.VoteWhereUniqueInput | Prisma.VoteWhereUniqueInput[]
   disconnect?: Prisma.VoteWhereUniqueInput | Prisma.VoteWhereUniqueInput[]
   delete?: Prisma.VoteWhereUniqueInput | Prisma.VoteWhereUniqueInput[]
   connect?: Prisma.VoteWhereUniqueInput | Prisma.VoteWhereUniqueInput[]
-  update?: Prisma.VoteUpdateWithWhereUniqueWithoutRoundInput | Prisma.VoteUpdateWithWhereUniqueWithoutRoundInput[]
-  updateMany?: Prisma.VoteUpdateManyWithWhereWithoutRoundInput | Prisma.VoteUpdateManyWithWhereWithoutRoundInput[]
+  update?: Prisma.VoteUpdateWithWhereUniqueWithoutMatchupInput | Prisma.VoteUpdateWithWhereUniqueWithoutMatchupInput[]
+  updateMany?: Prisma.VoteUpdateManyWithWhereWithoutMatchupInput | Prisma.VoteUpdateManyWithWhereWithoutMatchupInput[]
   deleteMany?: Prisma.VoteScalarWhereInput | Prisma.VoteScalarWhereInput[]
 }
 
-export type VoteUncheckedUpdateManyWithoutRoundNestedInput = {
-  create?: Prisma.XOR<Prisma.VoteCreateWithoutRoundInput, Prisma.VoteUncheckedCreateWithoutRoundInput> | Prisma.VoteCreateWithoutRoundInput[] | Prisma.VoteUncheckedCreateWithoutRoundInput[]
-  connectOrCreate?: Prisma.VoteCreateOrConnectWithoutRoundInput | Prisma.VoteCreateOrConnectWithoutRoundInput[]
-  upsert?: Prisma.VoteUpsertWithWhereUniqueWithoutRoundInput | Prisma.VoteUpsertWithWhereUniqueWithoutRoundInput[]
-  createMany?: Prisma.VoteCreateManyRoundInputEnvelope
+export type VoteUncheckedUpdateManyWithoutMatchupNestedInput = {
+  create?: Prisma.XOR<Prisma.VoteCreateWithoutMatchupInput, Prisma.VoteUncheckedCreateWithoutMatchupInput> | Prisma.VoteCreateWithoutMatchupInput[] | Prisma.VoteUncheckedCreateWithoutMatchupInput[]
+  connectOrCreate?: Prisma.VoteCreateOrConnectWithoutMatchupInput | Prisma.VoteCreateOrConnectWithoutMatchupInput[]
+  upsert?: Prisma.VoteUpsertWithWhereUniqueWithoutMatchupInput | Prisma.VoteUpsertWithWhereUniqueWithoutMatchupInput[]
+  createMany?: Prisma.VoteCreateManyMatchupInputEnvelope
   set?: Prisma.VoteWhereUniqueInput | Prisma.VoteWhereUniqueInput[]
   disconnect?: Prisma.VoteWhereUniqueInput | Prisma.VoteWhereUniqueInput[]
   delete?: Prisma.VoteWhereUniqueInput | Prisma.VoteWhereUniqueInput[]
   connect?: Prisma.VoteWhereUniqueInput | Prisma.VoteWhereUniqueInput[]
-  update?: Prisma.VoteUpdateWithWhereUniqueWithoutRoundInput | Prisma.VoteUpdateWithWhereUniqueWithoutRoundInput[]
-  updateMany?: Prisma.VoteUpdateManyWithWhereWithoutRoundInput | Prisma.VoteUpdateManyWithWhereWithoutRoundInput[]
+  update?: Prisma.VoteUpdateWithWhereUniqueWithoutMatchupInput | Prisma.VoteUpdateWithWhereUniqueWithoutMatchupInput[]
+  updateMany?: Prisma.VoteUpdateManyWithWhereWithoutMatchupInput | Prisma.VoteUpdateManyWithWhereWithoutMatchupInput[]
   deleteMany?: Prisma.VoteScalarWhereInput | Prisma.VoteScalarWhereInput[]
 }
 
@@ -417,12 +417,12 @@ export type VoteCreateWithoutUserInput = {
   id?: string
   decision: $Enums.VoteDecision
   submittedAt?: Date | string
-  round: Prisma.SessionRoundCreateNestedOneWithoutVotesInput
+  matchup: Prisma.MatchupCreateNestedOneWithoutVotesInput
 }
 
 export type VoteUncheckedCreateWithoutUserInput = {
   id?: string
-  roundId: string
+  matchupId: string
   decision: $Enums.VoteDecision
   submittedAt?: Date | string
 }
@@ -459,54 +459,54 @@ export type VoteScalarWhereInput = {
   NOT?: Prisma.VoteScalarWhereInput | Prisma.VoteScalarWhereInput[]
   id?: Prisma.StringFilter<"Vote"> | string
   userId?: Prisma.StringFilter<"Vote"> | string
-  roundId?: Prisma.StringFilter<"Vote"> | string
+  matchupId?: Prisma.StringFilter<"Vote"> | string
   decision?: Prisma.EnumVoteDecisionFilter<"Vote"> | $Enums.VoteDecision
   submittedAt?: Prisma.DateTimeFilter<"Vote"> | Date | string
 }
 
-export type VoteCreateWithoutRoundInput = {
+export type VoteCreateWithoutMatchupInput = {
   id?: string
   decision: $Enums.VoteDecision
   submittedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutVotesInput
 }
 
-export type VoteUncheckedCreateWithoutRoundInput = {
+export type VoteUncheckedCreateWithoutMatchupInput = {
   id?: string
   userId: string
   decision: $Enums.VoteDecision
   submittedAt?: Date | string
 }
 
-export type VoteCreateOrConnectWithoutRoundInput = {
+export type VoteCreateOrConnectWithoutMatchupInput = {
   where: Prisma.VoteWhereUniqueInput
-  create: Prisma.XOR<Prisma.VoteCreateWithoutRoundInput, Prisma.VoteUncheckedCreateWithoutRoundInput>
+  create: Prisma.XOR<Prisma.VoteCreateWithoutMatchupInput, Prisma.VoteUncheckedCreateWithoutMatchupInput>
 }
 
-export type VoteCreateManyRoundInputEnvelope = {
-  data: Prisma.VoteCreateManyRoundInput | Prisma.VoteCreateManyRoundInput[]
+export type VoteCreateManyMatchupInputEnvelope = {
+  data: Prisma.VoteCreateManyMatchupInput | Prisma.VoteCreateManyMatchupInput[]
   skipDuplicates?: boolean
 }
 
-export type VoteUpsertWithWhereUniqueWithoutRoundInput = {
+export type VoteUpsertWithWhereUniqueWithoutMatchupInput = {
   where: Prisma.VoteWhereUniqueInput
-  update: Prisma.XOR<Prisma.VoteUpdateWithoutRoundInput, Prisma.VoteUncheckedUpdateWithoutRoundInput>
-  create: Prisma.XOR<Prisma.VoteCreateWithoutRoundInput, Prisma.VoteUncheckedCreateWithoutRoundInput>
+  update: Prisma.XOR<Prisma.VoteUpdateWithoutMatchupInput, Prisma.VoteUncheckedUpdateWithoutMatchupInput>
+  create: Prisma.XOR<Prisma.VoteCreateWithoutMatchupInput, Prisma.VoteUncheckedCreateWithoutMatchupInput>
 }
 
-export type VoteUpdateWithWhereUniqueWithoutRoundInput = {
+export type VoteUpdateWithWhereUniqueWithoutMatchupInput = {
   where: Prisma.VoteWhereUniqueInput
-  data: Prisma.XOR<Prisma.VoteUpdateWithoutRoundInput, Prisma.VoteUncheckedUpdateWithoutRoundInput>
+  data: Prisma.XOR<Prisma.VoteUpdateWithoutMatchupInput, Prisma.VoteUncheckedUpdateWithoutMatchupInput>
 }
 
-export type VoteUpdateManyWithWhereWithoutRoundInput = {
+export type VoteUpdateManyWithWhereWithoutMatchupInput = {
   where: Prisma.VoteScalarWhereInput
-  data: Prisma.XOR<Prisma.VoteUpdateManyMutationInput, Prisma.VoteUncheckedUpdateManyWithoutRoundInput>
+  data: Prisma.XOR<Prisma.VoteUpdateManyMutationInput, Prisma.VoteUncheckedUpdateManyWithoutMatchupInput>
 }
 
 export type VoteCreateManyUserInput = {
   id?: string
-  roundId: string
+  matchupId: string
   decision: $Enums.VoteDecision
   submittedAt?: Date | string
 }
@@ -515,45 +515,45 @@ export type VoteUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   decision?: Prisma.EnumVoteDecisionFieldUpdateOperationsInput | $Enums.VoteDecision
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  round?: Prisma.SessionRoundUpdateOneRequiredWithoutVotesNestedInput
+  matchup?: Prisma.MatchupUpdateOneRequiredWithoutVotesNestedInput
 }
 
 export type VoteUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  roundId?: Prisma.StringFieldUpdateOperationsInput | string
+  matchupId?: Prisma.StringFieldUpdateOperationsInput | string
   decision?: Prisma.EnumVoteDecisionFieldUpdateOperationsInput | $Enums.VoteDecision
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type VoteUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  roundId?: Prisma.StringFieldUpdateOperationsInput | string
+  matchupId?: Prisma.StringFieldUpdateOperationsInput | string
   decision?: Prisma.EnumVoteDecisionFieldUpdateOperationsInput | $Enums.VoteDecision
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type VoteCreateManyRoundInput = {
+export type VoteCreateManyMatchupInput = {
   id?: string
   userId: string
   decision: $Enums.VoteDecision
   submittedAt?: Date | string
 }
 
-export type VoteUpdateWithoutRoundInput = {
+export type VoteUpdateWithoutMatchupInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   decision?: Prisma.EnumVoteDecisionFieldUpdateOperationsInput | $Enums.VoteDecision
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutVotesNestedInput
 }
 
-export type VoteUncheckedUpdateWithoutRoundInput = {
+export type VoteUncheckedUpdateWithoutMatchupInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   decision?: Prisma.EnumVoteDecisionFieldUpdateOperationsInput | $Enums.VoteDecision
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type VoteUncheckedUpdateManyWithoutRoundInput = {
+export type VoteUncheckedUpdateManyWithoutMatchupInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   decision?: Prisma.EnumVoteDecisionFieldUpdateOperationsInput | $Enums.VoteDecision
@@ -565,65 +565,65 @@ export type VoteUncheckedUpdateManyWithoutRoundInput = {
 export type VoteSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
-  roundId?: boolean
+  matchupId?: boolean
   decision?: boolean
   submittedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  round?: boolean | Prisma.SessionRoundDefaultArgs<ExtArgs>
+  matchup?: boolean | Prisma.MatchupDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["vote"]>
 
 export type VoteSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
-  roundId?: boolean
+  matchupId?: boolean
   decision?: boolean
   submittedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  round?: boolean | Prisma.SessionRoundDefaultArgs<ExtArgs>
+  matchup?: boolean | Prisma.MatchupDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["vote"]>
 
 export type VoteSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
-  roundId?: boolean
+  matchupId?: boolean
   decision?: boolean
   submittedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  round?: boolean | Prisma.SessionRoundDefaultArgs<ExtArgs>
+  matchup?: boolean | Prisma.MatchupDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["vote"]>
 
 export type VoteSelectScalar = {
   id?: boolean
   userId?: boolean
-  roundId?: boolean
+  matchupId?: boolean
   decision?: boolean
   submittedAt?: boolean
 }
 
-export type VoteOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "roundId" | "decision" | "submittedAt", ExtArgs["result"]["vote"]>
+export type VoteOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "matchupId" | "decision" | "submittedAt", ExtArgs["result"]["vote"]>
 export type VoteInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  round?: boolean | Prisma.SessionRoundDefaultArgs<ExtArgs>
+  matchup?: boolean | Prisma.MatchupDefaultArgs<ExtArgs>
 }
 export type VoteIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  round?: boolean | Prisma.SessionRoundDefaultArgs<ExtArgs>
+  matchup?: boolean | Prisma.MatchupDefaultArgs<ExtArgs>
 }
 export type VoteIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  round?: boolean | Prisma.SessionRoundDefaultArgs<ExtArgs>
+  matchup?: boolean | Prisma.MatchupDefaultArgs<ExtArgs>
 }
 
 export type $VotePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Vote"
   objects: {
     user: Prisma.$UserPayload<ExtArgs>
-    round: Prisma.$SessionRoundPayload<ExtArgs>
+    matchup: Prisma.$MatchupPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     userId: string
-    roundId: string
+    matchupId: string
     decision: $Enums.VoteDecision
     submittedAt: Date
   }, ExtArgs["result"]["vote"]>
@@ -1021,7 +1021,7 @@ readonly fields: VoteFieldRefs;
 export interface Prisma__VoteClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  round<T extends Prisma.SessionRoundDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SessionRoundDefaultArgs<ExtArgs>>): Prisma.Prisma__SessionRoundClient<runtime.Types.Result.GetResult<Prisma.$SessionRoundPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  matchup<T extends Prisma.MatchupDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MatchupDefaultArgs<ExtArgs>>): Prisma.Prisma__MatchupClient<runtime.Types.Result.GetResult<Prisma.$MatchupPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1053,7 +1053,7 @@ export interface Prisma__VoteClient<T, Null = never, ExtArgs extends runtime.Typ
 export interface VoteFieldRefs {
   readonly id: Prisma.FieldRef<"Vote", 'String'>
   readonly userId: Prisma.FieldRef<"Vote", 'String'>
-  readonly roundId: Prisma.FieldRef<"Vote", 'String'>
+  readonly matchupId: Prisma.FieldRef<"Vote", 'String'>
   readonly decision: Prisma.FieldRef<"Vote", 'VoteDecision'>
   readonly submittedAt: Prisma.FieldRef<"Vote", 'DateTime'>
 }

@@ -13,8 +13,7 @@ const createCampaignSchema = z.object({
   sessionsPerCycle: z.number().int().positive().optional(),
   videosPerSession: z.number().int().positive().optional(),
   votingRoundDurationSecs: z.number().int().positive().optional(),
-  tasksPerWeekPerCreator: z.number().int().positive().optional(),
-  submissionDeadlineHours: z.number().int().positive().optional(),
+  matchupsPerSession: z.number().int().positive().optional(),
 });
 
 // POST /api/admin/campaigns — Create a new campaign
@@ -46,10 +45,9 @@ export async function POST(req: NextRequest) {
       endDate: new Date(data.endDate),
       durationWeeks: data.durationWeeks ?? campaignConfig.cycleDurationWeeks,
       sessionsPerCycle: data.sessionsPerCycle ?? campaignConfig.liveSessionsPerCycle,
-      videosPerSession: data.videosPerSession ?? campaignConfig.videosPerLiveSession,
+      videosPerSession: data.videosPerSession ?? campaignConfig.matchupsPerSession * 2,
       votingRoundDurationSecs: data.votingRoundDurationSecs ?? campaignConfig.votingRoundDurationSeconds,
-      tasksPerWeekPerCreator: data.tasksPerWeekPerCreator ?? campaignConfig.contentTasksPerWeekPerCreator,
-      submissionDeadlineHours: data.submissionDeadlineHours ?? campaignConfig.submissionDeadlineHours,
+      matchupsPerSession: data.matchupsPerSession ?? campaignConfig.matchupsPerSession,
     },
   });
 

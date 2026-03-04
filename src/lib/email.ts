@@ -68,7 +68,7 @@ export async function sendResultsReady(
   correctVotes: number,
   tier: string,
   rewardAmount: number,
-  totalRounds: number = campaignConfig.videosPerLiveSession
+  totalRounds: number = campaignConfig.matchupsPerSession
 ): Promise<boolean> {
   try {
     const tierLabel = tier === "gold" ? "Gold" : tier === "base" ? "Base" : "Participation";

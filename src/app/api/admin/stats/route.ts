@@ -10,23 +10,11 @@ export async function GET(req: NextRequest) {
 
   const type = req.nextUrl.searchParams.get("type");
 
-  // Return creators list
-  if (type === "creators") {
-    const creators = await prisma.user.findMany({
-      where: { role: "creator" },
-      include: {
-        _count: { select: { tasks: true, referralsMade: true } },
-      },
-      orderBy: { createdAt: "desc" },
-    });
-    return NextResponse.json(creators);
-  }
-
   // Return sessions list
   if (type === "sessions") {
     const sessions = await prisma.weeklySession.findMany({
       include: {
-        _count: { select: { rounds: true, gameResults: true } },
+        _count: { select: { matchups: true, gameResults: true } },
       },
       orderBy: { weekNumber: "desc" },
     });
@@ -77,9 +65,8 @@ export async function GET(req: NextRequest) {
 
   // Default: dashboard stats
   const [
-    totalCreators,
-    totalFans,
-    pendingSubmissions,
+    totalPlayers,
+    totalVideos,
     upcomingSession,
     totalVotes,
     totalSessions,
@@ -89,9 +76,8 @@ export async function GET(req: NextRequest) {
     nftsMinted,
     usdcClaimed,
   ] = await Promise.all([
-    prisma.user.count({ where: { role: "creator" } }),
-    prisma.user.count({ where: { role: "fan" } }),
-    prisma.task.count({ where: { status: "submitted" } }),
+    prisma.user.count({ where: { role: "player" } }),
+    prisma.video.count(),
     prisma.weeklySession.findFirst({
       where: { status: "scheduled" },
       orderBy: { scheduledAt: "asc" },
@@ -107,9 +93,8 @@ export async function GET(req: NextRequest) {
   ]);
 
   return NextResponse.json({
-    totalCreators,
-    totalFans,
-    pendingSubmissions,
+    totalPlayers,
+    totalVideos,
     upcomingSession,
     totalVotes,
     totalSessions,

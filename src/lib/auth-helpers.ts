@@ -53,7 +53,7 @@ export async function getUserCampaignRole(userId: string, campaignId: string) {
   return enrollment?.role ?? null;
 }
 
-export async function requireRole(req: NextRequest, role: "creator" | "fan" | "admin") {
+export async function requireRole(req: NextRequest, role: "player" | "admin") {
   const user = await getAuthUser(req);
   if (!user) throw new Error("Unauthorized");
 

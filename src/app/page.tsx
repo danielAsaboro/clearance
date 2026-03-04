@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Eye, Users, Gift, Trophy } from "lucide-react";
+import { Eye, Trophy, Gift, Gamepad2 } from "lucide-react";
 import { usePrivy } from "@privy-io/react-auth";
 import { useEffect, useState } from "react";
 
@@ -44,38 +44,18 @@ export default function Home() {
       .finally(() => setLoadingProfile(false));
   }, [authenticated, getAccessToken]);
 
-  // Determine where Creator button should go
-  const creatorHref = !authenticated
-    ? "/onboarding/categories?role=creator"
-    : profile?.consentAccepted && profile?.role === "creator"
-    ? "/creator-hub"
-    : "/onboarding/categories?role=creator";
-
-  const creatorSubtext = !authenticated
-    ? "Upload content & earn prizes"
-    : profile?.consentAccepted && profile?.role === "creator"
-    ? "Go to Creator Hub"
-    : "Complete your registration";
-
-  // Determine where Fan button should go
-  const fanHref = !authenticated
-    ? "/onboarding/categories?role=fan"
-    : profile?.consentAccepted && profile?.role === "fan"
-    ? "/arena"
+  // Determine where Play button should go
+  const playHref = !authenticated
+    ? "/onboarding/categories"
     : profile?.consentAccepted
     ? "/arena"
-    : "/onboarding/categories?role=fan";
+    : "/onboarding/categories";
 
-  const fanSubtext = !authenticated
-    ? "Vote on content & win NFTs"
+  const playSubtext = !authenticated
+    ? "Predict trending videos & win NFTs"
     : profile?.consentAccepted
     ? "Go to Arena"
     : "Complete your registration";
-
-  // Role is locked once onboarding is complete
-  const roleLocked = profile?.consentAccepted === true;
-  const isCreator = roleLocked && profile?.role === "creator";
-  const isFan = roleLocked && profile?.role === "fan";
 
   return (
     <div className="flex-1 bg-black flex flex-col items-center justify-between px-6 py-6">
@@ -94,45 +74,28 @@ export default function Home() {
         </p>
       </div>
 
-      {/* Choose Your Path */}
+      {/* Actions */}
       <div className="w-full max-w-sm">
         <p className="text-[#888] text-xs tracking-[0.2em] text-center mb-4 uppercase">
-          {authenticated ? "Continue" : "Choose Your Path"}
+          {authenticated ? "Continue" : "Get Started"}
         </p>
 
-        {/* Creator button — hidden if user is locked as fan */}
-        {!isFan && (
-          <Link href={loadingProfile ? "#" : creatorHref}>
-            <div
-              className={`btn-yellow rounded-2xl p-5 flex items-center gap-4 mb-3 cursor-pointer ${
-                loadingProfile ? "opacity-60" : ""
-              }`}
-            >
-              <div className="w-10 h-10 bg-black/10 rounded-xl flex items-center justify-center">
-                <Users className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="font-bold text-lg">Creator</h3>
-                <p className="text-sm opacity-70">{creatorSubtext}</p>
-              </div>
+        {/* Play button */}
+        <Link href={loadingProfile ? "#" : playHref}>
+          <div
+            className={`btn-yellow rounded-2xl p-5 flex items-center gap-4 mb-3 cursor-pointer ${
+              loadingProfile ? "opacity-60" : ""
+            }`}
+          >
+            <div className="w-10 h-10 bg-black/10 rounded-xl flex items-center justify-center">
+              <Gamepad2 className="w-5 h-5" />
             </div>
-          </Link>
-        )}
-
-        {/* Fan button — hidden if user is locked as creator */}
-        {!isCreator && (
-          <Link href={loadingProfile ? "#" : fanHref}>
-            <div className="bg-[#1A1A1A] rounded-2xl p-5 flex items-center gap-4 cursor-pointer border border-[#2A2A2A] card-hover">
-              <div className="w-10 h-10 bg-[#2A2A2A] rounded-xl flex items-center justify-center">
-                <Eye className="w-5 h-5 text-[#F5E642]" />
-              </div>
-              <div>
-                <h3 className="font-bold text-lg text-white">Fan</h3>
-                <p className="text-sm text-[#888]">{fanSubtext}</p>
-              </div>
+            <div>
+              <h3 className="font-bold text-lg">Play</h3>
+              <p className="text-sm opacity-70">{playSubtext}</p>
             </div>
-          </Link>
-        )}
+          </div>
+        </Link>
 
         <Link href="/leaderboard">
           <div className="bg-[#1A1A1A] rounded-2xl p-5 flex items-center gap-4 cursor-pointer border border-[#2A2A2A] card-hover mt-3">
@@ -141,7 +104,7 @@ export default function Home() {
             </div>
             <div>
               <h3 className="font-bold text-lg text-white">Leaderboard</h3>
-              <p className="text-sm text-[#888]">Creator rankings & competition</p>
+              <p className="text-sm text-[#888]">Player rankings & predictions</p>
             </div>
           </div>
         </Link>

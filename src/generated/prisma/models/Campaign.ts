@@ -32,8 +32,7 @@ export type CampaignAvgAggregateOutputType = {
   sessionsPerCycle: number | null
   videosPerSession: number | null
   votingRoundDurationSecs: number | null
-  tasksPerWeekPerCreator: number | null
-  submissionDeadlineHours: number | null
+  matchupsPerSession: number | null
 }
 
 export type CampaignSumAggregateOutputType = {
@@ -42,8 +41,7 @@ export type CampaignSumAggregateOutputType = {
   sessionsPerCycle: number | null
   videosPerSession: number | null
   votingRoundDurationSecs: number | null
-  tasksPerWeekPerCreator: number | null
-  submissionDeadlineHours: number | null
+  matchupsPerSession: number | null
 }
 
 export type CampaignMinAggregateOutputType = {
@@ -57,8 +55,7 @@ export type CampaignMinAggregateOutputType = {
   sessionsPerCycle: number | null
   videosPerSession: number | null
   votingRoundDurationSecs: number | null
-  tasksPerWeekPerCreator: number | null
-  submissionDeadlineHours: number | null
+  matchupsPerSession: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -74,8 +71,7 @@ export type CampaignMaxAggregateOutputType = {
   sessionsPerCycle: number | null
   videosPerSession: number | null
   votingRoundDurationSecs: number | null
-  tasksPerWeekPerCreator: number | null
-  submissionDeadlineHours: number | null
+  matchupsPerSession: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -91,8 +87,7 @@ export type CampaignCountAggregateOutputType = {
   sessionsPerCycle: number
   videosPerSession: number
   votingRoundDurationSecs: number
-  tasksPerWeekPerCreator: number
-  submissionDeadlineHours: number
+  matchupsPerSession: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -105,8 +100,7 @@ export type CampaignAvgAggregateInputType = {
   sessionsPerCycle?: true
   videosPerSession?: true
   votingRoundDurationSecs?: true
-  tasksPerWeekPerCreator?: true
-  submissionDeadlineHours?: true
+  matchupsPerSession?: true
 }
 
 export type CampaignSumAggregateInputType = {
@@ -115,8 +109,7 @@ export type CampaignSumAggregateInputType = {
   sessionsPerCycle?: true
   videosPerSession?: true
   votingRoundDurationSecs?: true
-  tasksPerWeekPerCreator?: true
-  submissionDeadlineHours?: true
+  matchupsPerSession?: true
 }
 
 export type CampaignMinAggregateInputType = {
@@ -130,8 +123,7 @@ export type CampaignMinAggregateInputType = {
   sessionsPerCycle?: true
   videosPerSession?: true
   votingRoundDurationSecs?: true
-  tasksPerWeekPerCreator?: true
-  submissionDeadlineHours?: true
+  matchupsPerSession?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -147,8 +139,7 @@ export type CampaignMaxAggregateInputType = {
   sessionsPerCycle?: true
   videosPerSession?: true
   votingRoundDurationSecs?: true
-  tasksPerWeekPerCreator?: true
-  submissionDeadlineHours?: true
+  matchupsPerSession?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -164,8 +155,7 @@ export type CampaignCountAggregateInputType = {
   sessionsPerCycle?: true
   videosPerSession?: true
   votingRoundDurationSecs?: true
-  tasksPerWeekPerCreator?: true
-  submissionDeadlineHours?: true
+  matchupsPerSession?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -268,8 +258,7 @@ export type CampaignGroupByOutputType = {
   sessionsPerCycle: number
   videosPerSession: number
   votingRoundDurationSecs: number
-  tasksPerWeekPerCreator: number
-  submissionDeadlineHours: number
+  matchupsPerSession: number
   createdAt: Date
   updatedAt: Date
   _count: CampaignCountAggregateOutputType | null
@@ -308,8 +297,7 @@ export type CampaignWhereInput = {
   sessionsPerCycle?: Prisma.IntFilter<"Campaign"> | number
   videosPerSession?: Prisma.IntFilter<"Campaign"> | number
   votingRoundDurationSecs?: Prisma.IntFilter<"Campaign"> | number
-  tasksPerWeekPerCreator?: Prisma.IntFilter<"Campaign"> | number
-  submissionDeadlineHours?: Prisma.IntFilter<"Campaign"> | number
+  matchupsPerSession?: Prisma.IntFilter<"Campaign"> | number
   createdAt?: Prisma.DateTimeFilter<"Campaign"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Campaign"> | Date | string
   sessions?: Prisma.WeeklySessionListRelationFilter
@@ -327,8 +315,7 @@ export type CampaignOrderByWithRelationInput = {
   sessionsPerCycle?: Prisma.SortOrder
   videosPerSession?: Prisma.SortOrder
   votingRoundDurationSecs?: Prisma.SortOrder
-  tasksPerWeekPerCreator?: Prisma.SortOrder
-  submissionDeadlineHours?: Prisma.SortOrder
+  matchupsPerSession?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   sessions?: Prisma.WeeklySessionOrderByRelationAggregateInput
@@ -349,8 +336,7 @@ export type CampaignWhereUniqueInput = Prisma.AtLeast<{
   sessionsPerCycle?: Prisma.IntFilter<"Campaign"> | number
   videosPerSession?: Prisma.IntFilter<"Campaign"> | number
   votingRoundDurationSecs?: Prisma.IntFilter<"Campaign"> | number
-  tasksPerWeekPerCreator?: Prisma.IntFilter<"Campaign"> | number
-  submissionDeadlineHours?: Prisma.IntFilter<"Campaign"> | number
+  matchupsPerSession?: Prisma.IntFilter<"Campaign"> | number
   createdAt?: Prisma.DateTimeFilter<"Campaign"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Campaign"> | Date | string
   sessions?: Prisma.WeeklySessionListRelationFilter
@@ -368,8 +354,7 @@ export type CampaignOrderByWithAggregationInput = {
   sessionsPerCycle?: Prisma.SortOrder
   videosPerSession?: Prisma.SortOrder
   votingRoundDurationSecs?: Prisma.SortOrder
-  tasksPerWeekPerCreator?: Prisma.SortOrder
-  submissionDeadlineHours?: Prisma.SortOrder
+  matchupsPerSession?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.CampaignCountOrderByAggregateInput
@@ -393,8 +378,7 @@ export type CampaignScalarWhereWithAggregatesInput = {
   sessionsPerCycle?: Prisma.IntWithAggregatesFilter<"Campaign"> | number
   videosPerSession?: Prisma.IntWithAggregatesFilter<"Campaign"> | number
   votingRoundDurationSecs?: Prisma.IntWithAggregatesFilter<"Campaign"> | number
-  tasksPerWeekPerCreator?: Prisma.IntWithAggregatesFilter<"Campaign"> | number
-  submissionDeadlineHours?: Prisma.IntWithAggregatesFilter<"Campaign"> | number
+  matchupsPerSession?: Prisma.IntWithAggregatesFilter<"Campaign"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Campaign"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Campaign"> | Date | string
 }
@@ -410,8 +394,7 @@ export type CampaignCreateInput = {
   sessionsPerCycle: number
   videosPerSession: number
   votingRoundDurationSecs?: number
-  tasksPerWeekPerCreator: number
-  submissionDeadlineHours: number
+  matchupsPerSession?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.WeeklySessionCreateNestedManyWithoutCampaignInput
@@ -429,8 +412,7 @@ export type CampaignUncheckedCreateInput = {
   sessionsPerCycle: number
   videosPerSession: number
   votingRoundDurationSecs?: number
-  tasksPerWeekPerCreator: number
-  submissionDeadlineHours: number
+  matchupsPerSession?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutCampaignInput
@@ -448,8 +430,7 @@ export type CampaignUpdateInput = {
   sessionsPerCycle?: Prisma.IntFieldUpdateOperationsInput | number
   videosPerSession?: Prisma.IntFieldUpdateOperationsInput | number
   votingRoundDurationSecs?: Prisma.IntFieldUpdateOperationsInput | number
-  tasksPerWeekPerCreator?: Prisma.IntFieldUpdateOperationsInput | number
-  submissionDeadlineHours?: Prisma.IntFieldUpdateOperationsInput | number
+  matchupsPerSession?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.WeeklySessionUpdateManyWithoutCampaignNestedInput
@@ -467,8 +448,7 @@ export type CampaignUncheckedUpdateInput = {
   sessionsPerCycle?: Prisma.IntFieldUpdateOperationsInput | number
   videosPerSession?: Prisma.IntFieldUpdateOperationsInput | number
   votingRoundDurationSecs?: Prisma.IntFieldUpdateOperationsInput | number
-  tasksPerWeekPerCreator?: Prisma.IntFieldUpdateOperationsInput | number
-  submissionDeadlineHours?: Prisma.IntFieldUpdateOperationsInput | number
+  matchupsPerSession?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutCampaignNestedInput
@@ -486,8 +466,7 @@ export type CampaignCreateManyInput = {
   sessionsPerCycle: number
   videosPerSession: number
   votingRoundDurationSecs?: number
-  tasksPerWeekPerCreator: number
-  submissionDeadlineHours: number
+  matchupsPerSession?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -503,8 +482,7 @@ export type CampaignUpdateManyMutationInput = {
   sessionsPerCycle?: Prisma.IntFieldUpdateOperationsInput | number
   videosPerSession?: Prisma.IntFieldUpdateOperationsInput | number
   votingRoundDurationSecs?: Prisma.IntFieldUpdateOperationsInput | number
-  tasksPerWeekPerCreator?: Prisma.IntFieldUpdateOperationsInput | number
-  submissionDeadlineHours?: Prisma.IntFieldUpdateOperationsInput | number
+  matchupsPerSession?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -520,8 +498,7 @@ export type CampaignUncheckedUpdateManyInput = {
   sessionsPerCycle?: Prisma.IntFieldUpdateOperationsInput | number
   videosPerSession?: Prisma.IntFieldUpdateOperationsInput | number
   votingRoundDurationSecs?: Prisma.IntFieldUpdateOperationsInput | number
-  tasksPerWeekPerCreator?: Prisma.IntFieldUpdateOperationsInput | number
-  submissionDeadlineHours?: Prisma.IntFieldUpdateOperationsInput | number
+  matchupsPerSession?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -542,8 +519,7 @@ export type CampaignCountOrderByAggregateInput = {
   sessionsPerCycle?: Prisma.SortOrder
   videosPerSession?: Prisma.SortOrder
   votingRoundDurationSecs?: Prisma.SortOrder
-  tasksPerWeekPerCreator?: Prisma.SortOrder
-  submissionDeadlineHours?: Prisma.SortOrder
+  matchupsPerSession?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -554,8 +530,7 @@ export type CampaignAvgOrderByAggregateInput = {
   sessionsPerCycle?: Prisma.SortOrder
   videosPerSession?: Prisma.SortOrder
   votingRoundDurationSecs?: Prisma.SortOrder
-  tasksPerWeekPerCreator?: Prisma.SortOrder
-  submissionDeadlineHours?: Prisma.SortOrder
+  matchupsPerSession?: Prisma.SortOrder
 }
 
 export type CampaignMaxOrderByAggregateInput = {
@@ -569,8 +544,7 @@ export type CampaignMaxOrderByAggregateInput = {
   sessionsPerCycle?: Prisma.SortOrder
   videosPerSession?: Prisma.SortOrder
   votingRoundDurationSecs?: Prisma.SortOrder
-  tasksPerWeekPerCreator?: Prisma.SortOrder
-  submissionDeadlineHours?: Prisma.SortOrder
+  matchupsPerSession?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -586,8 +560,7 @@ export type CampaignMinOrderByAggregateInput = {
   sessionsPerCycle?: Prisma.SortOrder
   videosPerSession?: Prisma.SortOrder
   votingRoundDurationSecs?: Prisma.SortOrder
-  tasksPerWeekPerCreator?: Prisma.SortOrder
-  submissionDeadlineHours?: Prisma.SortOrder
+  matchupsPerSession?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -598,8 +571,7 @@ export type CampaignSumOrderByAggregateInput = {
   sessionsPerCycle?: Prisma.SortOrder
   videosPerSession?: Prisma.SortOrder
   votingRoundDurationSecs?: Prisma.SortOrder
-  tasksPerWeekPerCreator?: Prisma.SortOrder
-  submissionDeadlineHours?: Prisma.SortOrder
+  matchupsPerSession?: Prisma.SortOrder
 }
 
 export type CampaignScalarRelationFilter = {
@@ -652,8 +624,7 @@ export type CampaignCreateWithoutSessionsInput = {
   sessionsPerCycle: number
   videosPerSession: number
   votingRoundDurationSecs?: number
-  tasksPerWeekPerCreator: number
-  submissionDeadlineHours: number
+  matchupsPerSession?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   enrollments?: Prisma.CampaignEnrollmentCreateNestedManyWithoutCampaignInput
@@ -670,8 +641,7 @@ export type CampaignUncheckedCreateWithoutSessionsInput = {
   sessionsPerCycle: number
   videosPerSession: number
   votingRoundDurationSecs?: number
-  tasksPerWeekPerCreator: number
-  submissionDeadlineHours: number
+  matchupsPerSession?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   enrollments?: Prisma.CampaignEnrollmentUncheckedCreateNestedManyWithoutCampaignInput
@@ -704,8 +674,7 @@ export type CampaignUpdateWithoutSessionsInput = {
   sessionsPerCycle?: Prisma.IntFieldUpdateOperationsInput | number
   videosPerSession?: Prisma.IntFieldUpdateOperationsInput | number
   votingRoundDurationSecs?: Prisma.IntFieldUpdateOperationsInput | number
-  tasksPerWeekPerCreator?: Prisma.IntFieldUpdateOperationsInput | number
-  submissionDeadlineHours?: Prisma.IntFieldUpdateOperationsInput | number
+  matchupsPerSession?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   enrollments?: Prisma.CampaignEnrollmentUpdateManyWithoutCampaignNestedInput
@@ -722,8 +691,7 @@ export type CampaignUncheckedUpdateWithoutSessionsInput = {
   sessionsPerCycle?: Prisma.IntFieldUpdateOperationsInput | number
   videosPerSession?: Prisma.IntFieldUpdateOperationsInput | number
   votingRoundDurationSecs?: Prisma.IntFieldUpdateOperationsInput | number
-  tasksPerWeekPerCreator?: Prisma.IntFieldUpdateOperationsInput | number
-  submissionDeadlineHours?: Prisma.IntFieldUpdateOperationsInput | number
+  matchupsPerSession?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   enrollments?: Prisma.CampaignEnrollmentUncheckedUpdateManyWithoutCampaignNestedInput
@@ -740,8 +708,7 @@ export type CampaignCreateWithoutEnrollmentsInput = {
   sessionsPerCycle: number
   videosPerSession: number
   votingRoundDurationSecs?: number
-  tasksPerWeekPerCreator: number
-  submissionDeadlineHours: number
+  matchupsPerSession?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.WeeklySessionCreateNestedManyWithoutCampaignInput
@@ -758,8 +725,7 @@ export type CampaignUncheckedCreateWithoutEnrollmentsInput = {
   sessionsPerCycle: number
   videosPerSession: number
   votingRoundDurationSecs?: number
-  tasksPerWeekPerCreator: number
-  submissionDeadlineHours: number
+  matchupsPerSession?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.WeeklySessionUncheckedCreateNestedManyWithoutCampaignInput
@@ -792,8 +758,7 @@ export type CampaignUpdateWithoutEnrollmentsInput = {
   sessionsPerCycle?: Prisma.IntFieldUpdateOperationsInput | number
   videosPerSession?: Prisma.IntFieldUpdateOperationsInput | number
   votingRoundDurationSecs?: Prisma.IntFieldUpdateOperationsInput | number
-  tasksPerWeekPerCreator?: Prisma.IntFieldUpdateOperationsInput | number
-  submissionDeadlineHours?: Prisma.IntFieldUpdateOperationsInput | number
+  matchupsPerSession?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.WeeklySessionUpdateManyWithoutCampaignNestedInput
@@ -810,8 +775,7 @@ export type CampaignUncheckedUpdateWithoutEnrollmentsInput = {
   sessionsPerCycle?: Prisma.IntFieldUpdateOperationsInput | number
   videosPerSession?: Prisma.IntFieldUpdateOperationsInput | number
   votingRoundDurationSecs?: Prisma.IntFieldUpdateOperationsInput | number
-  tasksPerWeekPerCreator?: Prisma.IntFieldUpdateOperationsInput | number
-  submissionDeadlineHours?: Prisma.IntFieldUpdateOperationsInput | number
+  matchupsPerSession?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.WeeklySessionUncheckedUpdateManyWithoutCampaignNestedInput
@@ -868,8 +832,7 @@ export type CampaignSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   sessionsPerCycle?: boolean
   videosPerSession?: boolean
   votingRoundDurationSecs?: boolean
-  tasksPerWeekPerCreator?: boolean
-  submissionDeadlineHours?: boolean
+  matchupsPerSession?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   sessions?: boolean | Prisma.Campaign$sessionsArgs<ExtArgs>
@@ -888,8 +851,7 @@ export type CampaignSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   sessionsPerCycle?: boolean
   videosPerSession?: boolean
   votingRoundDurationSecs?: boolean
-  tasksPerWeekPerCreator?: boolean
-  submissionDeadlineHours?: boolean
+  matchupsPerSession?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["campaign"]>
@@ -905,8 +867,7 @@ export type CampaignSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   sessionsPerCycle?: boolean
   videosPerSession?: boolean
   votingRoundDurationSecs?: boolean
-  tasksPerWeekPerCreator?: boolean
-  submissionDeadlineHours?: boolean
+  matchupsPerSession?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["campaign"]>
@@ -922,13 +883,12 @@ export type CampaignSelectScalar = {
   sessionsPerCycle?: boolean
   videosPerSession?: boolean
   votingRoundDurationSecs?: boolean
-  tasksPerWeekPerCreator?: boolean
-  submissionDeadlineHours?: boolean
+  matchupsPerSession?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type CampaignOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "cycleNumber" | "title" | "startDate" | "endDate" | "status" | "durationWeeks" | "sessionsPerCycle" | "videosPerSession" | "votingRoundDurationSecs" | "tasksPerWeekPerCreator" | "submissionDeadlineHours" | "createdAt" | "updatedAt", ExtArgs["result"]["campaign"]>
+export type CampaignOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "cycleNumber" | "title" | "startDate" | "endDate" | "status" | "durationWeeks" | "sessionsPerCycle" | "videosPerSession" | "votingRoundDurationSecs" | "matchupsPerSession" | "createdAt" | "updatedAt", ExtArgs["result"]["campaign"]>
 export type CampaignInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | Prisma.Campaign$sessionsArgs<ExtArgs>
   enrollments?: boolean | Prisma.Campaign$enrollmentsArgs<ExtArgs>
@@ -954,8 +914,7 @@ export type $CampaignPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     sessionsPerCycle: number
     videosPerSession: number
     votingRoundDurationSecs: number
-    tasksPerWeekPerCreator: number
-    submissionDeadlineHours: number
+    matchupsPerSession: number
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["campaign"]>
@@ -1393,8 +1352,7 @@ export interface CampaignFieldRefs {
   readonly sessionsPerCycle: Prisma.FieldRef<"Campaign", 'Int'>
   readonly videosPerSession: Prisma.FieldRef<"Campaign", 'Int'>
   readonly votingRoundDurationSecs: Prisma.FieldRef<"Campaign", 'Int'>
-  readonly tasksPerWeekPerCreator: Prisma.FieldRef<"Campaign", 'Int'>
-  readonly submissionDeadlineHours: Prisma.FieldRef<"Campaign", 'Int'>
+  readonly matchupsPerSession: Prisma.FieldRef<"Campaign", 'Int'>
   readonly createdAt: Prisma.FieldRef<"Campaign", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Campaign", 'DateTime'>
 }

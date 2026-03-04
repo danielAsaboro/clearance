@@ -1,7 +1,7 @@
 /**
  * Full lifecycle demo — Clearance localnet.
  *
- * Exercises: admin setup → completed session (DB + on-chain) → fan on-chain
+ * Exercises: admin setup → completed session (DB + on-chain) → player on-chain
  * flow (deposit → NFT mint → raffle → VRF → claim) → playable session.
  *
  * Usage:
@@ -51,50 +51,48 @@ import {
 
 // ── Config ──────────────────────────────────────────────────────────
 
-const NUM_ROUNDS = 5;
+const NUM_MATCHUPS = 5;
 const DEPOSIT_USDC = 100;
 const ENTRY_FEE_USDC = 3.5;
 
-const SAMPLE_TIKTOK_URLS = [
-  "https://www.tiktok.com/@charlidamelio/video/7000000000000000001",
-  "https://www.tiktok.com/@khloekardashian/video/7000000000000000002",
-  "https://www.tiktok.com/@addisonre/video/7000000000000000003",
-  "https://www.tiktok.com/@bellapoarch/video/7000000000000000004",
-  "https://www.tiktok.com/@zachking/video/7000000000000000005",
+const SAMPLE_VIDEO_URLS = [
+  "https://clearance-demo.s3.amazonaws.com/videos/sample-1.mp4",
+  "https://clearance-demo.s3.amazonaws.com/videos/sample-2.mp4",
+  "https://clearance-demo.s3.amazonaws.com/videos/sample-3.mp4",
+  "https://clearance-demo.s3.amazonaws.com/videos/sample-4.mp4",
+  "https://clearance-demo.s3.amazonaws.com/videos/sample-5.mp4",
+  "https://clearance-demo.s3.amazonaws.com/videos/sample-6.mp4",
+  "https://clearance-demo.s3.amazonaws.com/videos/sample-7.mp4",
+  "https://clearance-demo.s3.amazonaws.com/videos/sample-8.mp4",
+  "https://clearance-demo.s3.amazonaws.com/videos/sample-9.mp4",
+  "https://clearance-demo.s3.amazonaws.com/videos/sample-10.mp4",
 ];
 
-// Admin verdicts for the completed session rounds
-const ADMIN_VERDICTS: ("approved" | "rejected")[] = [
-  "approved",
-  "approved",
-  "approved",
-  "rejected",
-  "rejected",
-];
-
-// Fan voting patterns for the completed session
-// Fan A: 5/5 correct (gold), Fan B: 3/5 correct (base), Fan C: 0/5 correct (participation)
-const FAN_VOTES: {
+// Player voting patterns for the completed session
+// Majority vote determines the winner per matchup.
+// With 3 players: 2+ votes for the same side = majority.
+// Matchup majority winners: [video_a, video_a, video_b, video_b, video_a]
+const PLAYER_VOTES: {
   label: string;
-  votes: ("approve" | "reject")[];
+  votes: ("video_a" | "video_b")[];
   correct: number;
   tier: "gold" | "base" | "participation";
 }[] = [
   {
-    label: "Fan A",
-    votes: ["approve", "approve", "approve", "reject", "reject"],
+    label: "Player A",
+    votes: ["video_a", "video_a", "video_b", "video_b", "video_a"],
     correct: 5,
     tier: "gold",
   },
   {
-    label: "Fan B",
-    votes: ["approve", "reject", "reject", "reject", "reject"],
+    label: "Player B",
+    votes: ["video_a", "video_a", "video_a", "video_b", "video_b"],
     correct: 3,
     tier: "base",
   },
   {
-    label: "Fan C",
-    votes: ["reject", "reject", "reject", "approve", "approve"],
+    label: "Player C",
+    votes: ["video_b", "video_b", "video_a", "video_a", "video_b"],
     correct: 0,
     tier: "participation",
   },
@@ -122,14 +120,14 @@ function logStep(phase: string, step: string) {
   console.log(`  [${phase}] ${step}`);
 }
 
-/** Deserialize a base64 tx, have the fan sign, then send. */
+/** Deserialize a base64 tx, have the player sign, then send. */
 async function signAndSendBase64Tx(
   base64Tx: string,
-  fanKeypair: Keypair
+  playerKeypair: Keypair
 ): Promise<string> {
   const txBuf = Buffer.from(base64Tx, "base64");
   const tx = Transaction.from(txBuf);
-  tx.partialSign(fanKeypair);
+  tx.partialSign(playerKeypair);
   const rawTx = tx.serialize();
   const sig = await connection.sendRawTransaction(rawTx, {
     skipPreflight: false,
@@ -220,7 +218,6 @@ async function phase2_completedSession(adminUserId: string) {
   } catch (err: any) {
     if (err.message?.includes("already in use")) {
       logStep("2", `Vault PDA (week ${WEEK}) already exists, continuing.`);
-      // Derive the address for DB record
       const { getVaultAddress } = await import("../anchor/src/clearance-exports");
       const [pda] = getVaultAddress(WEEK);
       vaultAddress = pda.toBase58();
@@ -245,160 +242,173 @@ async function phase2_completedSession(adminUserId: string) {
   });
   logStep("2", `Session: ${session.id} (status=ended)`);
 
-  // 2c. DB: Create tasks + rounds with verdicts
-  const roundIds: string[] = [];
-  for (let i = 0; i < NUM_ROUNDS; i++) {
-    const task = await prisma.task.create({
+  // 2c. DB: Upload demo videos + create matchups
+  const videoIds: string[] = [];
+  for (let i = 0; i < NUM_MATCHUPS * 2; i++) {
+    const video = await prisma.video.create({
       data: {
-        creatorId: adminUserId,
-        weekNumber: WEEK,
-        taskNumber: i + 1,
-        description: `Demo task #${i + 1}: Create a viral TikTok`,
-        hashtag: "#theclearanceNG",
-        deadline: scheduledAt,
-        tiktokUrl: SAMPLE_TIKTOK_URLS[i],
-        status: "verified",
-        submittedAt: new Date(),
-        verifiedAt: new Date(),
-        verifiedBy: adminUserId,
+        title: `Demo Video ${i + 1}`,
+        url: SAMPLE_VIDEO_URLS[i],
+        uploadedById: adminUserId,
       },
     });
+    videoIds.push(video.id);
+  }
+  logStep("2", `Uploaded ${NUM_MATCHUPS * 2} demo videos.`);
 
-    const round = await prisma.sessionRound.create({
+  const matchupIds: string[] = [];
+  for (let i = 0; i < NUM_MATCHUPS; i++) {
+    const matchup = await prisma.matchup.create({
       data: {
         sessionId: session.id,
-        roundNumber: i + 1,
-        taskId: task.id,
-        tiktokUrl: SAMPLE_TIKTOK_URLS[i],
+        matchupNumber: i + 1,
+        videoAId: videoIds[i * 2],
+        videoBId: videoIds[i * 2 + 1],
         duration: 30,
-        adminVerdict: ADMIN_VERDICTS[i],
       },
     });
-    roundIds.push(round.id);
+    matchupIds.push(matchup.id);
   }
-  logStep(
-    "2",
-    `Created ${NUM_ROUNDS} rounds: ${ADMIN_VERDICTS.map((v) => v[0].toUpperCase()).join(",")}`
-  );
+  logStep("2", `Created ${NUM_MATCHUPS} matchups.`);
 
-  // 2d. DB: Create fan users + votes + game results
-  for (const fan of FAN_VOTES) {
+  // 2d. DB: Create player users + votes + game results
+  for (const player of PLAYER_VOTES) {
     const user = await prisma.user.upsert({
-      where: { privyId: `demo-${fan.label.toLowerCase().replace(" ", "-")}` },
+      where: { privyId: `demo-${player.label.toLowerCase().replace(" ", "-")}` },
       update: {},
       create: {
-        privyId: `demo-${fan.label.toLowerCase().replace(" ", "-")}`,
-        displayName: `Demo ${fan.label}`,
-        role: "fan",
-        referralCode: `DEMO${fan.label.replace(" ", "").toUpperCase()}`,
+        privyId: `demo-${player.label.toLowerCase().replace(" ", "-")}`,
+        displayName: `Demo ${player.label}`,
+        role: "player",
+        referralCode: `DEMO${player.label.replace(" ", "").toUpperCase()}`,
         consentAccepted: true,
       },
     });
 
     // Create votes
-    for (let i = 0; i < NUM_ROUNDS; i++) {
+    for (let i = 0; i < NUM_MATCHUPS; i++) {
       await prisma.vote.upsert({
-        where: { userId_roundId: { userId: user.id, roundId: roundIds[i] } },
+        where: { userId_matchupId: { userId: user.id, matchupId: matchupIds[i] } },
         update: {},
         create: {
           userId: user.id,
-          roundId: roundIds[i],
-          decision: fan.votes[i],
+          matchupId: matchupIds[i],
+          decision: player.votes[i],
         },
       });
     }
 
-    // Create game result with tier override
+    // Create game result with tier
     await prisma.gameResult.upsert({
       where: { userId_sessionId: { userId: user.id, sessionId: session.id } },
       update: {},
       create: {
         userId: user.id,
         sessionId: session.id,
-        totalVotes: NUM_ROUNDS,
-        correctVotes: fan.correct,
-        tier: fan.tier,
+        totalVotes: NUM_MATCHUPS,
+        correctVotes: player.correct,
+        tier: player.tier,
       },
     });
 
     logStep(
       "2",
-      `${fan.label}: ${fan.correct}/${NUM_ROUNDS} correct → ${fan.tier} (user: ${user.id})`
+      `${player.label}: ${player.correct}/${NUM_MATCHUPS} correct → ${player.tier} (user: ${user.id})`
     );
   }
+
+  // 2e. Set majority winners on matchups
+  // Majority: video_a wins matchups 1,2,5; video_b wins matchups 3,4
+  const majorityWinners: ("video_a" | "video_b")[] = ["video_a", "video_a", "video_b", "video_b", "video_a"];
+  for (let i = 0; i < NUM_MATCHUPS; i++) {
+    const matchup = await prisma.matchup.findFirst({
+      where: { sessionId: session.id, matchupNumber: i + 1 },
+    });
+    if (matchup) {
+      const winningVideoId = majorityWinners[i] === "video_a" ? matchup.videoAId : matchup.videoBId;
+      await prisma.matchup.update({
+        where: { id: matchup.id },
+        data: { winningVideoId },
+      });
+    }
+  }
+  logStep(
+    "2",
+    `Set majority winners: ${majorityWinners.map((v) => v.toUpperCase().replace("VIDEO_", "")).join(",")}`
+  );
 
   return session;
 }
 
-// ── Phase 3: On-Chain Fan Flow (Fan A, Gold Tier) ───────────────────
+// ── Phase 3: On-Chain Player Flow (Player A, Gold Tier) ──────────────
 
-async function phase3_onChainFanFlow(adminKeypair: Keypair) {
-  console.log("\n  ── Phase 3: On-Chain Fan Flow (Fan A, Gold) ──\n");
+async function phase3_onChainPlayerFlow(adminKeypair: Keypair) {
+  console.log("\n  ── Phase 3: On-Chain Player Flow (Player A, Gold) ──\n");
 
   const WEEK = 1;
 
-  // Check if Fan A already claimed (skip if re-run)
-  const fanAUser = await prisma.user.findUnique({
-    where: { privyId: "demo-fan-a" },
+  // Check if Player A already claimed (skip if re-run)
+  const playerAUser = await prisma.user.findUnique({
+    where: { privyId: "demo-player-a" },
   });
-  if (!fanAUser) {
-    logStep("3", "Fan A user not found — skipping on-chain flow.");
+  if (!playerAUser) {
+    logStep("3", "Player A user not found — skipping on-chain flow.");
     return null;
   }
 
-  const fanAResult = await prisma.gameResult.findFirst({
-    where: { userId: fanAUser.id },
+  const playerAResult = await prisma.gameResult.findFirst({
+    where: { userId: playerAUser.id },
     include: { session: true },
   });
-  if (!fanAResult) {
-    logStep("3", "Fan A game result not found — skipping on-chain flow.");
+  if (!playerAResult) {
+    logStep("3", "Player A game result not found — skipping on-chain flow.");
     return null;
   }
-  if (fanAResult.usdcClaimed) {
-    logStep("3", "Fan A already claimed. Skipping on-chain flow.");
+  if (playerAResult.usdcClaimed) {
+    logStep("3", "Player A already claimed. Skipping on-chain flow.");
     return {
-      fanPubkey: fanAUser.walletAddress ?? "unknown",
-      nftAsset: fanAResult.nftTokenId ?? "unknown",
-      rewardAmount: fanAResult.rewardAmount,
+      playerPubkey: playerAUser.walletAddress ?? "unknown",
+      nftAsset: playerAResult.nftTokenId ?? "unknown",
+      rewardAmount: playerAResult.rewardAmount,
     };
   }
 
-  // Generate a local keypair for Fan A
-  const fanKeypair = Keypair.generate();
-  const fanPubkey = fanKeypair.publicKey;
-  logStep("3", `Fan A keypair: ${fanPubkey.toBase58()}`);
+  // Generate a local keypair for Player A
+  const playerKeypair = Keypair.generate();
+  const playerPubkey = playerKeypair.publicKey;
+  logStep("3", `Player A keypair: ${playerPubkey.toBase58()}`);
 
-  // Update Fan A's wallet address in DB
+  // Update Player A's wallet address in DB
   await prisma.user.update({
-    where: { id: fanAUser.id },
-    data: { walletAddress: fanPubkey.toBase58() },
+    where: { id: playerAUser.id },
+    data: { walletAddress: playerPubkey.toBase58() },
   });
 
-  // 3a. Airdrop SOL to fan
-  logStep("3", "Airdropping 2 SOL to fan...");
+  // 3a. Airdrop SOL to player
+  logStep("3", "Airdropping 2 SOL to player...");
   const airdropSig = await connection.requestAirdrop(
-    fanPubkey,
+    playerPubkey,
     2 * LAMPORTS_PER_SOL
   );
   await connection.confirmTransaction(airdropSig, "confirmed");
   logStep("3", `Airdrop tx: ${airdropSig.slice(0, 16)}...`);
 
-  // 3b. Mint USDC to fan
-  logStep("3", "Minting 10 USDC to fan...");
-  await mintUsdcToWallet(adminKeypair, fanPubkey, 10);
-  logStep("3", "Fan has 10 USDC.");
+  // 3b. Mint USDC to player
+  logStep("3", "Minting 10 USDC to player...");
+  await mintUsdcToWallet(adminKeypair, playerPubkey, 10);
+  logStep("3", "Player has 10 USDC.");
 
-  // 3c. fan_deposit (3.50 USDC entry fee)
-  logStep("3", `Fan deposit: ${ENTRY_FEE_USDC} USDC...`);
+  // 3c. player deposit (3.50 USDC entry fee)
+  logStep("3", `Player deposit: ${ENTRY_FEE_USDC} USDC...`);
   const depositBase64 = await buildFanDepositTx({
-    fanWalletAddress: fanPubkey.toBase58(),
+    fanWalletAddress: playerPubkey.toBase58(),
     sessionWeekNumber: WEEK,
     amountUsdc: ENTRY_FEE_USDC,
   });
-  const depositSig = await signAndSendBase64Tx(depositBase64, fanKeypair);
+  const depositSig = await signAndSendBase64Tx(depositBase64, playerKeypair);
   logStep("3", `fan_deposit tx: ${depositSig.slice(0, 16)}...`);
 
-  // 3d. Mint NFT via UMI (owner = fan, updateAuthority = admin)
+  // 3d. Mint NFT via UMI (owner = player, updateAuthority = admin)
   logStep("3", "Minting NFT (Metaplex Core)...");
   const umi = getUmiInstance(adminKeypair);
   const asset = generateSigner(umi);
@@ -406,7 +416,7 @@ async function phase3_onChainFanFlow(adminKeypair: Keypair) {
     asset,
     name: "Clearance Blind Box — Week 1",
     uri: "https://clearance.local/metadata/week1.json",
-    owner: toUmiPublicKey(fanPubkey.toBase58()),
+    owner: toUmiPublicKey(playerPubkey.toBase58()),
     updateAuthority: toUmiPublicKey(adminKeypair.publicKey.toBase58()),
   }).sendAndConfirm(umi);
   const nftAssetAddress = asset.publicKey.toString();
@@ -414,29 +424,29 @@ async function phase3_onChainFanFlow(adminKeypair: Keypair) {
 
   // Update GameResult with NFT info
   await prisma.gameResult.update({
-    where: { id: fanAResult.id },
+    where: { id: playerAResult.id },
     data: {
       nftMinted: true,
       nftTokenId: nftAssetAddress,
-      walletAddress: fanPubkey.toBase58(),
+      walletAddress: playerPubkey.toBase58(),
     },
   });
 
   // 3e. request_raffle (tier=2 → gold)
   logStep("3", "Requesting raffle (tier=2, gold)...");
   const raffleBase64 = await buildRequestRaffleTx({
-    fanWalletAddress: fanPubkey.toBase58(),
+    fanWalletAddress: playerPubkey.toBase58(),
     sessionWeekNumber: WEEK,
     tier: 2, // gold
   });
-  const raffleSig = await signAndSendBase64Tx(raffleBase64, fanKeypair);
+  const raffleSig = await signAndSendBase64Tx(raffleBase64, playerKeypair);
   logStep("3", `request_raffle tx: ${raffleSig.slice(0, 16)}...`);
 
   // 3f. VRF callback (randomness[0]=0 → guaranteed high payout = $3.50)
   logStep("3", "Simulating VRF callback (randomness[0]=0 → high payout)...");
   const randomness = new Array(32).fill(0);
   const rewardUsdc = await simulateVrfCallback(
-    fanPubkey.toBase58(),
+    playerPubkey.toBase58(),
     WEEK,
     randomness
   );
@@ -444,7 +454,7 @@ async function phase3_onChainFanFlow(adminKeypair: Keypair) {
 
   // Update GameResult with raffle result
   await prisma.gameResult.update({
-    where: { id: fanAResult.id },
+    where: { id: playerAResult.id },
     data: {
       rewardAmount: rewardUsdc,
       nftRevealed: true,
@@ -454,16 +464,16 @@ async function phase3_onChainFanFlow(adminKeypair: Keypair) {
   // 3g. claim_with_raffle
   logStep("3", "Claiming with raffle...");
   const claimBase64 = await buildClaimWithRaffleTx({
-    userWalletAddress: fanPubkey.toBase58(),
+    userWalletAddress: playerPubkey.toBase58(),
     nftAssetAddress,
     sessionWeekNumber: WEEK,
   });
-  const claimSig = await signAndSendBase64Tx(claimBase64, fanKeypair);
+  const claimSig = await signAndSendBase64Tx(claimBase64, playerKeypair);
   logStep("3", `claim_with_raffle tx: ${claimSig.slice(0, 16)}...`);
 
   // Update GameResult with claim info
   await prisma.gameResult.update({
-    where: { id: fanAResult.id },
+    where: { id: playerAResult.id },
     data: {
       usdcClaimed: true,
       claimTxHash: claimSig,
@@ -471,18 +481,18 @@ async function phase3_onChainFanFlow(adminKeypair: Keypair) {
     },
   });
 
-  // 3h. Verify fan USDC balance
-  const fanAta = getAssociatedTokenAddressSync(USDC_MINT, fanPubkey);
-  const fanAccount = await getAccount(connection, fanAta);
-  const fanBalance = Number(fanAccount.amount) / 1_000_000;
-  logStep("3", `Fan USDC balance: $${fanBalance.toFixed(2)}`);
+  // 3h. Verify player USDC balance
+  const playerAta = getAssociatedTokenAddressSync(USDC_MINT, playerPubkey);
+  const playerAccount = await getAccount(connection, playerAta);
+  const playerBalance = Number(playerAccount.amount) / 1_000_000;
+  logStep("3", `Player USDC balance: $${playerBalance.toFixed(2)}`);
 
   return {
-    fanPubkey: fanPubkey.toBase58(),
+    playerPubkey: playerPubkey.toBase58(),
     nftAsset: nftAssetAddress,
     rewardAmount: rewardUsdc,
     claimTx: claimSig,
-    fanBalance,
+    playerBalance,
   };
 }
 
@@ -534,35 +544,31 @@ async function phase4_playableSession(adminUserId: string) {
   });
   logStep("4", `Session: ${session.id} (status=scheduled, starts in ~2 min)`);
 
-  // 4c. DB: Create rounds (no verdicts — admin judges later)
-  for (let i = 0; i < NUM_ROUNDS; i++) {
-    const task = await prisma.task.create({
+  // 4c. DB: Upload videos + create matchups (no winners yet — determined by majority vote)
+  const videoIds: string[] = [];
+  for (let i = 0; i < NUM_MATCHUPS * 2; i++) {
+    const video = await prisma.video.create({
       data: {
-        creatorId: adminUserId,
-        weekNumber: WEEK,
-        taskNumber: i + 1,
-        description: `Week 2 task #${i + 1}: Create a viral TikTok`,
-        hashtag: "#theclearanceNG",
-        deadline: scheduledAt,
-        tiktokUrl: SAMPLE_TIKTOK_URLS[i],
-        status: "verified",
-        submittedAt: new Date(),
-        verifiedAt: new Date(),
-        verifiedBy: adminUserId,
+        title: `Week 2 Video ${i + 1}`,
+        url: SAMPLE_VIDEO_URLS[i],
+        uploadedById: adminUserId,
       },
     });
+    videoIds.push(video.id);
+  }
 
-    await prisma.sessionRound.create({
+  for (let i = 0; i < NUM_MATCHUPS; i++) {
+    await prisma.matchup.create({
       data: {
         sessionId: session.id,
-        roundNumber: i + 1,
-        taskId: task.id,
-        tiktokUrl: SAMPLE_TIKTOK_URLS[i],
+        matchupNumber: i + 1,
+        videoAId: videoIds[i * 2],
+        videoBId: videoIds[i * 2 + 1],
         duration: 30,
       },
     });
   }
-  logStep("4", `Created ${NUM_ROUNDS} rounds (no verdicts — ready for judging).`);
+  logStep("4", `Created ${NUM_MATCHUPS} matchups (no winners — ready for voting).`);
 
   return session;
 }
@@ -572,12 +578,12 @@ async function phase4_playableSession(adminUserId: string) {
 function phase5_summary(
   week1Session: { id: string; vaultAddress: string | null },
   week2Session: { id: string; vaultAddress: string | null },
-  fanFlowResult: {
-    fanPubkey: string;
+  playerFlowResult: {
+    playerPubkey: string;
     nftAsset: string;
     rewardAmount: number;
     claimTx?: string;
-    fanBalance?: number;
+    playerBalance?: number;
   } | null
 ) {
   console.log("\n  ════════════════════════════════════════════════");
@@ -587,19 +593,19 @@ function phase5_summary(
   console.log("  Week 1 (completed):");
   console.log(`    Session ID:    ${week1Session.id}`);
   console.log(`    Vault:         ${week1Session.vaultAddress}`);
-  console.log(`    Status:        ended (3 approved, 2 rejected)`);
-  console.log(`    Fans:          Fan A (gold), Fan B (base), Fan C (participation)`);
+  console.log(`    Status:        ended (majority vote finalized)`);
+  console.log(`    Players:       Player A (gold), Player B (base), Player C (participation)`);
 
-  if (fanFlowResult) {
-    console.log("\n  On-chain Fan Flow (Fan A):");
-    console.log(`    Wallet:        ${fanFlowResult.fanPubkey}`);
-    console.log(`    NFT Asset:     ${fanFlowResult.nftAsset}`);
-    console.log(`    Reward:        $${fanFlowResult.rewardAmount.toFixed(2)} USDC`);
-    if (fanFlowResult.claimTx) {
-      console.log(`    Claim Tx:      ${fanFlowResult.claimTx}`);
+  if (playerFlowResult) {
+    console.log("\n  On-chain Player Flow (Player A):");
+    console.log(`    Wallet:        ${playerFlowResult.playerPubkey}`);
+    console.log(`    NFT Asset:     ${playerFlowResult.nftAsset}`);
+    console.log(`    Reward:        $${playerFlowResult.rewardAmount.toFixed(2)} USDC`);
+    if (playerFlowResult.claimTx) {
+      console.log(`    Claim Tx:      ${playerFlowResult.claimTx}`);
     }
-    if (fanFlowResult.fanBalance !== undefined) {
-      console.log(`    Balance:       $${fanFlowResult.fanBalance.toFixed(2)} USDC`);
+    if (playerFlowResult.playerBalance !== undefined) {
+      console.log(`    Balance:       $${playerFlowResult.playerBalance.toFixed(2)} USDC`);
     }
   }
 
@@ -612,9 +618,9 @@ function phase5_summary(
   console.log("    1. Open http://localhost:3000");
   console.log('    2. Select "local" cluster in the header dropdown');
   console.log("    3. Login with Privy");
-  console.log("    4. /rewards → Fan A's completed blind box (claimed)");
-  console.log("    5. /arena   → Week 2 session → join → play → vote");
-  console.log("    6. Admin judges via /admin/sessions/[id]/judge");
+  console.log("    4. /rewards → Player A's completed blind box (claimed)");
+  console.log("    5. /arena   → Week 2 session → join → play → pick winners");
+  console.log("    6. After session ends → /admin/sessions → Finalize Results");
   console.log("    7. /rewards → Open Box → Reveal → Claim\n");
 }
 
@@ -632,7 +638,7 @@ async function main() {
   const week1Session = await phase2_completedSession(adminUser.id);
 
   // Phase 3
-  const fanFlowResult = await phase3_onChainFanFlow(adminKeypair);
+  const playerFlowResult = await phase3_onChainPlayerFlow(adminKeypair);
 
   // Phase 4
   const week2Session = await phase4_playableSession(adminUser.id);
@@ -641,7 +647,7 @@ async function main() {
   phase5_summary(
     { id: week1Session.id, vaultAddress: week1Session.vaultAddress },
     { id: week2Session.id, vaultAddress: week2Session.vaultAddress },
-    fanFlowResult
+    playerFlowResult
   );
 }
 

@@ -27,7 +27,7 @@ export default async function ReferralPage({
         You&apos;ve been invited!
       </p>
       <p className="text-[#888] text-sm text-center mb-2">
-        Join The Clearance and start earning through content creation.
+        Join The Clearance and start predicting trending content.
       </p>
       <p className="text-[#555] text-xs text-center mb-8">
         Referrals are recorded on Solana&apos;s social graph via Tapestry
@@ -38,18 +38,12 @@ export default async function ReferralPage({
         <p className="text-[#F5E642] font-bold text-lg">{code}</p>
       </div>
 
-      <div className="w-full max-w-sm space-y-3">
+      <div className="w-full max-w-sm">
         <a
-          href="/onboarding/categories?role=creator"
+          href="/onboarding/categories"
           className="btn-yellow w-full rounded-xl py-4 font-bold text-base flex items-center justify-center"
         >
-          Join as Creator
-        </a>
-        <a
-          href="/onboarding/categories?role=fan"
-          className="w-full bg-[#1A1A1A] rounded-xl py-4 font-bold text-base text-white border border-[#2A2A2A] flex items-center justify-center"
-        >
-          Join as Fan
+          Join & Play
         </a>
       </div>
     </div>

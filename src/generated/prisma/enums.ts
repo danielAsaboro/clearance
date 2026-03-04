@@ -10,22 +10,11 @@
 */
 
 export const UserRole = {
-  creator: 'creator',
-  fan: 'fan',
+  player: 'player',
   admin: 'admin'
 } as const
 
 export type UserRole = (typeof UserRole)[keyof typeof UserRole]
-
-
-export const TaskStatus = {
-  pending: 'pending',
-  submitted: 'submitted',
-  verified: 'verified',
-  rejected: 'rejected'
-} as const
-
-export type TaskStatus = (typeof TaskStatus)[keyof typeof TaskStatus]
 
 
 export const SessionStatus = {
@@ -37,17 +26,9 @@ export const SessionStatus = {
 export type SessionStatus = (typeof SessionStatus)[keyof typeof SessionStatus]
 
 
-export const RoundVerdict = {
-  approved: 'approved',
-  rejected: 'rejected'
-} as const
-
-export type RoundVerdict = (typeof RoundVerdict)[keyof typeof RoundVerdict]
-
-
 export const VoteDecision = {
-  approve: 'approve',
-  reject: 'reject'
+  video_a: 'video_a',
+  video_b: 'video_b'
 } as const
 
 export type VoteDecision = (typeof VoteDecision)[keyof typeof VoteDecision]

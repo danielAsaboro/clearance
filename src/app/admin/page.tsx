@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import {
   Users,
-  ListTodo,
+  Film,
   Radio,
   Clock,
   ThumbsUp,
@@ -16,9 +16,8 @@ import {
 } from "lucide-react";
 
 interface Stats {
-  totalCreators: number;
-  totalFans: number;
-  pendingSubmissions: number;
+  totalPlayers: number;
+  totalVideos: number;
   upcomingSession: { title: string; scheduledAt: string } | null;
   totalVotes: number;
   totalSessions: number;
@@ -83,18 +82,17 @@ export default function AdminDashboard() {
       <h1 className="text-xl font-bold text-white mb-6">Dashboard</h1>
 
       {/* Core Stats */}
-      <p className="text-[#888] text-xs uppercase tracking-wider mb-3">Users</p>
+      <p className="text-[#888] text-xs uppercase tracking-wider mb-3">Platform</p>
       <div className="grid grid-cols-2 gap-3 mb-6">
-        <StatCard icon={Users} value={stats?.totalCreators ?? "-"} label="Creators" />
-        <StatCard icon={Users} value={stats?.totalFans ?? "-"} label="Fans" />
-        <StatCard icon={ListTodo} value={stats?.pendingSubmissions ?? "-"} label="Pending Reviews" />
+        <StatCard icon={Users} value={stats?.totalPlayers ?? "-"} label="Total Players" />
+        <StatCard icon={Film} value={stats?.totalVideos ?? "-"} label="Videos in Library" />
         <StatCard icon={Link2} value={stats?.totalReferrals ?? "-"} label="Referrals" />
+        <StatCard icon={ThumbsUp} value={stats?.totalVotes ?? "-"} label="Total Votes" />
       </div>
 
       {/* Voting & Session Stats */}
       <p className="text-[#888] text-xs uppercase tracking-wider mb-3">Engagement</p>
       <div className="grid grid-cols-2 gap-3 mb-6">
-        <StatCard icon={ThumbsUp} value={stats?.totalVotes ?? "-"} label="Total Votes" />
         <StatCard icon={TrendingUp} value={stats?.totalGameResults ?? "-"} label="Game Participations" />
         <StatCard
           icon={BarChart3}

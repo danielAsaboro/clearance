@@ -30,9 +30,7 @@ export type UserMinAggregateOutputType = {
   phone: string | null
   displayName: string | null
   profilePhoto: string | null
-  tiktokUsername: string | null
   role: $Enums.UserRole | null
-  willingToDeclare: boolean | null
   consentAccepted: boolean | null
   privyId: string | null
   walletAddress: string | null
@@ -48,9 +46,7 @@ export type UserMaxAggregateOutputType = {
   phone: string | null
   displayName: string | null
   profilePhoto: string | null
-  tiktokUsername: string | null
   role: $Enums.UserRole | null
-  willingToDeclare: boolean | null
   consentAccepted: boolean | null
   privyId: string | null
   walletAddress: string | null
@@ -66,10 +62,7 @@ export type UserCountAggregateOutputType = {
   phone: number
   displayName: number
   profilePhoto: number
-  tiktokUsername: number
   role: number
-  debtSources: number
-  willingToDeclare: number
   consentAccepted: number
   privyId: number
   walletAddress: number
@@ -88,9 +81,7 @@ export type UserMinAggregateInputType = {
   phone?: true
   displayName?: true
   profilePhoto?: true
-  tiktokUsername?: true
   role?: true
-  willingToDeclare?: true
   consentAccepted?: true
   privyId?: true
   walletAddress?: true
@@ -106,9 +97,7 @@ export type UserMaxAggregateInputType = {
   phone?: true
   displayName?: true
   profilePhoto?: true
-  tiktokUsername?: true
   role?: true
-  willingToDeclare?: true
   consentAccepted?: true
   privyId?: true
   walletAddress?: true
@@ -124,10 +113,7 @@ export type UserCountAggregateInputType = {
   phone?: true
   displayName?: true
   profilePhoto?: true
-  tiktokUsername?: true
   role?: true
-  debtSources?: true
-  willingToDeclare?: true
   consentAccepted?: true
   privyId?: true
   walletAddress?: true
@@ -217,10 +203,7 @@ export type UserGroupByOutputType = {
   phone: string | null
   displayName: string | null
   profilePhoto: string | null
-  tiktokUsername: string | null
   role: $Enums.UserRole
-  debtSources: runtime.JsonValue | null
-  willingToDeclare: boolean | null
   consentAccepted: boolean
   privyId: string
   walletAddress: string | null
@@ -258,10 +241,7 @@ export type UserWhereInput = {
   phone?: Prisma.StringNullableFilter<"User"> | string | null
   displayName?: Prisma.StringNullableFilter<"User"> | string | null
   profilePhoto?: Prisma.StringNullableFilter<"User"> | string | null
-  tiktokUsername?: Prisma.StringNullableFilter<"User"> | string | null
   role?: Prisma.EnumUserRoleFilter<"User"> | $Enums.UserRole
-  debtSources?: Prisma.JsonNullableFilter<"User">
-  willingToDeclare?: Prisma.BoolNullableFilter<"User"> | boolean | null
   consentAccepted?: Prisma.BoolFilter<"User"> | boolean
   privyId?: Prisma.StringFilter<"User"> | string
   walletAddress?: Prisma.StringNullableFilter<"User"> | string | null
@@ -270,7 +250,7 @@ export type UserWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   categories?: Prisma.JsonNullableFilter<"User">
-  tasks?: Prisma.TaskListRelationFilter
+  uploadedVideos?: Prisma.VideoListRelationFilter
   votes?: Prisma.VoteListRelationFilter
   gameResults?: Prisma.GameResultListRelationFilter
   referralsMade?: Prisma.ReferralListRelationFilter
@@ -284,10 +264,7 @@ export type UserOrderByWithRelationInput = {
   phone?: Prisma.SortOrderInput | Prisma.SortOrder
   displayName?: Prisma.SortOrderInput | Prisma.SortOrder
   profilePhoto?: Prisma.SortOrderInput | Prisma.SortOrder
-  tiktokUsername?: Prisma.SortOrderInput | Prisma.SortOrder
   role?: Prisma.SortOrder
-  debtSources?: Prisma.SortOrderInput | Prisma.SortOrder
-  willingToDeclare?: Prisma.SortOrderInput | Prisma.SortOrder
   consentAccepted?: Prisma.SortOrder
   privyId?: Prisma.SortOrder
   walletAddress?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -296,7 +273,7 @@ export type UserOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   categories?: Prisma.SortOrderInput | Prisma.SortOrder
-  tasks?: Prisma.TaskOrderByRelationAggregateInput
+  uploadedVideos?: Prisma.VideoOrderByRelationAggregateInput
   votes?: Prisma.VoteOrderByRelationAggregateInput
   gameResults?: Prisma.GameResultOrderByRelationAggregateInput
   referralsMade?: Prisma.ReferralOrderByRelationAggregateInput
@@ -315,17 +292,14 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   phone?: Prisma.StringNullableFilter<"User"> | string | null
   displayName?: Prisma.StringNullableFilter<"User"> | string | null
   profilePhoto?: Prisma.StringNullableFilter<"User"> | string | null
-  tiktokUsername?: Prisma.StringNullableFilter<"User"> | string | null
   role?: Prisma.EnumUserRoleFilter<"User"> | $Enums.UserRole
-  debtSources?: Prisma.JsonNullableFilter<"User">
-  willingToDeclare?: Prisma.BoolNullableFilter<"User"> | boolean | null
   consentAccepted?: Prisma.BoolFilter<"User"> | boolean
   walletAddress?: Prisma.StringNullableFilter<"User"> | string | null
   referredBy?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   categories?: Prisma.JsonNullableFilter<"User">
-  tasks?: Prisma.TaskListRelationFilter
+  uploadedVideos?: Prisma.VideoListRelationFilter
   votes?: Prisma.VoteListRelationFilter
   gameResults?: Prisma.GameResultListRelationFilter
   referralsMade?: Prisma.ReferralListRelationFilter
@@ -339,10 +313,7 @@ export type UserOrderByWithAggregationInput = {
   phone?: Prisma.SortOrderInput | Prisma.SortOrder
   displayName?: Prisma.SortOrderInput | Prisma.SortOrder
   profilePhoto?: Prisma.SortOrderInput | Prisma.SortOrder
-  tiktokUsername?: Prisma.SortOrderInput | Prisma.SortOrder
   role?: Prisma.SortOrder
-  debtSources?: Prisma.SortOrderInput | Prisma.SortOrder
-  willingToDeclare?: Prisma.SortOrderInput | Prisma.SortOrder
   consentAccepted?: Prisma.SortOrder
   privyId?: Prisma.SortOrder
   walletAddress?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -365,10 +336,7 @@ export type UserScalarWhereWithAggregatesInput = {
   phone?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   displayName?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   profilePhoto?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
-  tiktokUsername?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   role?: Prisma.EnumUserRoleWithAggregatesFilter<"User"> | $Enums.UserRole
-  debtSources?: Prisma.JsonNullableWithAggregatesFilter<"User">
-  willingToDeclare?: Prisma.BoolNullableWithAggregatesFilter<"User"> | boolean | null
   consentAccepted?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
   privyId?: Prisma.StringWithAggregatesFilter<"User"> | string
   walletAddress?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
@@ -385,10 +353,7 @@ export type UserCreateInput = {
   phone?: string | null
   displayName?: string | null
   profilePhoto?: string | null
-  tiktokUsername?: string | null
   role?: $Enums.UserRole
-  debtSources?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  willingToDeclare?: boolean | null
   consentAccepted?: boolean
   privyId: string
   walletAddress?: string | null
@@ -397,7 +362,7 @@ export type UserCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  tasks?: Prisma.TaskCreateNestedManyWithoutCreatorInput
+  uploadedVideos?: Prisma.VideoCreateNestedManyWithoutUploadedByInput
   votes?: Prisma.VoteCreateNestedManyWithoutUserInput
   gameResults?: Prisma.GameResultCreateNestedManyWithoutUserInput
   referralsMade?: Prisma.ReferralCreateNestedManyWithoutReferrerInput
@@ -411,10 +376,7 @@ export type UserUncheckedCreateInput = {
   phone?: string | null
   displayName?: string | null
   profilePhoto?: string | null
-  tiktokUsername?: string | null
   role?: $Enums.UserRole
-  debtSources?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  willingToDeclare?: boolean | null
   consentAccepted?: boolean
   privyId: string
   walletAddress?: string | null
@@ -423,7 +385,7 @@ export type UserUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  tasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatorInput
+  uploadedVideos?: Prisma.VideoUncheckedCreateNestedManyWithoutUploadedByInput
   votes?: Prisma.VoteUncheckedCreateNestedManyWithoutUserInput
   gameResults?: Prisma.GameResultUncheckedCreateNestedManyWithoutUserInput
   referralsMade?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferrerInput
@@ -437,10 +399,7 @@ export type UserUpdateInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  tiktokUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
-  debtSources?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  willingToDeclare?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   consentAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   privyId?: Prisma.StringFieldUpdateOperationsInput | string
   walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -449,7 +408,7 @@ export type UserUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  tasks?: Prisma.TaskUpdateManyWithoutCreatorNestedInput
+  uploadedVideos?: Prisma.VideoUpdateManyWithoutUploadedByNestedInput
   votes?: Prisma.VoteUpdateManyWithoutUserNestedInput
   gameResults?: Prisma.GameResultUpdateManyWithoutUserNestedInput
   referralsMade?: Prisma.ReferralUpdateManyWithoutReferrerNestedInput
@@ -463,10 +422,7 @@ export type UserUncheckedUpdateInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  tiktokUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
-  debtSources?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  willingToDeclare?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   consentAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   privyId?: Prisma.StringFieldUpdateOperationsInput | string
   walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -475,7 +431,7 @@ export type UserUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  tasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatorNestedInput
+  uploadedVideos?: Prisma.VideoUncheckedUpdateManyWithoutUploadedByNestedInput
   votes?: Prisma.VoteUncheckedUpdateManyWithoutUserNestedInput
   gameResults?: Prisma.GameResultUncheckedUpdateManyWithoutUserNestedInput
   referralsMade?: Prisma.ReferralUncheckedUpdateManyWithoutReferrerNestedInput
@@ -489,10 +445,7 @@ export type UserCreateManyInput = {
   phone?: string | null
   displayName?: string | null
   profilePhoto?: string | null
-  tiktokUsername?: string | null
   role?: $Enums.UserRole
-  debtSources?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  willingToDeclare?: boolean | null
   consentAccepted?: boolean
   privyId: string
   walletAddress?: string | null
@@ -509,10 +462,7 @@ export type UserUpdateManyMutationInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  tiktokUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
-  debtSources?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  willingToDeclare?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   consentAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   privyId?: Prisma.StringFieldUpdateOperationsInput | string
   walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -529,10 +479,7 @@ export type UserUncheckedUpdateManyInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  tiktokUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
-  debtSources?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  willingToDeclare?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   consentAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   privyId?: Prisma.StringFieldUpdateOperationsInput | string
   walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -549,10 +496,7 @@ export type UserCountOrderByAggregateInput = {
   phone?: Prisma.SortOrder
   displayName?: Prisma.SortOrder
   profilePhoto?: Prisma.SortOrder
-  tiktokUsername?: Prisma.SortOrder
   role?: Prisma.SortOrder
-  debtSources?: Prisma.SortOrder
-  willingToDeclare?: Prisma.SortOrder
   consentAccepted?: Prisma.SortOrder
   privyId?: Prisma.SortOrder
   walletAddress?: Prisma.SortOrder
@@ -569,9 +513,7 @@ export type UserMaxOrderByAggregateInput = {
   phone?: Prisma.SortOrder
   displayName?: Prisma.SortOrder
   profilePhoto?: Prisma.SortOrder
-  tiktokUsername?: Prisma.SortOrder
   role?: Prisma.SortOrder
-  willingToDeclare?: Prisma.SortOrder
   consentAccepted?: Prisma.SortOrder
   privyId?: Prisma.SortOrder
   walletAddress?: Prisma.SortOrder
@@ -587,9 +529,7 @@ export type UserMinOrderByAggregateInput = {
   phone?: Prisma.SortOrder
   displayName?: Prisma.SortOrder
   profilePhoto?: Prisma.SortOrder
-  tiktokUsername?: Prisma.SortOrder
   role?: Prisma.SortOrder
-  willingToDeclare?: Prisma.SortOrder
   consentAccepted?: Prisma.SortOrder
   privyId?: Prisma.SortOrder
   walletAddress?: Prisma.SortOrder
@@ -616,10 +556,6 @@ export type EnumUserRoleFieldUpdateOperationsInput = {
   set?: $Enums.UserRole
 }
 
-export type NullableBoolFieldUpdateOperationsInput = {
-  set?: boolean | null
-}
-
 export type BoolFieldUpdateOperationsInput = {
   set?: boolean
 }
@@ -628,18 +564,18 @@ export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
 }
 
-export type UserCreateNestedOneWithoutTasksInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutTasksInput, Prisma.UserUncheckedCreateWithoutTasksInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutTasksInput
+export type UserCreateNestedOneWithoutUploadedVideosInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutUploadedVideosInput, Prisma.UserUncheckedCreateWithoutUploadedVideosInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutUploadedVideosInput
   connect?: Prisma.UserWhereUniqueInput
 }
 
-export type UserUpdateOneRequiredWithoutTasksNestedInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutTasksInput, Prisma.UserUncheckedCreateWithoutTasksInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutTasksInput
-  upsert?: Prisma.UserUpsertWithoutTasksInput
+export type UserUpdateOneRequiredWithoutUploadedVideosNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutUploadedVideosInput, Prisma.UserUncheckedCreateWithoutUploadedVideosInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutUploadedVideosInput
+  upsert?: Prisma.UserUpsertWithoutUploadedVideosInput
   connect?: Prisma.UserWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutTasksInput, Prisma.UserUpdateWithoutTasksInput>, Prisma.UserUncheckedUpdateWithoutTasksInput>
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutUploadedVideosInput, Prisma.UserUpdateWithoutUploadedVideosInput>, Prisma.UserUncheckedUpdateWithoutUploadedVideosInput>
 }
 
 export type UserCreateNestedOneWithoutVotesInput = {
@@ -712,16 +648,13 @@ export type UserUpdateOneRequiredWithoutEnrollmentsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutEnrollmentsInput, Prisma.UserUpdateWithoutEnrollmentsInput>, Prisma.UserUncheckedUpdateWithoutEnrollmentsInput>
 }
 
-export type UserCreateWithoutTasksInput = {
+export type UserCreateWithoutUploadedVideosInput = {
   id?: string
   email?: string | null
   phone?: string | null
   displayName?: string | null
   profilePhoto?: string | null
-  tiktokUsername?: string | null
   role?: $Enums.UserRole
-  debtSources?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  willingToDeclare?: boolean | null
   consentAccepted?: boolean
   privyId: string
   walletAddress?: string | null
@@ -737,16 +670,13 @@ export type UserCreateWithoutTasksInput = {
   enrollments?: Prisma.CampaignEnrollmentCreateNestedManyWithoutUserInput
 }
 
-export type UserUncheckedCreateWithoutTasksInput = {
+export type UserUncheckedCreateWithoutUploadedVideosInput = {
   id?: string
   email?: string | null
   phone?: string | null
   displayName?: string | null
   profilePhoto?: string | null
-  tiktokUsername?: string | null
   role?: $Enums.UserRole
-  debtSources?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  willingToDeclare?: boolean | null
   consentAccepted?: boolean
   privyId: string
   walletAddress?: string | null
@@ -762,32 +692,29 @@ export type UserUncheckedCreateWithoutTasksInput = {
   enrollments?: Prisma.CampaignEnrollmentUncheckedCreateNestedManyWithoutUserInput
 }
 
-export type UserCreateOrConnectWithoutTasksInput = {
+export type UserCreateOrConnectWithoutUploadedVideosInput = {
   where: Prisma.UserWhereUniqueInput
-  create: Prisma.XOR<Prisma.UserCreateWithoutTasksInput, Prisma.UserUncheckedCreateWithoutTasksInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutUploadedVideosInput, Prisma.UserUncheckedCreateWithoutUploadedVideosInput>
 }
 
-export type UserUpsertWithoutTasksInput = {
-  update: Prisma.XOR<Prisma.UserUpdateWithoutTasksInput, Prisma.UserUncheckedUpdateWithoutTasksInput>
-  create: Prisma.XOR<Prisma.UserCreateWithoutTasksInput, Prisma.UserUncheckedCreateWithoutTasksInput>
+export type UserUpsertWithoutUploadedVideosInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutUploadedVideosInput, Prisma.UserUncheckedUpdateWithoutUploadedVideosInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutUploadedVideosInput, Prisma.UserUncheckedCreateWithoutUploadedVideosInput>
   where?: Prisma.UserWhereInput
 }
 
-export type UserUpdateToOneWithWhereWithoutTasksInput = {
+export type UserUpdateToOneWithWhereWithoutUploadedVideosInput = {
   where?: Prisma.UserWhereInput
-  data: Prisma.XOR<Prisma.UserUpdateWithoutTasksInput, Prisma.UserUncheckedUpdateWithoutTasksInput>
+  data: Prisma.XOR<Prisma.UserUpdateWithoutUploadedVideosInput, Prisma.UserUncheckedUpdateWithoutUploadedVideosInput>
 }
 
-export type UserUpdateWithoutTasksInput = {
+export type UserUpdateWithoutUploadedVideosInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  tiktokUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
-  debtSources?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  willingToDeclare?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   consentAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   privyId?: Prisma.StringFieldUpdateOperationsInput | string
   walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -803,16 +730,13 @@ export type UserUpdateWithoutTasksInput = {
   enrollments?: Prisma.CampaignEnrollmentUpdateManyWithoutUserNestedInput
 }
 
-export type UserUncheckedUpdateWithoutTasksInput = {
+export type UserUncheckedUpdateWithoutUploadedVideosInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  tiktokUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
-  debtSources?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  willingToDeclare?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   consentAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   privyId?: Prisma.StringFieldUpdateOperationsInput | string
   walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -834,10 +758,7 @@ export type UserCreateWithoutVotesInput = {
   phone?: string | null
   displayName?: string | null
   profilePhoto?: string | null
-  tiktokUsername?: string | null
   role?: $Enums.UserRole
-  debtSources?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  willingToDeclare?: boolean | null
   consentAccepted?: boolean
   privyId: string
   walletAddress?: string | null
@@ -846,7 +767,7 @@ export type UserCreateWithoutVotesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  tasks?: Prisma.TaskCreateNestedManyWithoutCreatorInput
+  uploadedVideos?: Prisma.VideoCreateNestedManyWithoutUploadedByInput
   gameResults?: Prisma.GameResultCreateNestedManyWithoutUserInput
   referralsMade?: Prisma.ReferralCreateNestedManyWithoutReferrerInput
   referralReceived?: Prisma.ReferralCreateNestedOneWithoutReferredUserInput
@@ -859,10 +780,7 @@ export type UserUncheckedCreateWithoutVotesInput = {
   phone?: string | null
   displayName?: string | null
   profilePhoto?: string | null
-  tiktokUsername?: string | null
   role?: $Enums.UserRole
-  debtSources?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  willingToDeclare?: boolean | null
   consentAccepted?: boolean
   privyId: string
   walletAddress?: string | null
@@ -871,7 +789,7 @@ export type UserUncheckedCreateWithoutVotesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  tasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatorInput
+  uploadedVideos?: Prisma.VideoUncheckedCreateNestedManyWithoutUploadedByInput
   gameResults?: Prisma.GameResultUncheckedCreateNestedManyWithoutUserInput
   referralsMade?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferrerInput
   referralReceived?: Prisma.ReferralUncheckedCreateNestedOneWithoutReferredUserInput
@@ -900,10 +818,7 @@ export type UserUpdateWithoutVotesInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  tiktokUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
-  debtSources?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  willingToDeclare?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   consentAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   privyId?: Prisma.StringFieldUpdateOperationsInput | string
   walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -912,7 +827,7 @@ export type UserUpdateWithoutVotesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  tasks?: Prisma.TaskUpdateManyWithoutCreatorNestedInput
+  uploadedVideos?: Prisma.VideoUpdateManyWithoutUploadedByNestedInput
   gameResults?: Prisma.GameResultUpdateManyWithoutUserNestedInput
   referralsMade?: Prisma.ReferralUpdateManyWithoutReferrerNestedInput
   referralReceived?: Prisma.ReferralUpdateOneWithoutReferredUserNestedInput
@@ -925,10 +840,7 @@ export type UserUncheckedUpdateWithoutVotesInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  tiktokUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
-  debtSources?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  willingToDeclare?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   consentAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   privyId?: Prisma.StringFieldUpdateOperationsInput | string
   walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -937,7 +849,7 @@ export type UserUncheckedUpdateWithoutVotesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  tasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatorNestedInput
+  uploadedVideos?: Prisma.VideoUncheckedUpdateManyWithoutUploadedByNestedInput
   gameResults?: Prisma.GameResultUncheckedUpdateManyWithoutUserNestedInput
   referralsMade?: Prisma.ReferralUncheckedUpdateManyWithoutReferrerNestedInput
   referralReceived?: Prisma.ReferralUncheckedUpdateOneWithoutReferredUserNestedInput
@@ -950,10 +862,7 @@ export type UserCreateWithoutGameResultsInput = {
   phone?: string | null
   displayName?: string | null
   profilePhoto?: string | null
-  tiktokUsername?: string | null
   role?: $Enums.UserRole
-  debtSources?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  willingToDeclare?: boolean | null
   consentAccepted?: boolean
   privyId: string
   walletAddress?: string | null
@@ -962,7 +871,7 @@ export type UserCreateWithoutGameResultsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  tasks?: Prisma.TaskCreateNestedManyWithoutCreatorInput
+  uploadedVideos?: Prisma.VideoCreateNestedManyWithoutUploadedByInput
   votes?: Prisma.VoteCreateNestedManyWithoutUserInput
   referralsMade?: Prisma.ReferralCreateNestedManyWithoutReferrerInput
   referralReceived?: Prisma.ReferralCreateNestedOneWithoutReferredUserInput
@@ -975,10 +884,7 @@ export type UserUncheckedCreateWithoutGameResultsInput = {
   phone?: string | null
   displayName?: string | null
   profilePhoto?: string | null
-  tiktokUsername?: string | null
   role?: $Enums.UserRole
-  debtSources?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  willingToDeclare?: boolean | null
   consentAccepted?: boolean
   privyId: string
   walletAddress?: string | null
@@ -987,7 +893,7 @@ export type UserUncheckedCreateWithoutGameResultsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  tasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatorInput
+  uploadedVideos?: Prisma.VideoUncheckedCreateNestedManyWithoutUploadedByInput
   votes?: Prisma.VoteUncheckedCreateNestedManyWithoutUserInput
   referralsMade?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferrerInput
   referralReceived?: Prisma.ReferralUncheckedCreateNestedOneWithoutReferredUserInput
@@ -1016,10 +922,7 @@ export type UserUpdateWithoutGameResultsInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  tiktokUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
-  debtSources?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  willingToDeclare?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   consentAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   privyId?: Prisma.StringFieldUpdateOperationsInput | string
   walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1028,7 +931,7 @@ export type UserUpdateWithoutGameResultsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  tasks?: Prisma.TaskUpdateManyWithoutCreatorNestedInput
+  uploadedVideos?: Prisma.VideoUpdateManyWithoutUploadedByNestedInput
   votes?: Prisma.VoteUpdateManyWithoutUserNestedInput
   referralsMade?: Prisma.ReferralUpdateManyWithoutReferrerNestedInput
   referralReceived?: Prisma.ReferralUpdateOneWithoutReferredUserNestedInput
@@ -1041,10 +944,7 @@ export type UserUncheckedUpdateWithoutGameResultsInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  tiktokUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
-  debtSources?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  willingToDeclare?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   consentAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   privyId?: Prisma.StringFieldUpdateOperationsInput | string
   walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1053,7 +953,7 @@ export type UserUncheckedUpdateWithoutGameResultsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  tasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatorNestedInput
+  uploadedVideos?: Prisma.VideoUncheckedUpdateManyWithoutUploadedByNestedInput
   votes?: Prisma.VoteUncheckedUpdateManyWithoutUserNestedInput
   referralsMade?: Prisma.ReferralUncheckedUpdateManyWithoutReferrerNestedInput
   referralReceived?: Prisma.ReferralUncheckedUpdateOneWithoutReferredUserNestedInput
@@ -1066,10 +966,7 @@ export type UserCreateWithoutReferralsMadeInput = {
   phone?: string | null
   displayName?: string | null
   profilePhoto?: string | null
-  tiktokUsername?: string | null
   role?: $Enums.UserRole
-  debtSources?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  willingToDeclare?: boolean | null
   consentAccepted?: boolean
   privyId: string
   walletAddress?: string | null
@@ -1078,7 +975,7 @@ export type UserCreateWithoutReferralsMadeInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  tasks?: Prisma.TaskCreateNestedManyWithoutCreatorInput
+  uploadedVideos?: Prisma.VideoCreateNestedManyWithoutUploadedByInput
   votes?: Prisma.VoteCreateNestedManyWithoutUserInput
   gameResults?: Prisma.GameResultCreateNestedManyWithoutUserInput
   referralReceived?: Prisma.ReferralCreateNestedOneWithoutReferredUserInput
@@ -1091,10 +988,7 @@ export type UserUncheckedCreateWithoutReferralsMadeInput = {
   phone?: string | null
   displayName?: string | null
   profilePhoto?: string | null
-  tiktokUsername?: string | null
   role?: $Enums.UserRole
-  debtSources?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  willingToDeclare?: boolean | null
   consentAccepted?: boolean
   privyId: string
   walletAddress?: string | null
@@ -1103,7 +997,7 @@ export type UserUncheckedCreateWithoutReferralsMadeInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  tasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatorInput
+  uploadedVideos?: Prisma.VideoUncheckedCreateNestedManyWithoutUploadedByInput
   votes?: Prisma.VoteUncheckedCreateNestedManyWithoutUserInput
   gameResults?: Prisma.GameResultUncheckedCreateNestedManyWithoutUserInput
   referralReceived?: Prisma.ReferralUncheckedCreateNestedOneWithoutReferredUserInput
@@ -1121,10 +1015,7 @@ export type UserCreateWithoutReferralReceivedInput = {
   phone?: string | null
   displayName?: string | null
   profilePhoto?: string | null
-  tiktokUsername?: string | null
   role?: $Enums.UserRole
-  debtSources?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  willingToDeclare?: boolean | null
   consentAccepted?: boolean
   privyId: string
   walletAddress?: string | null
@@ -1133,7 +1024,7 @@ export type UserCreateWithoutReferralReceivedInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  tasks?: Prisma.TaskCreateNestedManyWithoutCreatorInput
+  uploadedVideos?: Prisma.VideoCreateNestedManyWithoutUploadedByInput
   votes?: Prisma.VoteCreateNestedManyWithoutUserInput
   gameResults?: Prisma.GameResultCreateNestedManyWithoutUserInput
   referralsMade?: Prisma.ReferralCreateNestedManyWithoutReferrerInput
@@ -1146,10 +1037,7 @@ export type UserUncheckedCreateWithoutReferralReceivedInput = {
   phone?: string | null
   displayName?: string | null
   profilePhoto?: string | null
-  tiktokUsername?: string | null
   role?: $Enums.UserRole
-  debtSources?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  willingToDeclare?: boolean | null
   consentAccepted?: boolean
   privyId: string
   walletAddress?: string | null
@@ -1158,7 +1046,7 @@ export type UserUncheckedCreateWithoutReferralReceivedInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  tasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatorInput
+  uploadedVideos?: Prisma.VideoUncheckedCreateNestedManyWithoutUploadedByInput
   votes?: Prisma.VoteUncheckedCreateNestedManyWithoutUserInput
   gameResults?: Prisma.GameResultUncheckedCreateNestedManyWithoutUserInput
   referralsMade?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferrerInput
@@ -1187,10 +1075,7 @@ export type UserUpdateWithoutReferralsMadeInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  tiktokUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
-  debtSources?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  willingToDeclare?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   consentAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   privyId?: Prisma.StringFieldUpdateOperationsInput | string
   walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1199,7 +1084,7 @@ export type UserUpdateWithoutReferralsMadeInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  tasks?: Prisma.TaskUpdateManyWithoutCreatorNestedInput
+  uploadedVideos?: Prisma.VideoUpdateManyWithoutUploadedByNestedInput
   votes?: Prisma.VoteUpdateManyWithoutUserNestedInput
   gameResults?: Prisma.GameResultUpdateManyWithoutUserNestedInput
   referralReceived?: Prisma.ReferralUpdateOneWithoutReferredUserNestedInput
@@ -1212,10 +1097,7 @@ export type UserUncheckedUpdateWithoutReferralsMadeInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  tiktokUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
-  debtSources?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  willingToDeclare?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   consentAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   privyId?: Prisma.StringFieldUpdateOperationsInput | string
   walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1224,7 +1106,7 @@ export type UserUncheckedUpdateWithoutReferralsMadeInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  tasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatorNestedInput
+  uploadedVideos?: Prisma.VideoUncheckedUpdateManyWithoutUploadedByNestedInput
   votes?: Prisma.VoteUncheckedUpdateManyWithoutUserNestedInput
   gameResults?: Prisma.GameResultUncheckedUpdateManyWithoutUserNestedInput
   referralReceived?: Prisma.ReferralUncheckedUpdateOneWithoutReferredUserNestedInput
@@ -1248,10 +1130,7 @@ export type UserUpdateWithoutReferralReceivedInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  tiktokUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
-  debtSources?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  willingToDeclare?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   consentAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   privyId?: Prisma.StringFieldUpdateOperationsInput | string
   walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1260,7 +1139,7 @@ export type UserUpdateWithoutReferralReceivedInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  tasks?: Prisma.TaskUpdateManyWithoutCreatorNestedInput
+  uploadedVideos?: Prisma.VideoUpdateManyWithoutUploadedByNestedInput
   votes?: Prisma.VoteUpdateManyWithoutUserNestedInput
   gameResults?: Prisma.GameResultUpdateManyWithoutUserNestedInput
   referralsMade?: Prisma.ReferralUpdateManyWithoutReferrerNestedInput
@@ -1273,10 +1152,7 @@ export type UserUncheckedUpdateWithoutReferralReceivedInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  tiktokUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
-  debtSources?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  willingToDeclare?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   consentAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   privyId?: Prisma.StringFieldUpdateOperationsInput | string
   walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1285,7 +1161,7 @@ export type UserUncheckedUpdateWithoutReferralReceivedInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  tasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatorNestedInput
+  uploadedVideos?: Prisma.VideoUncheckedUpdateManyWithoutUploadedByNestedInput
   votes?: Prisma.VoteUncheckedUpdateManyWithoutUserNestedInput
   gameResults?: Prisma.GameResultUncheckedUpdateManyWithoutUserNestedInput
   referralsMade?: Prisma.ReferralUncheckedUpdateManyWithoutReferrerNestedInput
@@ -1298,10 +1174,7 @@ export type UserCreateWithoutEnrollmentsInput = {
   phone?: string | null
   displayName?: string | null
   profilePhoto?: string | null
-  tiktokUsername?: string | null
   role?: $Enums.UserRole
-  debtSources?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  willingToDeclare?: boolean | null
   consentAccepted?: boolean
   privyId: string
   walletAddress?: string | null
@@ -1310,7 +1183,7 @@ export type UserCreateWithoutEnrollmentsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  tasks?: Prisma.TaskCreateNestedManyWithoutCreatorInput
+  uploadedVideos?: Prisma.VideoCreateNestedManyWithoutUploadedByInput
   votes?: Prisma.VoteCreateNestedManyWithoutUserInput
   gameResults?: Prisma.GameResultCreateNestedManyWithoutUserInput
   referralsMade?: Prisma.ReferralCreateNestedManyWithoutReferrerInput
@@ -1323,10 +1196,7 @@ export type UserUncheckedCreateWithoutEnrollmentsInput = {
   phone?: string | null
   displayName?: string | null
   profilePhoto?: string | null
-  tiktokUsername?: string | null
   role?: $Enums.UserRole
-  debtSources?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  willingToDeclare?: boolean | null
   consentAccepted?: boolean
   privyId: string
   walletAddress?: string | null
@@ -1335,7 +1205,7 @@ export type UserUncheckedCreateWithoutEnrollmentsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  tasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatorInput
+  uploadedVideos?: Prisma.VideoUncheckedCreateNestedManyWithoutUploadedByInput
   votes?: Prisma.VoteUncheckedCreateNestedManyWithoutUserInput
   gameResults?: Prisma.GameResultUncheckedCreateNestedManyWithoutUserInput
   referralsMade?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferrerInput
@@ -1364,10 +1234,7 @@ export type UserUpdateWithoutEnrollmentsInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  tiktokUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
-  debtSources?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  willingToDeclare?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   consentAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   privyId?: Prisma.StringFieldUpdateOperationsInput | string
   walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1376,7 +1243,7 @@ export type UserUpdateWithoutEnrollmentsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  tasks?: Prisma.TaskUpdateManyWithoutCreatorNestedInput
+  uploadedVideos?: Prisma.VideoUpdateManyWithoutUploadedByNestedInput
   votes?: Prisma.VoteUpdateManyWithoutUserNestedInput
   gameResults?: Prisma.GameResultUpdateManyWithoutUserNestedInput
   referralsMade?: Prisma.ReferralUpdateManyWithoutReferrerNestedInput
@@ -1389,10 +1256,7 @@ export type UserUncheckedUpdateWithoutEnrollmentsInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  tiktokUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
-  debtSources?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  willingToDeclare?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   consentAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   privyId?: Prisma.StringFieldUpdateOperationsInput | string
   walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1401,7 +1265,7 @@ export type UserUncheckedUpdateWithoutEnrollmentsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  tasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatorNestedInput
+  uploadedVideos?: Prisma.VideoUncheckedUpdateManyWithoutUploadedByNestedInput
   votes?: Prisma.VoteUncheckedUpdateManyWithoutUserNestedInput
   gameResults?: Prisma.GameResultUncheckedUpdateManyWithoutUserNestedInput
   referralsMade?: Prisma.ReferralUncheckedUpdateManyWithoutReferrerNestedInput
@@ -1414,7 +1278,7 @@ export type UserUncheckedUpdateWithoutEnrollmentsInput = {
  */
 
 export type UserCountOutputType = {
-  tasks: number
+  uploadedVideos: number
   votes: number
   gameResults: number
   referralsMade: number
@@ -1422,7 +1286,7 @@ export type UserCountOutputType = {
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  tasks?: boolean | UserCountOutputTypeCountTasksArgs
+  uploadedVideos?: boolean | UserCountOutputTypeCountUploadedVideosArgs
   votes?: boolean | UserCountOutputTypeCountVotesArgs
   gameResults?: boolean | UserCountOutputTypeCountGameResultsArgs
   referralsMade?: boolean | UserCountOutputTypeCountReferralsMadeArgs
@@ -1442,8 +1306,8 @@ export type UserCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensi
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountTasksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.TaskWhereInput
+export type UserCountOutputTypeCountUploadedVideosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.VideoWhereInput
 }
 
 /**
@@ -1481,10 +1345,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   phone?: boolean
   displayName?: boolean
   profilePhoto?: boolean
-  tiktokUsername?: boolean
   role?: boolean
-  debtSources?: boolean
-  willingToDeclare?: boolean
   consentAccepted?: boolean
   privyId?: boolean
   walletAddress?: boolean
@@ -1493,7 +1354,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   createdAt?: boolean
   updatedAt?: boolean
   categories?: boolean
-  tasks?: boolean | Prisma.User$tasksArgs<ExtArgs>
+  uploadedVideos?: boolean | Prisma.User$uploadedVideosArgs<ExtArgs>
   votes?: boolean | Prisma.User$votesArgs<ExtArgs>
   gameResults?: boolean | Prisma.User$gameResultsArgs<ExtArgs>
   referralsMade?: boolean | Prisma.User$referralsMadeArgs<ExtArgs>
@@ -1508,10 +1369,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   phone?: boolean
   displayName?: boolean
   profilePhoto?: boolean
-  tiktokUsername?: boolean
   role?: boolean
-  debtSources?: boolean
-  willingToDeclare?: boolean
   consentAccepted?: boolean
   privyId?: boolean
   walletAddress?: boolean
@@ -1528,10 +1386,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   phone?: boolean
   displayName?: boolean
   profilePhoto?: boolean
-  tiktokUsername?: boolean
   role?: boolean
-  debtSources?: boolean
-  willingToDeclare?: boolean
   consentAccepted?: boolean
   privyId?: boolean
   walletAddress?: boolean
@@ -1548,10 +1403,7 @@ export type UserSelectScalar = {
   phone?: boolean
   displayName?: boolean
   profilePhoto?: boolean
-  tiktokUsername?: boolean
   role?: boolean
-  debtSources?: boolean
-  willingToDeclare?: boolean
   consentAccepted?: boolean
   privyId?: boolean
   walletAddress?: boolean
@@ -1562,9 +1414,9 @@ export type UserSelectScalar = {
   categories?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "phone" | "displayName" | "profilePhoto" | "tiktokUsername" | "role" | "debtSources" | "willingToDeclare" | "consentAccepted" | "privyId" | "walletAddress" | "referralCode" | "referredBy" | "createdAt" | "updatedAt" | "categories", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "phone" | "displayName" | "profilePhoto" | "role" | "consentAccepted" | "privyId" | "walletAddress" | "referralCode" | "referredBy" | "createdAt" | "updatedAt" | "categories", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  tasks?: boolean | Prisma.User$tasksArgs<ExtArgs>
+  uploadedVideos?: boolean | Prisma.User$uploadedVideosArgs<ExtArgs>
   votes?: boolean | Prisma.User$votesArgs<ExtArgs>
   gameResults?: boolean | Prisma.User$gameResultsArgs<ExtArgs>
   referralsMade?: boolean | Prisma.User$referralsMadeArgs<ExtArgs>
@@ -1578,7 +1430,7 @@ export type UserIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
 export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "User"
   objects: {
-    tasks: Prisma.$TaskPayload<ExtArgs>[]
+    uploadedVideos: Prisma.$VideoPayload<ExtArgs>[]
     votes: Prisma.$VotePayload<ExtArgs>[]
     gameResults: Prisma.$GameResultPayload<ExtArgs>[]
     referralsMade: Prisma.$ReferralPayload<ExtArgs>[]
@@ -1591,10 +1443,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     phone: string | null
     displayName: string | null
     profilePhoto: string | null
-    tiktokUsername: string | null
     role: $Enums.UserRole
-    debtSources: runtime.JsonValue | null
-    willingToDeclare: boolean | null
     consentAccepted: boolean
     privyId: string
     walletAddress: string | null
@@ -1997,7 +1846,7 @@ readonly fields: UserFieldRefs;
  */
 export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  tasks<T extends Prisma.User$tasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$tasksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  uploadedVideos<T extends Prisma.User$uploadedVideosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$uploadedVideosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$VideoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   votes<T extends Prisma.User$votesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$votesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$VotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   gameResults<T extends Prisma.User$gameResultsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$gameResultsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GameResultPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   referralsMade<T extends Prisma.User$referralsMadeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$referralsMadeArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReferralPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -2037,10 +1886,7 @@ export interface UserFieldRefs {
   readonly phone: Prisma.FieldRef<"User", 'String'>
   readonly displayName: Prisma.FieldRef<"User", 'String'>
   readonly profilePhoto: Prisma.FieldRef<"User", 'String'>
-  readonly tiktokUsername: Prisma.FieldRef<"User", 'String'>
   readonly role: Prisma.FieldRef<"User", 'UserRole'>
-  readonly debtSources: Prisma.FieldRef<"User", 'Json'>
-  readonly willingToDeclare: Prisma.FieldRef<"User", 'Boolean'>
   readonly consentAccepted: Prisma.FieldRef<"User", 'Boolean'>
   readonly privyId: Prisma.FieldRef<"User", 'String'>
   readonly walletAddress: Prisma.FieldRef<"User", 'String'>
@@ -2437,27 +2283,27 @@ export type UserDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
 }
 
 /**
- * User.tasks
+ * User.uploadedVideos
  */
-export type User$tasksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type User$uploadedVideosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the Task
+   * Select specific fields to fetch from the Video
    */
-  select?: Prisma.TaskSelect<ExtArgs> | null
+  select?: Prisma.VideoSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the Task
+   * Omit specific fields from the Video
    */
-  omit?: Prisma.TaskOmit<ExtArgs> | null
+  omit?: Prisma.VideoOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.TaskInclude<ExtArgs> | null
-  where?: Prisma.TaskWhereInput
-  orderBy?: Prisma.TaskOrderByWithRelationInput | Prisma.TaskOrderByWithRelationInput[]
-  cursor?: Prisma.TaskWhereUniqueInput
+  include?: Prisma.VideoInclude<ExtArgs> | null
+  where?: Prisma.VideoWhereInput
+  orderBy?: Prisma.VideoOrderByWithRelationInput | Prisma.VideoOrderByWithRelationInput[]
+  cursor?: Prisma.VideoWhereUniqueInput
   take?: number
   skip?: number
-  distinct?: Prisma.TaskScalarFieldEnum | Prisma.TaskScalarFieldEnum[]
+  distinct?: Prisma.VideoScalarFieldEnum | Prisma.VideoScalarFieldEnum[]
 }
 
 /**

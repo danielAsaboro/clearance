@@ -1,24 +1,19 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ArrowLeft, Eye, Trophy, TrendingUp, ThumbsUp, UserPlus, Users } from "lucide-react";
+import { ArrowLeft, Eye, Trophy, TrendingUp, Target } from "lucide-react";
 import Link from "next/link";
-import { usePrivy } from "@privy-io/react-auth";
 import OnChainLeaderboard from "@/components/OnChainLeaderboard";
 
-interface CreatorRanking {
+interface PlayerRanking {
   rank: number;
   userId: string;
   displayName: string;
-  tiktokUsername: string;
   profilePhoto: string | null;
-  approvedVideos: number;
-  totalVideos: number;
-  approvalRate: number;
-  fanVotesReceived: number;
-  weekNumbers: number[];
-  walletAddress?: string | null;
-  followerCount?: number;
+  correctPredictions: number;
+  totalVotes: number;
+  sessionsPlayed: number;
+  winRate: number;
 }
 
 const rankBadge = (rank: number) => {
@@ -29,49 +24,16 @@ const rankBadge = (rank: number) => {
 };
 
 export default function LeaderboardPage() {
-  const { authenticated, getAccessToken } = usePrivy();
-  const [rankings, setRankings] = useState<CreatorRanking[]>([]);
+  const [rankings, setRankings] = useState<PlayerRanking[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"platform" | "onchain">("platform");
-  const [followingSet, setFollowingSet] = useState<Set<string>>(new Set());
-  const [followLoading, setFollowLoading] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/creators/leaderboard")
+    fetch("/api/leaderboard")
       .then((res) => res.json())
       .then(setRankings)
       .finally(() => setLoading(false));
   }, []);
-
-  const handleFollow = async (creatorWallet: string) => {
-    if (!authenticated || !creatorWallet) return;
-    setFollowLoading(creatorWallet);
-    try {
-      const token = await getAccessToken();
-      const res = await fetch("/api/social/follow", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ creatorWallet }),
-      });
-      if (res.ok) {
-        setFollowingSet((prev) => new Set([...prev, creatorWallet]));
-        setRankings((prev) =>
-          prev.map((c) =>
-            c.walletAddress === creatorWallet
-              ? { ...c, followerCount: (c.followerCount ?? 0) + 1 }
-              : c
-          )
-        );
-      }
-    } catch {
-      // Non-fatal
-    } finally {
-      setFollowLoading(null);
-    }
-  };
 
   return (
     <div className="flex-1 bg-black px-6 py-6 pb-12">
@@ -86,12 +48,12 @@ export default function LeaderboardPage() {
           <Eye className="w-4 h-4 text-black" />
         </div>
         <div>
-          <h1 className="text-white font-bold text-lg">Creator Leaderboard</h1>
-          <p className="text-[#888] text-xs">Who&apos;s trending this season</p>
+          <h1 className="text-white font-bold text-lg">Player Leaderboard</h1>
+          <p className="text-[#888] text-xs">Top predictors this season</p>
         </div>
       </div>
 
-      {/* Tab Toggle: Platform vs On-Chain */}
+      {/* Tab Toggle */}
       <div className="flex gap-2 mb-6">
         <button
           onClick={() => setTab("platform")}
@@ -126,7 +88,7 @@ export default function LeaderboardPage() {
           <Trophy className="w-16 h-16 text-[#555] mx-auto mb-4" />
           <h2 className="text-white font-bold text-lg mb-2">No Rankings Yet</h2>
           <p className="text-[#888] text-sm">
-            Rankings appear after the first session is judged.
+            Rankings appear after the first session is finalized.
           </p>
         </div>
       ) : (
@@ -134,46 +96,46 @@ export default function LeaderboardPage() {
           {/* Top 3 Podium */}
           {rankings.length >= 3 && (
             <div className="grid grid-cols-3 gap-2 mb-8">
-              {[rankings[1], rankings[0], rankings[2]].map((creator, i) => {
+              {[rankings[1], rankings[0], rankings[2]].map((player, i) => {
                 const isCenter = i === 1;
                 return (
                   <div
-                    key={creator.userId}
+                    key={player.userId}
                     className={`flex flex-col items-center ${isCenter ? "-mt-4" : "mt-2"}`}
                   >
                     <div
                       className={`w-14 h-14 ${isCenter ? "w-18 h-18" : ""} rounded-full border-2 ${
-                        creator.rank === 1
+                        player.rank === 1
                           ? "border-yellow-400"
-                          : creator.rank === 2
+                          : player.rank === 2
                             ? "border-gray-300"
                             : "border-amber-600"
                       } overflow-hidden bg-[#1A1A1A] flex items-center justify-center mb-2`}
                     >
-                      {creator.profilePhoto ? (
+                      {player.profilePhoto ? (
                         <img
-                          src={creator.profilePhoto}
-                          alt={creator.displayName}
+                          src={player.profilePhoto}
+                          alt={player.displayName}
                           className="w-full h-full object-cover"
                         />
                       ) : (
                         <span className="text-[#888] font-bold text-lg">
-                          {creator.displayName.charAt(0)}
+                          {player.displayName.charAt(0)}
                         </span>
                       )}
                     </div>
                     <p className="text-white text-xs font-bold text-center truncate w-full">
-                      {creator.displayName}
+                      {player.displayName}
                     </p>
                     <p className="text-[#F5E642] text-xs font-bold">
-                      {creator.approvedVideos} approved
+                      {player.correctPredictions} correct
                     </p>
                     <div
                       className={`mt-1 px-2 py-0.5 rounded-full text-xs font-bold ${
-                        rankBadge(creator.rank).bg
-                      } ${rankBadge(creator.rank).text}`}
+                        rankBadge(player.rank).bg
+                      } ${rankBadge(player.rank).text}`}
                     >
-                      {rankBadge(creator.rank).emoji}
+                      {rankBadge(player.rank).emoji}
                     </div>
                   </div>
                 );
@@ -183,13 +145,13 @@ export default function LeaderboardPage() {
 
           {/* Full List */}
           <div className="space-y-2">
-            {rankings.map((creator) => {
-              const badge = rankBadge(creator.rank);
+            {rankings.map((player) => {
+              const badge = rankBadge(player.rank);
               return (
                 <div
-                  key={creator.userId}
+                  key={player.userId}
                   className={`bg-[#1A1A1A] rounded-xl p-4 border ${
-                    creator.rank <= 3 ? "border-[#F5E642]/20" : "border-[#2A2A2A]"
+                    player.rank <= 3 ? "border-[#F5E642]/20" : "border-[#2A2A2A]"
                   } flex items-center gap-3`}
                 >
                   {/* Rank */}
@@ -203,15 +165,15 @@ export default function LeaderboardPage() {
 
                   {/* Avatar */}
                   <div className="w-10 h-10 rounded-full bg-[#2A2A2A] overflow-hidden flex items-center justify-center flex-shrink-0">
-                    {creator.profilePhoto ? (
+                    {player.profilePhoto ? (
                       <img
-                        src={creator.profilePhoto}
-                        alt={creator.displayName}
+                        src={player.profilePhoto}
+                        alt={player.displayName}
                         className="w-full h-full object-cover"
                       />
                     ) : (
                       <span className="text-[#555] font-bold">
-                        {creator.displayName.charAt(0)}
+                        {player.displayName.charAt(0)}
                       </span>
                     )}
                   </div>
@@ -219,44 +181,33 @@ export default function LeaderboardPage() {
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <p className="text-white font-bold text-sm truncate">
-                      {creator.displayName}
+                      {player.displayName}
                     </p>
-                    <p className="text-[#888] text-xs">@{creator.tiktokUsername}</p>
+                    <p className="text-[#888] text-xs">
+                      {player.sessionsPlayed} session{player.sessionsPlayed !== 1 ? "s" : ""} played
+                    </p>
                   </div>
 
                   {/* Stats */}
                   <div className="flex items-center gap-3 flex-shrink-0">
                     <div className="text-center">
                       <div className="flex items-center gap-1">
-                        <ThumbsUp className="w-3 h-3 text-[#F5E642]" />
+                        <TrendingUp className="w-3 h-3 text-[#F5E642]" />
                         <span className="text-white text-sm font-bold">
-                          {creator.approvedVideos}
+                          {player.correctPredictions}
                         </span>
                       </div>
-                      <p className="text-[#555] text-[10px]">approved</p>
+                      <p className="text-[#555] text-[10px]">correct</p>
                     </div>
                     <div className="text-center">
                       <div className="flex items-center gap-1">
-                        <Users className="w-3 h-3 text-blue-400" />
+                        <Target className="w-3 h-3 text-green-400" />
                         <span className="text-white text-sm font-bold">
-                          {creator.followerCount ?? 0}
+                          {player.winRate}%
                         </span>
                       </div>
-                      <p className="text-[#555] text-[10px]">followers</p>
+                      <p className="text-[#555] text-[10px]">win rate</p>
                     </div>
-                    {authenticated && creator.walletAddress && !followingSet.has(creator.walletAddress) && (
-                      <button
-                        onClick={() => handleFollow(creator.walletAddress!)}
-                        disabled={followLoading === creator.walletAddress}
-                        className="flex items-center gap-1 bg-[#F5E642] text-black px-2.5 py-1.5 rounded-lg text-xs font-bold hover:bg-[#e6d73b] transition-colors disabled:opacity-50"
-                      >
-                        <UserPlus className="w-3 h-3" />
-                        {followLoading === creator.walletAddress ? "..." : "Follow"}
-                      </button>
-                    )}
-                    {authenticated && creator.walletAddress && followingSet.has(creator.walletAddress) && (
-                      <span className="text-green-400 text-xs font-bold px-2">Following</span>
-                    )}
                   </div>
                 </div>
               );

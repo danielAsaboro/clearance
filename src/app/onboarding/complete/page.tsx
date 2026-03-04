@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   Eye,
@@ -16,13 +16,10 @@ import ProgressBar from "@/components/ProgressBar";
 import { useOnboarding } from "@/lib/onboarding-context";
 import { usePrivy } from "@privy-io/react-auth";
 
+const TOTAL_STEPS = 4;
+
 export default function CompleteStep() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const role = searchParams.get("role") ?? "fan";
-  const totalSteps = role === "creator" ? 7 : 4;
-  const currentStep = totalSteps;
-
   const { data, updateData, resetData } = useOnboarding();
   const { getAccessToken } = usePrivy();
   const [copied, setCopied] = useState(false);
@@ -30,46 +27,25 @@ export default function CompleteStep() {
   const [referralCode, setReferralCode] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
-  const backHref =
-    role === "creator"
-      ? `/onboarding/tiktok?role=${role}`
-      : `/onboarding/profile?role=${role}`;
-
-  const terms =
-    role === "creator"
-      ? [
-          "I understand this is a social-impact program focused on debt relief through content creation",
-          "I consent to my submitted TikTok content being displayed in live voting sessions",
-          "I understand that prize amounts are determined by fan voting outcomes",
-          "I acknowledge that The Clearance does not guarantee specific debt relief amounts",
-          "I retain ownership of my content and grant The Clearance a display license",
-        ]
-      : [
-          "I understand The Clearance is a platform for discovering and voting on content",
-          "I will participate in good faith during live voting sessions",
-          "I understand that rewards are based on voting accuracy and participation",
-          "I acknowledge that The Clearance does not guarantee specific reward amounts",
-        ];
+  const terms = [
+    "I understand The Clearance is a platform for predicting trending content",
+    "I will participate in good faith during live voting sessions",
+    "I understand that rewards are based on prediction accuracy and participation",
+    "I acknowledge that The Clearance does not guarantee specific reward amounts",
+  ];
 
   const handleSubmit = async () => {
     setSubmitting(true);
     try {
       const token = await getAccessToken();
       const body: Record<string, unknown> = {
-        role,
+        role: "player",
         categories: data.categories,
         email: data.email || undefined,
         displayName: data.displayName,
         profilePhoto: data.profilePhoto || undefined,
         consentAccepted: data.consentAccepted,
       };
-
-      // Add creator-specific fields
-      if (role === "creator") {
-        body.debtSources = data.debtSources;
-        body.willingToDeclare = data.willingToDeclare;
-        body.tiktokUsername = data.tiktokUsername;
-      }
 
       const res = await fetch("/api/onboard", {
         method: "POST",
@@ -108,13 +84,9 @@ export default function CompleteStep() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleGoToNext = () => {
+  const handleGoToArena = () => {
     resetData();
-    if (role === "creator") {
-      router.push("/creator-hub");
-    } else {
-      router.push("/arena");
-    }
+    router.push("/arena");
   };
 
   return (
@@ -122,7 +94,7 @@ export default function CompleteStep() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         {!submitted ? (
-          <Link href={backHref}>
+          <Link href="/onboarding/profile">
             <div className="w-10 h-10 rounded-full border border-[#333] flex items-center justify-center hover:border-[#F5E642]/50 transition-colors">
               <ArrowLeft className="w-5 h-5 text-white" />
             </div>
@@ -134,11 +106,11 @@ export default function CompleteStep() {
           <Eye className="w-4 h-4 text-black" />
         </div>
         <span className="text-[#888] text-xs tracking-wider">
-          STEP {currentStep} OF {totalSteps}
+          STEP {TOTAL_STEPS} OF {TOTAL_STEPS}
         </span>
       </div>
 
-      <ProgressBar currentStep={currentStep} totalSteps={totalSteps} />
+      <ProgressBar currentStep={TOTAL_STEPS} totalSteps={TOTAL_STEPS} />
 
       {!submitted ? (
         <div className="mt-8 flex-1 flex flex-col">
@@ -193,7 +165,7 @@ export default function CompleteStep() {
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span className="text-[#888] text-sm">Role</span>
-                <span className="text-white text-sm capitalize">{role}</span>
+                <span className="text-white text-sm">Player</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-[#888] text-sm">Name</span>
@@ -205,14 +177,6 @@ export default function CompleteStep() {
                   {data.categories.length} selected
                 </span>
               </div>
-              {role === "creator" && data.tiktokUsername && (
-                <div className="flex justify-between">
-                  <span className="text-[#888] text-sm">TikTok</span>
-                  <span className="text-white text-sm">
-                    @{data.tiktokUsername}
-                  </span>
-                </div>
-              )}
             </div>
           </div>
 
@@ -240,7 +204,7 @@ export default function CompleteStep() {
             You&apos;re In!
           </h1>
           <p className="text-[#888] text-sm mb-8">
-            Welcome to The Clearance. Your {role} account is ready.
+            Welcome to The Clearance. Your account is ready.
           </p>
 
           {/* Referral Code */}
@@ -269,11 +233,10 @@ export default function CompleteStep() {
           </div>
 
           <button
-            onClick={handleGoToNext}
+            onClick={handleGoToArena}
             className="btn-yellow w-full rounded-xl py-4 text-base font-bold flex items-center justify-center gap-2 mt-8"
           >
-            {role === "creator" ? "Go to Creator Hub" : "Go to Arena"}{" "}
-            <ArrowRight className="w-5 h-5" />
+            Go to Arena <ArrowRight className="w-5 h-5" />
           </button>
         </div>
       )}
