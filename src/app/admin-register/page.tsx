@@ -63,7 +63,7 @@ export default function AdminRegisterPage() {
                 <div className="w-8 h-8 bg-[#F5E642] rounded-xl flex items-center justify-center">
                     <Eye className="w-5 h-5 text-black" />
                 </div>
-                <span className="text-white font-bold text-base tracking-tight">The Clearance</span>
+                <span className="text-white font-bold text-base tracking-tight">Spotr TV</span>
             </div>
 
             <div className="w-full max-w-sm">

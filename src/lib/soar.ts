@@ -43,8 +43,8 @@ export async function initializeLeaderboard(): Promise<{
   const { newGame, transaction: gameTransaction } =
     await client.initializeNewGame(
       game.publicKey,
-      "The Clearance",
-      "On-chain leaderboard for The Clearance voting sessions",
+      "Spotr TV",
+      "On-chain leaderboard for Spotr TV voting sessions",
       GENRE_ACTION,
       GAME_TYPE_WEB,
       authority.publicKey, // nftMeta placeholder

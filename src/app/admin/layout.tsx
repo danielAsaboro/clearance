@@ -96,7 +96,7 @@ export default function AdminLayout({
           <div className="w-7 h-7 bg-[#F5E642] rounded-lg flex items-center justify-center">
             <Eye className="w-4 h-4 text-black" />
           </div>
-          <span className="text-white font-bold text-sm">The Clearance</span>
+          <span className="text-white font-bold text-sm">Spotr TV</span>
           <span className="text-[#888] text-xs ml-2 px-2 py-0.5 bg-[#1A1A1A] rounded-full">
             Admin
           </span>

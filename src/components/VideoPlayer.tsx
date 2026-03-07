@@ -8,6 +8,8 @@ interface VideoPlayerProps {
   thumbnailUrl?: string | null;
   title?: string | null;
   autoplay?: boolean;
+  muted?: boolean;
+  onToggleMute?: () => void;
 }
 
 export default function VideoPlayer({
@@ -15,10 +17,14 @@ export default function VideoPlayer({
   thumbnailUrl,
   title,
   autoplay = true,
+  muted: mutedProp,
+  onToggleMute,
 }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
-  const [muted, setMuted] = useState(true);
+  const [localMuted, setLocalMuted] = useState(true);
+
+  const muted = mutedProp !== undefined ? mutedProp : localMuted;
 
   const handlePlay = () => {
     if (videoRef.current) {
@@ -28,9 +34,11 @@ export default function VideoPlayer({
   };
 
   const toggleMute = () => {
-    if (videoRef.current) {
+    if (onToggleMute) {
+      onToggleMute();
+    } else if (videoRef.current) {
       videoRef.current.muted = !videoRef.current.muted;
-      setMuted(videoRef.current.muted);
+      setLocalMuted(videoRef.current.muted);
     }
   };
 

@@ -3,10 +3,9 @@
 import { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { usePrivy } from "@privy-io/react-auth";
-import { AlertCircle, Coins, ChevronRight, X } from "lucide-react";
+import { AlertCircle, Coins, ChevronRight, X, CheckCircle2, BarChart3, Trophy } from "lucide-react";
 import Link from "next/link";
 import MatchupPicker from "@/components/MatchupPicker";
-import ScoreTracker from "@/components/ScoreTracker";
 import ProgressBar from "@/components/ProgressBar";
 
 interface MatchupVideo {
@@ -184,6 +183,145 @@ function SyncedTimer({
 }
 
 // ---------------------------------------------------------------------------
+// Round Transition Interstitial
+// ---------------------------------------------------------------------------
+function RoundTransition({
+  completedRound,
+  totalRounds,
+  pick,
+}: {
+  completedRound: number;
+  totalRounds: number;
+  pick: "video_a" | "video_b" | null;
+}) {
+  const [phase, setPhase] = useState<"tallying" | "done">("tallying");
+
+  useEffect(() => {
+    const t = setTimeout(() => setPhase("done"), 1500);
+    return () => clearTimeout(t);
+  }, []);
+
+  return (
+    <div className="flex-1 bg-black flex flex-col items-center justify-center px-6 anim-fade-in">
+      <div className="w-full max-w-xs flex flex-col items-center gap-6">
+        {/* Round badge */}
+        <div className="text-[#888] text-xs tracking-wider uppercase">
+          Round {completedRound} / {totalRounds}
+        </div>
+
+        {/* Animated icon */}
+        <div className="relative w-20 h-20">
+          {phase === "tallying" ? (
+            <div className="w-20 h-20 rounded-full border-4 border-[#F5E642]/30 flex items-center justify-center">
+              <BarChart3 className="w-8 h-8 text-[#F5E642] animate-pulse" />
+            </div>
+          ) : (
+            <div className="w-20 h-20 rounded-full bg-[#F5E642]/10 border-4 border-[#F5E642] flex items-center justify-center anim-zoom-in">
+              <CheckCircle2 className="w-10 h-10 text-[#F5E642]" />
+            </div>
+          )}
+        </div>
+
+        {/* Status text */}
+        <div className="text-center">
+          <p className="text-white font-bold text-lg">
+            {phase === "tallying" ? "Tallying votes..." : "Vote recorded!"}
+          </p>
+          {pick && phase === "done" && (
+            <p className="text-[#888] text-sm mt-1">
+              You picked <span className="text-[#F5E642] font-semibold">{pick === "video_a" ? "Video A" : "Video B"}</span>
+            </p>
+          )}
+          {!pick && phase === "done" && (
+            <p className="text-[#888] text-sm mt-1">You didn&apos;t vote this round</p>
+          )}
+        </div>
+
+        {/* Progress dots */}
+        <div className="flex gap-1.5">
+          {Array.from({ length: totalRounds }).map((_, i) => (
+            <div
+              key={i}
+              className={`w-2 h-2 rounded-full transition-colors ${
+                i < completedRound ? "bg-[#F5E642]" : "bg-[#333]"
+              }`}
+            />
+          ))}
+        </div>
+
+        {/* Next round hint */}
+        {completedRound < totalRounds && (
+          <p className="text-[#555] text-xs animate-pulse">
+            Next matchup starting...
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Game Over Screen
+// ---------------------------------------------------------------------------
+function GameOverScreen({ sessionId, totalRounds }: { sessionId: string; totalRounds: number }) {
+  const router = useRouter();
+  const [step, setStep] = useState(0);
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setStep(1), 1200);
+    const t2 = setTimeout(() => setStep(2), 2400);
+    const t3 = setTimeout(() => {
+      router.push(`/arena/results?session=${sessionId}`);
+    }, 4000);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+  }, [router, sessionId]);
+
+  return (
+    <div className="flex-1 bg-black flex flex-col items-center justify-center px-6 anim-fade-in">
+      <div className="w-full max-w-xs flex flex-col items-center gap-8">
+        {/* Trophy */}
+        <div className="w-24 h-24 rounded-full bg-[#F5E642]/10 border-4 border-[#F5E642] flex items-center justify-center anim-zoom-in">
+          <Trophy className="w-12 h-12 text-[#F5E642]" />
+        </div>
+
+        <div className="text-center space-y-2">
+          <h2 className="text-white font-bold text-2xl">Session Complete!</h2>
+          <p className="text-[#888] text-sm">
+            All <span className="text-white font-semibold">{totalRounds}</span> matchups finished
+          </p>
+        </div>
+
+        {/* Animated steps */}
+        <div className="w-full space-y-3">
+          {[
+            "Collecting votes from all players...",
+            "Calculating majority picks...",
+            "Determining your rewards...",
+          ].map((text, i) => (
+            <div
+              key={i}
+              className={`flex items-center gap-3 ${step >= i ? "anim-slide-in" : "opacity-0"}`}
+              style={step >= i ? { animationDelay: `${i * 100}ms` } : undefined}
+            >
+              {step > i ? (
+                <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0" />
+              ) : step === i ? (
+                <div className="w-5 h-5 border-2 border-[#F5E642] border-t-transparent rounded-full animate-spin flex-shrink-0" />
+              ) : (
+                <div className="w-5 h-5 rounded-full border border-[#333] flex-shrink-0" />
+              )}
+              <span className={`text-sm ${step >= i ? "text-white" : "text-[#555]"}`}>
+                {text}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Main game content
 // ---------------------------------------------------------------------------
 function GameContent() {
@@ -196,13 +334,19 @@ function GameContent() {
   const [matchups, setMatchups] = useState<Matchup[]>([]);
   const [roundState, setRoundState] = useState<RoundState | null>(null);
   const [voted, setVoted] = useState<"video_a" | "video_b" | null>(null);
-  const [totalVoted, setTotalVoted] = useState(0);
   const [loading, setLoading] = useState(false);
   const [gameOver, setGameOver] = useState(false);
+  const [muted, setMuted] = useState(true);
+  const [interstitial, setInterstitial] = useState<{
+    round: number;
+    totalRounds: number;
+    pick: "video_a" | "video_b" | null;
+  } | null>(null);
 
   // Track which SSE round we last voted on
   const lastVotedRound = useRef<number>(0);
   const prevRound = useRef<number>(0);
+  const lastPick = useRef<"video_a" | "video_b" | null>(null);
 
   // Fetch matchups list
   const fetchMatchups = useCallback(async () => {
@@ -242,14 +386,30 @@ function GameContent() {
     return () => es.close();
   }, [phase, sessionId]);
 
-  // Auto-advance voted state when server round changes
+  // Auto-advance voted state when server round changes — show interstitial
   useEffect(() => {
     if (!roundState) return;
     const serverRound = roundState.round;
 
     if (serverRound !== prevRound.current) {
+      const completedRound = prevRound.current;
       prevRound.current = serverRound;
-      setVoted(null);
+
+      // Show interstitial between rounds (skip on first load)
+      if (completedRound > 0) {
+        setInterstitial({
+          round: completedRound,
+          totalRounds: roundState.totalRounds,
+          pick: lastPick.current,
+        });
+        setTimeout(() => {
+          setInterstitial(null);
+          setVoted(null);
+          lastPick.current = null;
+        }, 3000);
+      } else {
+        setVoted(null);
+      }
     }
   }, [roundState]);
 
@@ -279,13 +439,12 @@ function GameContent() {
   };
 
   const handleVote = async (decision: "video_a" | "video_b") => {
-    if (voted !== null) return;
+    if (decision === voted) return; // same pick, no-op
     const serverRound = roundState?.round ?? 1;
-    if (lastVotedRound.current === serverRound) return;
 
     setVoted(decision);
+    lastPick.current = decision;
     lastVotedRound.current = serverRound;
-    setTotalVoted((prev) => prev + 1);
 
     const currentMatchup = matchups[serverRound - 1];
     if (!currentMatchup) return;
@@ -309,8 +468,12 @@ function GameContent() {
   };
 
   if (gameOver) {
-    router.push(`/arena/results?session=${sessionId}`);
-    return null;
+    return (
+      <GameOverScreen
+        sessionId={sessionId!}
+        totalRounds={roundState?.totalRounds ?? matchups.length}
+      />
+    );
   }
 
   if (phase === "confirming") {
@@ -348,6 +511,16 @@ function GameContent() {
     );
   }
 
+  if (interstitial) {
+    return (
+      <RoundTransition
+        completedRound={interstitial.round}
+        totalRounds={interstitial.totalRounds}
+        pick={interstitial.pick}
+      />
+    );
+  }
+
   const serverRound = roundState?.round ?? 1;
   const secondsRemaining = roundState?.secondsRemaining ?? 30;
   const currentMatchup = matchups[serverRound - 1] ?? matchups[0];
@@ -361,7 +534,11 @@ function GameContent() {
           <span className="text-[#888] text-xs tracking-wider uppercase">
             Matchup {serverRound} / {totalRounds}
           </span>
-          <ScoreTracker correct={totalVoted} total={totalRounds} />
+          <div className="flex items-center gap-1.5 bg-[#1A1A1A] rounded-full px-3 py-1.5 border border-[#2A2A2A]">
+            <BarChart3 className="w-4 h-4 text-[#F5E642]" />
+            <span className="text-white text-sm font-bold">{serverRound}</span>
+            <span className="text-[#555] text-sm">/ {totalRounds}</span>
+          </div>
         </div>
         <div className="mb-3">
           <ProgressBar currentStep={serverRound} totalSteps={totalRounds} />
@@ -377,6 +554,8 @@ function GameContent() {
           videoB={currentMatchup.videoB}
           onPick={handleVote}
           voted={voted}
+          muted={muted}
+          onToggleMute={() => setMuted((m) => !m)}
         />
       </div>
     </div>

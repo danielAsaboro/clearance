@@ -74,7 +74,7 @@ export default function MintPage() {
           <Wallet className="w-12 h-12 text-[#F5E642] mx-auto mb-4" />
           <h1 className="text-white text-2xl font-bold mb-2">Connect Wallet</h1>
           <p className="text-[#888] text-sm mb-6">
-            Connect your wallet to get test USDC for The Clearance.
+            Connect your wallet to get test USDC for Spotr TV.
           </p>
         </div>
         <ConnectWallet />

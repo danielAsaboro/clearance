@@ -54,8 +54,8 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const collectibleName = `The Clearance — Week ${session.weekNumber} Participation`;
-  const collectibleDescription = `Participation collectible for The Clearance, Week ${session.weekNumber}. ${eligibleWallets.length} fans voted live!`;
+  const collectibleName = `Spotr TV — Week ${session.weekNumber} Participation`;
+  const collectibleDescription = `Participation collectible for Spotr TV, Week ${session.weekNumber}. ${eligibleWallets.length} fans voted live!`;
 
   // Upload collectible metadata to S3
   const metadataUri = await uploadNftMetadata(
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
       name: collectibleName,
       description: collectibleDescription,
       image: `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/icon-512x512.png`,
-      external_url: process.env.NEXT_PUBLIC_APP_URL ?? "https://theclearance.ng",
+      external_url: process.env.NEXT_PUBLIC_APP_URL ?? "https://spotr.tv",
       attributes: [
         { trait_type: "Type", value: "Participation" },
         { trait_type: "Week", value: session.weekNumber.toString() },
@@ -83,11 +83,11 @@ export async function POST(req: NextRequest) {
     collectible: {
       name: collectibleName,
       description: collectibleDescription,
-      symbol: "CLEARANCE",
+      symbol: "SPOTRTV",
       metadataUri,
     },
     distributedAt: new Date().toISOString(),
-    channel: "the-clearance",
+    channel: "spotr-tv",
     status: "pending",
   };
 
@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
         body: JSON.stringify({
           name: collectibleName,
           description: collectibleDescription,
-          symbol: "CLEARANCE",
+          symbol: "SPOTRTV",
           metadataUri,
           recipients: eligibleWallets.map((w) => w.wallet),
         }),

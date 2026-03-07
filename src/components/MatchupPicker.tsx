@@ -17,6 +17,8 @@ interface MatchupPickerProps {
   onPick: (decision: "video_a" | "video_b") => void;
   voted: "video_a" | "video_b" | null;
   disabled?: boolean;
+  muted?: boolean;
+  onToggleMute?: () => void;
 }
 
 export default function MatchupPicker({
@@ -25,8 +27,14 @@ export default function MatchupPicker({
   onPick,
   voted,
   disabled = false,
+  muted: mutedProp,
+  onToggleMute: onToggleMuteProp,
 }: MatchupPickerProps) {
   const [activeVideo, setActiveVideo] = useState<"a" | "b">("a");
+  const [localMuted, setLocalMuted] = useState(true);
+
+  const muted = mutedProp !== undefined ? mutedProp : localMuted;
+  const handleToggleMute = onToggleMuteProp ?? (() => setLocalMuted((m) => !m));
 
   const currentVideo = activeVideo === "a" ? videoA : videoB;
 
@@ -64,6 +72,8 @@ export default function MatchupPicker({
           thumbnailUrl={currentVideo.thumbnailUrl}
           title={currentVideo.title}
           autoplay
+          muted={muted}
+          onToggleMute={handleToggleMute}
         />
       </div>
 
@@ -71,12 +81,10 @@ export default function MatchupPicker({
       <div className="flex gap-2 mt-3">
         <button
           onClick={() => onPick("video_a")}
-          disabled={voted !== null || disabled}
+          disabled={disabled}
           className={`flex-1 py-3.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${
             voted === "video_a"
               ? "bg-[#F5E642] text-black"
-              : voted !== null
-              ? "bg-[#1A1A1A] text-[#444] cursor-not-allowed"
               : "bg-[#1A1A1A] text-white border border-[#2A2A2A] hover:border-[#F5E642]/50"
           }`}
         >
@@ -92,12 +100,10 @@ export default function MatchupPicker({
         </button>
         <button
           onClick={() => onPick("video_b")}
-          disabled={voted !== null || disabled}
+          disabled={disabled}
           className={`flex-1 py-3.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${
             voted === "video_b"
               ? "bg-[#F5E642] text-black"
-              : voted !== null
-              ? "bg-[#1A1A1A] text-[#444] cursor-not-allowed"
               : "bg-[#1A1A1A] text-white border border-[#2A2A2A] hover:border-[#F5E642]/50"
           }`}
         >

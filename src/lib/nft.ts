@@ -28,10 +28,10 @@ export async function createBlindBoxCollection(
   const collectionSigner = generateSigner(umi);
 
   const metadataUri = await uploadNftMetadata({
-    name: `The Clearance Blind Box — Week ${sessionWeek}`,
-    description: `Blind Box NFT collection for The Clearance Week ${sessionWeek}. Reveal your box to discover your reward tier.`,
+    name: `Spotr TV Blind Box — Week ${sessionWeek}`,
+    description: `Blind Box NFT collection for Spotr TV Week ${sessionWeek}. Reveal your box to discover your reward tier.`,
     image: `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/icon-512x512.png`,
-    external_url: process.env.NEXT_PUBLIC_APP_URL ?? "https://theclearance.ng",
+    external_url: process.env.NEXT_PUBLIC_APP_URL ?? "https://spotr.tv",
     attributes: [
       { trait_type: "Season", value: "1" },
       { trait_type: "Week", value: sessionWeek.toString() },
@@ -41,7 +41,7 @@ export async function createBlindBoxCollection(
 
   await createCollection(umi, {
     collection: collectionSigner,
-    name: `The Clearance Blind Box — Week ${sessionWeek}`,
+    name: `Spotr TV Blind Box — Week ${sessionWeek}`,
     uri: metadataUri,
     updateAuthority: signer.publicKey,
   }).sendAndConfirm(umi);
@@ -79,9 +79,9 @@ export async function mintBlindBox(
 
   const metadataUri = await uploadNftMetadata({
     name,
-    description: `A mystery Blind Box from The Clearance Week ${sessionWeek}. Reveal to discover your reward tier and claim USDC.`,
+    description: `A mystery Blind Box from Spotr TV Week ${sessionWeek}. Reveal to discover your reward tier and claim USDC.`,
     image: `${process.env.NEXT_PUBLIC_APP_URL ?? ""}${tierImages[tier] ?? "/icon-512x512.png"}`,
-    external_url: `${process.env.NEXT_PUBLIC_APP_URL ?? "https://theclearance.ng"}/rewards`,
+    external_url: `${process.env.NEXT_PUBLIC_APP_URL ?? "https://spotr.tv"}/rewards`,
     attributes: [
       { trait_type: "Tier", value: tier },
       { trait_type: "Reward", value: `${rewardAmount} USDC` },
@@ -108,7 +108,7 @@ export async function mintBlindBox(
       },
       {
         type: "FreezeDelegate",
-        frozen: false,
+        frozen: tier === "participation",
         authority: { type: "UpdateAuthority" },
       },
     ],

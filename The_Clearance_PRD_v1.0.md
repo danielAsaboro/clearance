@@ -1,10 +1,9 @@
 
-# THE CLEARANCE
+# SPOTR TV
 
 **Product Requirements Document (PRD)**
-MVP Stage — 3-Week Development Cycle
-Version 1.1 | February 2026
-Status: Draft for Review
+Version 2.0 | March 2026
+Status: Current
 
 | Prepared by | Daniel Asaboro |
 | :---------- | :------------- |
@@ -16,406 +15,432 @@ Status: Draft for Review
 
 1. [Executive Summary](#1-executive-summary)
 2. [Product Overview](#2-product-overview)
-3. [User Roles & Detailed Flows](#3-user-roles--detailed-flows)
-4. [Weekly Campaign Cycle](#4-weekly-campaign-cycle)
-5. [Technical Requirements](#5-technical-requirements-mvp)
-6. [Blockchain & Token Configuration](#6-blockchain--token-configuration)
-7. [Identified Gaps & Resolutions](#7-identified-gaps--resolutions)
-8. [MVP Development Milestones](#8-mvp-development-milestones-3-week-cycle)
-9. [Key Risks & Mitigations](#9-key-risks--mitigations)
-10. [MVP Success Metrics](#10-mvp-success-metrics)
-11. [Out of Scope (Post-MVP)](#11-out-of-scope-post-mvp)
+3. [User Roles](#3-user-roles)
+4. [Core Flow](#4-core-flow)
+5. [Session Mechanics](#5-session-mechanics)
+6. [Rewards](#6-rewards)
+7. [Technical Requirements](#7-technical-requirements)
+8. [Blockchain & Token Configuration](#8-blockchain--token-configuration)
+9. [Environment Configuration](#9-environment-configuration)
+10. [Risks & Mitigations](#10-risks--mitigations)
+11. [Success Metrics](#11-success-metrics)
+12. [Out of Scope (Post-MVP)](#12-out-of-scope-post-mvp)
 
 ---
 
 ## 1. Executive Summary
 
-**The Clearance** is a gamified, social-impact web application targeting the Nigerian market. It connects debt-burdened content creators with engaged fans through weekly interactive live sessions. Creators produce TikTok content tied to platform-assigned tasks; fans participate in live voting sessions where their predictive accuracy earns them **Blind Box NFT rewards** with real USDC value.
-
-The platform runs on a fixed **3-week campaign cycle**. Each week features one live session with up to **28 creator videos**, **30-second voting rounds**, and NFT-based reward distribution. Fans pay a **$3.50 USDC entry fee** per session, which funds the reward pool and creates real stakes for every vote.
+**Spotr TV** is a gamified prediction game where fans pay a $3.50 USDC entry fee to join live sessions, watch pairs of short videos, and pick which one will "go viral." Each session consists of up to 28 matchups with 30-second voting rounds. After all rounds, the majority vote on each matchup determines the correct answer. Fans earn tiered Blind Box NFT rewards based on their prediction accuracy, with USDC payouts determined by a raffle-within-tier mechanic. Admins create sessions, upload videos, configure matchups, and manage the session lifecycle through an admin panel.
 
 ---
 
 ## 2. Product Overview
 
-### 2.1 Problem Statement
+### 2.1 Problem & Solution
 
-Many Nigerian content creators carry personal debt from various sources (betting, medical emergencies, business failures) and lack structured paths to monetize their content for debt relief. Meanwhile, audiences who want to support creators have no engaging mechanism beyond passive viewership.
+Audiences crave interactive, short-form video entertainment with real stakes. Spotr TV solves this by letting fans put their trend-spotting instincts to the test: each session presents head-to-head video matchups, fans pick their winner, and accuracy earns them NFT-backed rewards with real USDC value.
 
-### 2.2 Solution
-
-The Clearance bridges this gap by creating a structured, time-bound campaign where creators complete content tasks for visibility and debt relief consideration, while fans engage in gamified voting sessions that reward accuracy with tradable NFT assets.
-
-### 2.3 Target Audience
+### 2.2 Target Audience
 
 | Segment | Profile |
 | :------ | :------ |
-| **Creators** | Nigerian TikTok content creators, aged 18–35, carrying personal debt, willing to produce content for the platform |
-| **Fans** | Nigerian social media users, aged 16–40, interested in interactive entertainment, NFTs, and supporting creators |
+| **Fans** | Social media users, aged 16–40, interested in interactive entertainment, NFTs, and predicting viral content |
 
-### 2.4 Core Value Propositions
+### 2.3 Core Value Proposition
 
-| For Creators | For Fans |
-| :----------- | :------- |
-| Structured path to earn debt relief through content creation | Gamified voting experience with real stakes |
-| Amplified reach via the `#theclearanceNG` hashtag campaign | Earn Blind Box NFTs with real USDC value based on voting accuracy |
-| Referral tools to mobilize fan support | Tradable NFT assets (unopened blind boxes) |
-| | Raffle-based reward: $3.50 entry, tiered blind box reveal with up to $3.50 payout |
+- Gamified voting experience with real financial stakes ($3.50 USDC entry)
+- Blind Box NFT rewards tied to prediction accuracy
+- Tradable NFT assets (unopened blind boxes can be sold on marketplaces)
+- Simple, mobile-first UX — swipe between two videos and pick your winner
 
 ---
 
-## 3. User Roles & Detailed Flows
+## 3. User Roles
 
-### 3.1 Entry Point — All Users
+### 3.1 Admin
 
-On app launch, the user is presented with a **role selection screen**. This is a **one-time, irreversible choice** for the duration of the campaign cycle. The two available roles are:
+Admins manage the entire session lifecycle. Admin access is granted via a secret key (`ADMIN_SECRET` environment variable). Any authenticated user can register as an admin by navigating to `/admin-register` and providing the correct secret key.
 
-- **Creator**
-- **Fan**
+**Admin capabilities:**
+- Upload and manage videos (via S3 presigned URLs)
+- Create and schedule sessions (title, date/time, late-join cutoff)
+- Configure matchups (pair videos A vs B for each round)
+- Control session status transitions: `scheduled` → `live` → `ended`
+- Finalize results (trigger majority-vote calculation and tier assignment)
+- Trigger NFT minting, raffle, reveal, and USDC distribution
+- View stats and analytics
 
-Upon selection, the user is redirected to the corresponding onboarding experience. No traditional account creation is required at this stage — identification is handled via wallet connection (Privy) or a simple email/phone capture.
+### 3.2 Fan (Player)
 
----
+Fans are the core participants. They browse sessions, pay the entry fee, vote in matchups, and earn rewards. Users default to the `player` role upon registration.
 
-### 3.2 Creator Flow
-
-#### 3.2.1 Step 1 — Profile Setup
-
-Creators complete a mandatory onboarding form before accessing the platform.
-
-| Field | Type / Options | Notes |
-| :---- | :------------- | :---- |
-| Source of Debt | Multi-select: Betting, Emergency, Medical, Business, None | Required. Used for creator profiling and storytelling context. "None" allows debt-free creators to participate. |
-| Willingness Declaration | Binary: Yes / No | Required. Confirms creator is willing to complete any legal task assigned. Selecting "No" triggers a confirmation modal explaining limited task options. |
-| TikTok Username | Text input (validated format: `@username`) | Required. Must be a valid, publicly accessible TikTok profile. Handle format is validated on submit. |
-| Disclaimer / Consent | Checkbox acceptance | Required. Creator grants the platform full ownership of submitted video content and permission to use, distribute, and modify it. Must include a link to full legal terms. |
-| Display Name | Text input | Required. The name shown to fans during voting sessions. |
-| Profile Photo | Image upload (max 2MB, JPG/PNG) | Optional for MVP. Default avatar assigned if skipped. |
-
-#### 3.2.2 Step 2 — Task Assignment
-
-Upon completing profile setup, each creator is assigned exactly **3 content tasks** for the current week by the platform admin.
-
-**Task Requirements:**
-- Each task must be filmed and posted as a **TikTok video** on the creator's own account.
-- Every video must include the hashtag `#theclearanceNG` in the caption.
-- The creator must submit the **TikTok video URL** inside the platform via a submission form.
-- All 3 submissions must be completed before the weekly deadline: **Thursday, 7:00 PM CET**.
-
-**Submission States:**
-
-| State | Description |
-| :---- | :---------- |
-| **Pending** | Task assigned, not yet submitted |
-| **Submitted** | Link provided, awaiting admin verification |
-| **Verified** | Link confirmed as valid TikTok URL with correct hashtag |
-| **Rejected** | Invalid link or missing hashtag; creator notified to re-submit before deadline |
-
-**Missed Deadline Policy:** Creators who do not submit all 3 videos by the deadline are excluded from that week's session. Their slot is left empty (reducing session below 28 videos) or filled by a backup creator from the waitlist.
-
-#### 3.2.3 Step 3 — Referral System
-
-Each creator receives a **unique referral link/code** upon completing their profile. The referral system serves two purposes: driving fan engagement to their specific videos and tracking creator reach for future incentives.
-
-**Referral Mechanics:**
-- Format: `theclearance.ng/ref/[creator_code]` or a short alphanumeric code.
-- Fans who join via a referral link are tagged to that creator (tracked internally).
-- Creator dashboard shows referral count and fan engagement metrics.
-- For MVP, referrals provide **visibility tracking only** — no direct monetary reward is attached.
+**Fan capabilities:**
+- Browse upcoming, live, and past sessions
+- Pay $3.50 USDC entry fee to join a live session
+- Vote in each matchup round (pick video A or video B)
+- View results and accuracy breakdown after a session ends
+- Mint, reveal, and claim Blind Box NFT rewards
+- Mint test USDC from the faucet (Mint Page)
 
 ---
 
-### 3.3 Fan Flow
+## 4. Core Flow
 
-#### 3.3.1 Step 1 — Session Awareness
+### 4.1 Admin Flow
 
-After selecting the Fan role, the user lands on the **Session Page**. This page adapts dynamically based on session timing:
+#### 4.1.1 Register as Admin
+
+1. User logs in via Privy (email, phone, or wallet).
+2. Navigates to `/admin-register`.
+3. Enters the admin secret key.
+4. Backend (`POST /api/admin/register`) validates the secret against `ADMIN_SECRET` env var.
+5. On match, user's role is promoted to `admin` in the database.
+6. User is redirected to the admin dashboard at `/admin`.
+
+#### 4.1.2 Upload Videos
+
+1. Admin navigates to `/admin/videos`.
+2. Uploads video files via S3 presigned URLs (`POST /api/admin/videos/presign`).
+3. After upload completes, creates a video record (`POST /api/admin/videos`) with title, URL, and optional thumbnail.
+
+#### 4.1.3 Create a Session
+
+1. Admin navigates to `/admin/sessions`.
+2. Creates a new session (`POST /api/sessions`) with:
+   - `weekNumber` — unique identifier for the session
+   - `title` — display name
+   - `scheduledAt` — date and time the session is scheduled to go live
+   - `lateJoinCutoff` — (optional) deadline after which fans cannot join
+
+#### 4.1.4 Configure Matchups
+
+1. Admin selects a scheduled session.
+2. Creates matchups (`POST /api/admin/sessions/:id/matchups`) — an array of video pairs, each with a `matchupNumber`, `videoAId`, and `videoBId`.
+3. Matchups can only be added to sessions in `scheduled` status.
+4. Creating new matchups replaces any existing matchups for that session.
+
+#### 4.1.5 Run the Session
+
+1. Admin sets session status to `live` (`PATCH /api/sessions/:id` with `{ status: "live" }`).
+2. Email reminders are automatically sent to all registered players when a session goes live.
+3. The SSE stream (`/api/sessions/:id/stream`) begins broadcasting round state (current round, seconds remaining) to connected fans.
+4. When all rounds complete, admin sets status to `ended`.
+
+#### 4.1.6 Finalize Results
+
+1. Admin triggers finalization (`POST /api/admin/sessions/:id/finalize`).
+2. The system calculates majority winners for each matchup (video_a wins ties).
+3. Each fan's correct vote count is tallied against the majority winners.
+4. Reward tiers are assigned based on accuracy thresholds.
+5. `GameResult` records are updated with `correctVotes`, `totalVotes`, `tier`, and `rewardAmount`.
+
+### 4.2 Fan Flow
+
+#### 4.2.1 Session Awareness
+
+After logging in, fans land on the **Arena** page (`/arena`). The page adapts based on session state:
 
 | Condition | Display | Action |
 | :-------- | :------ | :----- |
-| Session is on a future date (>24 hours away) | Session date, time, and brief description | "Add to Google Calendar" button (generates `.ics` or Google Calendar deep link) |
-| Session is today but not yet started | Live countdown timer (hours, minutes, seconds) | "Set Reminder" option + countdown display |
-| Session is currently live | "Session is LIVE" banner with current round indicator | "Join Now" button (available up to 1 hour after session start) |
-| Session has ended | Session results summary and next session date | "View Results" + "Add Next Session to Calendar" |
+| Session is on a future date | Session date, time, and description | "Add to Google Calendar" button |
+| Session is today but not yet live | Live countdown timer | Countdown display |
+| Session is currently live | "Session is LIVE" banner with current round | "Join Now" button |
+| Session has ended | Results summary and next session date | "View Results" link |
 
-#### 3.3.2 Step 2 — Session Entry & Deposit
+#### 4.2.2 Session Entry & Deposit
 
-When a fan clicks **"Join Now"**, before entering Game Mode they go through a brief entry flow:
+1. Fan clicks "Join Now" on a live session.
+2. Entry confirmation modal is shown: "$3.50 USDC entry fee, added to the reward pool."
+3. Fan confirms. The backend builds an unsigned `fan_deposit` transaction (`POST /api/sessions/:id/join`).
+4. Fan signs the transaction in their wallet.
+5. A `GameResult` record is created, linking the fan to the session.
+6. If the fan's wallet has insufficient USDC, a friendly notification directs them to the Mint Page (`/mint`).
 
-**Entry Flow:**
-1. Fan is prompted to **connect their wallet** via Privy (embedded wallet or Phantom).
-2. Platform checks the fan's USDC balance.
-3. If balance ≥ $3.50 USDC:
-   - A clear **entry confirmation screen** is shown: _"Joining this session costs $3.50 USDC, which is added to the reward pool. You may win up to $3.50 USDC back. Your voting accuracy determines your Blind Box tier; a raffle at reveal determines your exact reward."_
-   - Fan confirms. $3.50 USDC is deducted from their wallet and added to the **session reward pool**.
-   - Fan enters Game Mode.
-4. If balance < $3.50 USDC:
-   - A **friendly, styled notification** is shown: _"You don't have enough USDC to join this session. You need at least $3.50 USDC. Head to the Mint Page to get some test USDC."_
-   - A prominent **"Get USDC →"** button links to the Mint Page.
+#### 4.2.3 Game Mode (Voting)
 
-> **Note:** The $3.50 entry fee is a core mechanic. Gold Box holders have a 10% chance of breaking even ($3.50 back) and a 90% chance of getting $1.75 back. Base Box holders have a 10% chance of getting $1.75 back.
+1. Fan enters the game UI (`/arena/game?session=<id>`).
+2. The client connects to the SSE stream for real-time round synchronization.
+3. Each round displays a **matchup** — two videos side by side.
+4. Fan picks **video A** or **video B** (which one they think will trend/go viral).
+5. Each round lasts 30 seconds (configurable via `VOTING_ROUND_DURATION_SECONDS`).
+6. If the fan does not vote within the time limit, the round is skipped (no vote recorded).
+7. After all rounds, the client redirects to the results page.
 
-#### 3.3.3 Step 3 — Session Participation (Game Mode)
+#### 4.2.4 Results
 
-When the session goes live and entry fee is confirmed, fans enter the **Game Mode** interface.
+After the session ends and results are finalized, fans view their results at `/arena/results?session=<id>`:
 
-**Session Structure:**
-
-| Parameter | Value |
-| :-------- | :---- |
-| Total videos per session | 28 (from ~9–10 creators × 3 videos each, minus no-shows) |
-| Round duration | 30 seconds per video |
-| Total session duration | ~14 minutes active voting + transitions |
-| Late join window | Up to 1 hour after session start |
-| Late joiner behaviour | Votes on remaining rounds only |
-
-**Voting Mechanic:**
-- Each round, the fan watches a short **TikTok video embed** (TikTok oEmbed API) or thumbnail + link (fallback).
-- Fan votes either **Approve (✅)** or **Reject (❌)**.
-- If a fan does not vote within 30 seconds, the round is skipped (counted as no vote — neither correct nor incorrect).
-
-**Voting Criteria:**
-Fans predict which videos will be selected as winning entries by the platform judges. The platform determines the "correct" outcome after the session based on internal judging criteria: content quality, engagement, creativity, and adherence to task.
-
-#### 3.3.4 Step 4 — Results & Blind Box NFT Rewards
-
-At the end of the session, results are calculated and each participating fan receives one **Blind Box NFT** based on voting accuracy. Earning a tier is only the first step — the actual USDC payout is determined by a **raffle at reveal**:
-
-| Accuracy | Tier Earned | Reveal Outcome (Raffle) | Payout |
-| :------- | :---------- | :---------------------- | :----- |
-| ≥ 21/28 (75%) | **Gold Blind Box** | 10% chance | $3.50 USDC |
-| ≥ 21/28 (75%) | **Gold Blind Box** | 90% chance | $1.75 USDC |
-| ≥ 10/28 (36%) | **Base Blind Box** | 10% chance | $1.75 USDC |
-| ≥ 10/28 (36%) | **Base Blind Box** | 90% chance | $0 (Participation) |
-| < 10/28 | **Participation NFT** | — | $0 |
-
-> Earning a Gold or Base Blind Box does not guarantee a fixed payout. The tier earned determines probabilities — the actual value is revealed when the fan opens their box. This is the core "blind box" mechanic.
-
-The results screen shows a full **accuracy breakdown** and the fan's **Blind Box tier reveal**.
-
-#### 3.3.5 Step 5 — NFT Minting & Management
-
-After results are calculated:
-
-1. Fans are prompted to **mint their Blind Box** as an NFT (wallet must be connected via Privy or Phantom).
-2. **Unopened Blind Boxes** can be listed and traded on supported external NFT marketplaces (e.g., Magic Eden).
-3. Once **opened ("revealed")**, the NFT:
-   - Shows the raffle-determined USDC amount based on the fan's tier.
-   - Becomes **soulbound (non-transferable)**.
-   - Unlocks the **USDC claim flow** (on-chain SPL token transfer from the treasury).
-4. Opened NFTs remain in the user's wallet as permanent proof of participation.
+- Accuracy breakdown (correct votes / total matchups)
+- Blind Box tier earned (Gold, Base, or Participation)
+- Reward amount
+- NFT mint status
+- Option to share results
 
 ---
 
-### 3.4 Mint Page (Test USDC Faucet)
+## 5. Session Mechanics
 
-The platform includes a dedicated **Mint Page** accessible from the main navigation and the insufficient-balance notification. This page allows users to mint test USDC from the platform's fake USDC mint for development/MVP purposes.
+### 5.1 Structure
 
-**Mint Page Features:**
-- Displays the user's current fake USDC balance.
-- Shows the **mint address** and **mint authority** for transparency.
-- A single **"Mint USDC"** button mints a configurable amount (e.g., 10 USDC) directly to the connected wallet.
-- Clear labelling: _"This is test USDC used exclusively within The Clearance platform."_
-- Transaction status: pending → confirmed, with a toast notification on success/failure.
+| Parameter | Value | Source |
+| :-------- | :---- | :----- |
+| Matchups per session | 28 (default) | `MATCHUPS_PER_SESSION` env var |
+| Round duration | 30 seconds (default) | `VOTING_ROUND_DURATION_SECONDS` env var |
+| Estimated session duration | ~14 minutes (28 rounds x 30s) | Calculated |
+| Late join window | Up to 1 hour after session start (default) | `lateJoinCutoff` on session, or 1-hour default |
 
----
+### 5.2 Matchup Voting
 
-## 4. Weekly Campaign Cycle
+Each matchup presents two videos. Fans pick which video they believe will trend. The vote is recorded as `video_a` or `video_b`.
 
-The Clearance operates on a fixed 3-week campaign cycle. Each week follows the same operational cadence:
+### 5.3 Scoring — Majority Vote
 
-| Day | Creator Activity | Fan Activity | Admin Activity |
-| :-- | :--------------- | :----------- | :------------- |
-| **Monday** | Receive 3 new task assignments | View upcoming session; add to calendar | Assign tasks to creators; configure session; fund USDC treasury |
-| **Tue–Thu** | Film, post on TikTok, submit links | Browse creator profiles; use referral links | Review submissions; verify links |
-| **Thursday 7 PM CET** | Submission deadline | — | Lock submissions; finalize video pool |
-| **Saturday** | Watch session results | Pay entry fee; join live session; vote in rounds | Run session; judge videos; trigger results |
-| **Sunday** | Review performance metrics | Mint NFTs; trade or reveal rewards | Distribute USDC rewards; prepare next week |
+After a session ends, the **correct answer** for each matchup is determined by majority vote:
 
-After Week 3, the campaign cycle concludes. A new cycle may begin with a fresh cohort of creators.
+- Count all `video_a` vs `video_b` votes per matchup.
+- The video with the most votes is the winner.
+- **Ties go to video_a** (first-listed video wins ties).
+- A fan's vote is "correct" if it matches the majority winner.
 
----
+### 5.4 Late Join
 
-## 5. Technical Requirements (MVP)
+- Fans can join a live session up to 1 hour after it starts (or until `lateJoinCutoff` if set).
+- Late joiners vote only on remaining rounds.
+- Their tier is still calculated against the total matchup count.
 
-### 5.1 Platform
+### 5.5 Real-Time Sync
 
-- **Mobile-first** responsive web application (PWA recommended for MVP).
-- No native app required for MVP — browser-based experience.
-- Optimized for **low-bandwidth environments** (target market: Nigeria).
+Round state is broadcast via **Server-Sent Events (SSE)** at `/api/sessions/:id/stream`. Each event contains:
 
-### 5.2 Authentication
+```json
+{
+  "status": "live",
+  "round": 5,
+  "secondsRemaining": 18,
+  "totalRounds": 28
+}
+```
 
-- MVP: Simple **email/phone capture** + wallet connection via **Privy** for NFT features.
-- **No password-based auth** — magic link or OTP-based authentication only.
-- **Social login (Google)** as optional enhancement.
-- Wallet connection via **Privy** (embedded wallets for non-crypto users) + **Phantom** (for Solana-native users).
-
-### 5.3 Key Integrations
-
-| Integration | Purpose | MVP Priority | Notes |
-| :---------- | :------ | :----------- | :---- |
-| TikTok oEmbed API | Embed creator videos in voting rounds | **P0 — Critical** | Fallback: thumbnail + external link. Cache embeds. |
-| Privy SDK | Wallet connection, embedded wallets, auth | **P0 — Critical** | Handles both non-crypto and native Solana users |
-| Phantom Wallet | Native Solana wallet connection | **P0 — Critical** | Via Privy or direct wallet adapter |
-| Google Calendar API | Session reminders for fans | **P1 — Important** | `.ics` file as fallback |
-| Metaplex Core (Solana) | Blind Box NFT minting, reveal, soulbound logic | **P0 — Critical** | Deploy on Solana (low fees, fast finality) |
-| SPL USDC Token (Fake) | Entry fee collection, reward distribution | **P0 — Critical** | Platform-issued fake USDC. Pre-funded treasury per session. |
-| WebSockets | Real-time session sync (round timer, votes) | **P0 — Critical** | Required for synchronized 30s countdown across all fans |
-
-### 5.4 Admin Panel (MVP)
-
-- Manage creator applications and task assignments.
-- Configure weekly session date and time.
-- Review and verify video submissions (mark Verified / Rejected).
-- Judge videos post-session (mark Selected / Not Selected).
-- Trigger NFT reward distribution to eligible fans.
-- Fund USDC treasury wallet before each session.
-- View analytics: fan count, entry fee collected, voting stats, referral tracking.
+When the session ends, a final event with `"status": "ended"` is sent.
 
 ---
 
-## 6. Blockchain & Token Configuration
+## 6. Rewards
 
-### 6.1 Chain & Standards
+### 6.1 Tier Thresholds
 
-| Parameter | Value |
-| :-------- | :---- |
-| **Blockchain** | Solana (Devnet for development, Mainnet for production) |
-| **NFT Standard** | Metaplex Core |
-| **Token Standard** | SPL Token (fake USDC) |
-| **Wallet Support** | Privy (embedded) + Phantom |
+| Accuracy | Tier | NFT Awarded |
+| :------- | :--- | :---------- |
+| >= 75% correct | **Gold** | Gold Blind Box |
+| >= 36% correct | **Base** | Base Blind Box |
+| < 36% correct | **Participation** | Participation NFT |
 
-### 6.2 Fake USDC Configuration
+Thresholds are calculated dynamically: `goldThreshold = ceil(totalMatchups * 0.75)`, `baseThreshold = ceil(totalMatchups * 0.36)`.
 
-The platform uses a **platform-issued fake USDC token** for the MVP. This is a standard SPL token deployed on Solana Devnet (and later Mainnet) to simulate USDC without real monetary value during development and initial launch.
+### 6.2 Blind Box NFT Mechanics
 
-| Key | Value |
-| :-- | :---- |
-| **Mint Authority Keypair** | `anchor/keys/usdc-mint-authority.json` |
-| **Mint Authority Public Key** | `DYbPcr6TNCbsdwdKZEJQqNUEFthyPZoigrT17MNdJieL` |
-| **Mint Address Keypair** | `anchor/keys/usdc-mint-address.json` |
-| **Mint Address (Token Address)** | `Gn5mJ41R8PFTP35t1nB2hJW5hqnLFX4WcocA9hBs6c96` |
-| **Decimals** | 6 (matching real USDC) |
-| **Symbol** | USDC (labelled "Test USDC" in UI) |
+1. After results are finalized, fans can **mint** their Blind Box as an NFT (Metaplex Core on Solana).
+2. **Unopened Blind Boxes** can be listed and traded on NFT marketplaces (e.g., Magic Eden).
+3. Admin triggers a **raffle** that determines the actual USDC payout within each tier.
+4. On **reveal**, the NFT shows its raffle-determined USDC amount and becomes **soulbound** (non-transferable).
+5. Fans **claim** their USDC payout (on-chain SPL token transfer from the session vault).
+6. Revealed NFTs remain in the wallet as permanent proof of participation.
 
-> **Security Note:** The mint authority keypair grants the ability to mint unlimited fake USDC. It must be kept secure and never exposed in frontend code. Minting from the Mint Page should be routed through a backend API that holds the authority.
+### 6.3 Raffle Distribution
 
-### 6.3 NFT Configuration
-
-| Parameter | Value |
-| :-------- | :---- |
-| **NFT Program** | Metaplex Core |
-| **Blind Box Types** | Gold Blind Box, Base Blind Box, Participation NFT |
-| **Soulbound Logic** | Applied on reveal — NFT becomes non-transferable after opening |
-| **Reveal Mechanism** | Admin-triggered post-session (MVP). On-chain randomness post-MVP. Reveal applies raffle probabilities per tier: Gold Box — 10% receive $3.50 / 90% receive $1.75; Base Box — 10% receive $1.75 / 90% receive $0. |
-| **USDC Distribution** | On-chain SPL token transfer from pre-funded treasury wallet on claim |
-
-### 6.4 Session Economics
-
-| Parameter | Value |
-| :-------- | :---- |
-| **Fan Entry Fee** | $3.50 USDC per session |
-| **Treasury Funding** | Admin pre-loads USDC into the contract treasury before each session |
-
-**Raffle Distribution Table:**
-
-| Tier | Raffle Split | Payout |
-| :--- | :----------- | :----- |
+| Tier | Raffle Chance | Payout |
+| :--- | :------------ | :----- |
 | Gold Blind Box | 10% of Gold winners | $3.50 USDC |
 | Gold Blind Box | 90% of Gold winners | $1.75 USDC |
 | Base Blind Box | 10% of Base winners | $1.75 USDC |
 | Base Blind Box | 90% of Base winners | $0 |
 | Participation NFT | — | $0 |
 
-**Expected Values:**
-- Gold Box: (0.10 × $3.50) + (0.90 × $1.75) = $0.35 + $1.575 = **$1.925**
-- Base Box: (0.10 × $1.75) + (0.90 × $0) = **$0.175**
+**Expected values:**
+- Gold Box: (0.10 x $3.50) + (0.90 x $1.75) = **$1.925**
+- Base Box: (0.10 x $1.75) + (0.90 x $0) = **$0.175**
+
+### 6.4 Session Economics
+
+| Parameter | Value |
+| :-------- | :---- |
+| Fan entry fee | $3.50 USDC per session |
+| Treasury funding | Admin pre-loads USDC into session vault before each session |
+
+### 6.5 DRiP Collectibles
+
+All session participants also earn a **DRiP collectible** — a participation collectible distributed to their wallet via DRiP, regardless of tier.
 
 ---
 
-## 7. Identified Gaps & Resolutions
+## 7. Technical Requirements
 
-| # | Gap | Resolution |
-| :- | :-- | :--------- |
-| 1 | No user authentication method defined | MVP uses email/phone capture + wallet connection via Privy. No password auth; magic link or OTP. |
-| 2 | Voting criteria not specified | Fans predict which videos will be "selected" by judges. Correct = vote matches judge outcome. |
-| 3 | No judging mechanism defined | 2–3 internal judges review videos and mark selected/not selected post-session via admin panel. |
-| 4 | No reward tier for fans scoring below 10/28 | Participation NFT (no USDC) awarded as proof of attendance. |
-| 5 | Missed deadline handling for creators | Creator excluded from session; slot left empty or filled from waitlist. |
-| 6 | Blockchain and wallet specifics not defined | Solana chain. Metaplex Core for Blind Box NFTs. Privy embedded wallets + Phantom. |
-| 7 | Session day/time not specified | Saturdays for live sessions. Exact time configurable by admin. Thursday 7 PM CET is the submission deadline. |
-| 8 | No admin panel defined | Admin panel required for task assignment, submission review, judging, session management, and reward distribution. |
-| 9 | Creator count per session not specified | ~9–10 creators per session (28 videos / 3 per creator). Configurable by admin. |
-| 10 | No USDC funding/treasury model | Pre-funded reward pool per session. Admin loads fake USDC into contract before session. |
-| 11 | Fan entry mechanism not defined | Fans pay $3.50 USDC on session join. Fee added to reward pool. Insufficient balance triggers a friendly notification with a link to the Mint Page. |
-| 12 | Test USDC token not defined | Platform-issued fake USDC on Solana. Mint Authority: `DYbPcr6TNCbsdwdKZEJQqNUEFthyPZoigrT17MNdJieL`. Mint Address: `Gn5mJ41R8PFTP35t1nB2hJW5hqnLFX4WcocA9hBs6c96`. Keys stored in `anchor/keys/`. |
-| 13 | No faucet for fans to obtain test USDC | Mint Page added: a dedicated UI where fans can mint test USDC directly to their connected wallet. |
-| 14 | Pool reward distribution method not defined | Raffle-within-tier mechanic. Gold Box: 10% get $3.50 / 90% get $1.75. Base Box: 10% get $1.75 / 90% get $0. |
+### 7.1 Stack
+
+| Component | Technology |
+| :-------- | :--------- |
+| Framework | Next.js (App Router) |
+| Language | TypeScript |
+| Database | PostgreSQL (via Prisma ORM) |
+| Authentication | Privy (email, phone, social login, embedded wallets) |
+| Wallet support | Privy embedded wallets + Phantom (Solana-native) |
+| Blockchain | Solana (Devnet / Mainnet) |
+| NFT standard | Metaplex Core |
+| Token standard | SPL Token (fake USDC) |
+| File storage | S3 (presigned uploads) |
+| Real-time sync | Server-Sent Events (SSE) |
+| Styling | Tailwind CSS |
+| Validation | Zod |
+
+### 7.2 Authentication
+
+- **No password-based auth** — Privy handles authentication via email magic link, phone OTP, social login (Google), and wallet connection.
+- Embedded wallets (via Privy) for non-crypto-native users.
+- Phantom wallet adapter for Solana-native users.
+
+### 7.3 Admin Panel
+
+The admin panel is a protected section at `/admin` with bottom navigation:
+
+| Section | Path | Purpose |
+| :------ | :--- | :------ |
+| Dashboard | `/admin` | Overview and stats |
+| Videos | `/admin/videos` | Upload, list, search, and manage videos |
+| Sessions | `/admin/sessions` | Create sessions, manage matchups, control session lifecycle |
+| Results | `/admin/results` | View finalized results, trigger NFT distribution |
+
+Admin authorization is enforced at the API level — every admin endpoint checks `user.role === "admin"`.
+
+### 7.4 Key API Routes
+
+| Method | Route | Purpose |
+| :----- | :---- | :------ |
+| POST | `/api/admin/register` | Register as admin with secret key |
+| GET/POST | `/api/admin/videos` | List / create video records |
+| POST | `/api/admin/videos/presign` | Get S3 presigned upload URL |
+| GET/POST/DELETE | `/api/admin/sessions/:id/matchups` | Manage matchups for a session |
+| POST | `/api/admin/sessions/:id/finalize` | Calculate majority winners & assign tiers |
+| GET | `/api/sessions` | Get current, next, and last ended session |
+| POST | `/api/sessions` | Create a new session (admin) |
+| GET/PATCH | `/api/sessions/:id` | Get session details / update status |
+| POST | `/api/sessions/:id/join` | Fan joins session (builds deposit tx) |
+| GET | `/api/sessions/:id/rounds` | Get matchup list for gameplay |
+| GET | `/api/sessions/:id/stream` | SSE stream for real-time round state |
+| GET | `/api/sessions/:id/results` | Get fan's results for a session |
+| POST | `/api/votes` | Submit a vote on a matchup |
+| GET | `/api/usdc/balance` | Check USDC balance |
+| POST | `/api/usdc/mint` | Mint test USDC (faucet) |
+| POST | `/api/nft/mint` | Mint Blind Box NFT |
+| POST | `/api/nft/raffle` | Run raffle for a session |
+| POST | `/api/nft/reveal` | Reveal a Blind Box |
+| POST | `/api/nft/claim` | Claim USDC reward |
+
+### 7.5 Data Models
+
+| Model | Purpose |
+| :---- | :------ |
+| `User` | Player or admin account (linked to Privy) |
+| `Video` | Uploaded video with URL and metadata |
+| `WeeklySession` | A voting session with status, schedule, and optional campaign link |
+| `Matchup` | A video-pair round within a session (videoA vs videoB) |
+| `Vote` | A fan's vote on a matchup (video_a or video_b) |
+| `GameResult` | A fan's session outcome (votes, accuracy, tier, reward, NFT status) |
+| `Referral` | Fan-to-fan referral tracking |
+
+### 7.6 Mint Page (Test USDC Faucet)
+
+The platform includes a **Mint Page** (`/mint`) accessible from navigation and insufficient-balance screens:
+
+- Displays the user's current fake USDC balance
+- Shows the mint address and mint authority for transparency
+- "Mint USDC" button mints a configurable amount directly to the connected wallet
+- Clear labelling: "This is test USDC used exclusively within Spotr TV"
+- Transaction status feedback (pending → confirmed)
 
 ---
 
-## 8. MVP Development Milestones (3-Week Cycle)
+## 8. Blockchain & Token Configuration
 
-The following milestone plan assumes a team of 2–3 developers (1 frontend, 1 backend, 1 blockchain/smart contract) with a designer available for Week 1. Scope is strictly MVP — features marked "post-MVP" are deferred.
+### 8.1 Chain & Standards
 
-### Week 1 — Foundation & Core Infrastructure (Days 1–7)
+| Parameter | Value |
+| :-------- | :---- |
+| Blockchain | Solana (Devnet for development, Mainnet for production) |
+| NFT Standard | Metaplex Core |
+| Token Standard | SPL Token (fake USDC) |
+| Wallet Support | Privy (embedded) + Phantom |
 
-| Track | Deliverables | Owner |
-| :---- | :----------- | :---- |
-| **Design** | Complete UI/UX for: role selection screen, creator onboarding form, fan session page (all 4 states), session entry/deposit screen, voting round interface, results screen, mint page. Deliver Figma file. | Designer |
-| **Frontend** | Project setup (Next.js + TailwindCSS). Role selection page. Creator profile setup form with validation. Fan session page with all 4 timing states, countdown timer, and Google Calendar integration (.ics fallback). | Frontend Dev |
-| **Backend** | Project setup (Node.js + Express or equivalent). Database schema design and setup (PostgreSQL / Supabase). API endpoints: user registration, role assignment, creator profile CRUD, task assignment CRUD. Admin panel scaffold: task management and creator management views. | Backend Dev |
-| **Blockchain** | Initialize fake USDC SPL token using pre-generated mint authority and mint address keypairs. Deploy token on Devnet. Smart contract: Blind Box NFT (Metaplex Core) with mint, reveal, and soulbound logic. USDC integration for entry fee collection and reward claims. Deploy to Devnet. Unit tests. | Blockchain Dev |
+### 8.2 Fake USDC Configuration
 
-**Week 1 Exit Criteria:** Creator can sign up, complete profile, and view assigned tasks. Fan can visit session page and see countdown. Fake USDC token deployed on Devnet. Smart contract deployed to Devnet with passing tests.
+The platform uses a **platform-issued fake USDC token** to simulate USDC without real monetary value during development and initial launch.
 
----
+| Key | Value |
+| :-- | :---- |
+| Mint Authority Keypair | `anchor/keys/usdc-mint-authority.json` |
+| Mint Authority Public Key | `DYbPcr6TNCbsdwdKZEJQqNUEFthyPZoigrT17MNdJieL` |
+| Mint Address Keypair | `anchor/keys/usdc-mint-address.json` |
+| Mint Address (Token Address) | `Gn5mJ41R8PFTP35t1nB2hJW5hqnLFX4WcocA9hBs6c96` |
+| Decimals | 6 (matching real USDC) |
+| Symbol | USDC (labelled "Test USDC" in UI) |
 
-### Week 2 — Core Game Loop & Voting Engine (Days 8–14)
+> **Security Note:** The mint authority keypair grants the ability to mint unlimited fake USDC. It must be kept secure and never exposed in frontend code. Minting is routed through a backend API that holds the authority.
 
-| Track | Deliverables | Owner |
-| :---- | :----------- | :---- |
-| **Frontend** | Creator dashboard: task list, submission form (TikTok URL input + validation), submission status tracker. Referral link display and copy-to-clipboard. **Mint Page**: displays USDC balance, mint button, transaction status. Fan game mode: session entry screen with $3.50 fee confirmation + insufficient balance notification. 30-second voting round UI, TikTok oEmbed video embed, approve/reject buttons, round progress bar. Results screen with accuracy breakdown and Blind Box tier reveal. | Frontend Dev |
-| **Backend** | Video submission endpoints with URL validation. Referral code generation and tracking. USDC entry fee verification and pool tracking. Session engine: round timer management (WebSocket-based), vote recording, late-join logic. Voting results calculation engine (compare fan votes to judge outcomes). Admin panel: submission review/verification, session configuration, judging interface, treasury management view. | Backend Dev |
-| **Blockchain** | Frontend wallet connection via Privy (embedded wallets for non-crypto users) and Phantom (Solana-native). Mint Page backend API for minting fake USDC (uses mint authority keypair server-side). Entry fee transfer logic ($3.50 USDC from fan wallet to session treasury). Blind Box NFT mint function integration with backend results. Reveal mechanism (admin-triggered). USDC claim flow for fans post-reveal. Deploy to Devnet (full flow). | Blockchain Dev |
+### 8.3 NFT Configuration
 
-**Week 2 Exit Criteria:** End-to-end flow works on staging: creator submits videos, admin judges, fan pays entry fee (with balance check), fan votes in real-time, results calculate correctly, NFT minting functional on Devnet, USDC claim works.
-
----
-
-### Week 3 — Integration, Polish & Launch (Days 15–21)
-
-| Track | Deliverables | Owner |
-| :---- | :----------- | :---- |
-| **Frontend** | NFT minting and reveal flow UI. Wallet connection onboarding for non-crypto users (Privy guided flow). Mint Page final polish. Final UI polish: loading states, error handling, empty states, mobile responsiveness audit. End-to-end smoke testing across all user paths. | Frontend Dev |
-| **Backend** | Full integration testing (creator flow, fan flow, admin flow). Performance optimization for concurrent users during live sessions. Session replay / results persistence. Notification system (email or push for session reminders and results). Security audit: input sanitization, rate limiting, API auth. | Backend Dev |
-| **Blockchain** | Smart contract audit (internal review or automated tools). Mainnet deployment (fake USDC token + Blind Box NFT contract). Gas fee estimation and optimization. Fallback mechanisms for failed transactions. Verify soulbound logic on mainnet. | Blockchain Dev |
-| **QA / Launch** | User acceptance testing with 3–5 test creators and 10–15 test fans. Bug fixes and final adjustments. Staging-to-production deployment. Launch Day: Week 1 Session go-live. | All |
-
-**Week 3 Exit Criteria:** Platform is live on production. First cohort of creators onboarded. Session 1 configured and ready for Saturday go-live. NFT minting and USDC claims work on mainnet. Mint Page functional for fans.
+| Parameter | Value |
+| :-------- | :---- |
+| NFT Program | Metaplex Core |
+| Blind Box Types | Gold Blind Box, Base Blind Box, Participation NFT |
+| Soulbound Logic | Applied on reveal — NFT becomes non-transferable after opening |
+| Reveal Mechanism | Admin-triggered post-session (MVP). On-chain randomness post-MVP. |
+| Raffle Probabilities | Gold: 10% get $3.50 / 90% get $1.75. Base: 10% get $1.75 / 90% get $0. |
+| USDC Distribution | On-chain SPL token transfer from pre-funded session vault on claim |
 
 ---
 
-## 9. Key Risks & Mitigations
+## 9. Environment Configuration
+
+| Variable | Default | Description |
+| :------- | :------ | :---------- |
+| `MATCHUPS_PER_SESSION` | `28` | Number of video-pair matchups per session |
+| `VOTING_ROUND_DURATION_SECONDS` | `30` | Duration of each voting round in seconds |
+| `CAMPAIGN_CYCLE_DURATION_WEEKS` | `3` | Number of weeks in a campaign cycle |
+| `LIVE_SESSIONS_PER_CYCLE` | `3` | Number of sessions per campaign cycle |
+| `ADMIN_SECRET` | — | Secret key required to register as admin |
+| `DATABASE_URL` | — | PostgreSQL connection string |
+| `PRIVY_APP_ID` | — | Privy application ID |
+| `PRIVY_APP_SECRET` | — | Privy application secret |
+
+These values are consumed by `src/lib/campaign-config.ts`:
+
+```typescript
+export const campaignConfig = {
+  cycleDurationWeeks: parseInt(process.env.CAMPAIGN_CYCLE_DURATION_WEEKS ?? "3"),
+  liveSessionsPerCycle: parseInt(process.env.LIVE_SESSIONS_PER_CYCLE ?? "3"),
+  matchupsPerSession: parseInt(process.env.MATCHUPS_PER_SESSION ?? "28"),
+  votingRoundDurationSeconds: parseInt(process.env.VOTING_ROUND_DURATION_SECONDS ?? "30"),
+} as const;
+```
+
+---
+
+## 10. Risks & Mitigations
 
 | Risk | Impact | Likelihood | Mitigation |
 | :--- | :----- | :--------- | :--------- |
-| TikTok API rate limits or embed restrictions | High — breaks core voting UX | Medium | Fallback to thumbnail + external link. Cache embeds server-side. |
-| Low crypto literacy among target users | High — blocks NFT claims and entry fee | High | Privy embedded wallets remove the need for external wallet setup. In-app wallet setup guide. Mint Page provides easy access to test USDC. |
-| Insufficient creator submissions | Medium — reduces session quality | Medium | Maintain creator waitlist. Admin can adjust video count per session. |
-| Gas fee spikes on Solana | Low — minimal due to Solana's low fees | Low | Platform covers gas for NFT minting. Batch where possible. |
-| Concurrent user load during live session | High — platform downtime | Medium | Load testing in Week 3. Use WebSockets. CDN for static assets. |
-| Fan has insufficient USDC to enter session | Medium — fan friction and drop-off | High | Clear insufficient balance notification with a direct link to the Mint Page. |
-| Fake USDC mint authority key exposure | High — unlimited minting possible | Low | Mint authority keypair kept server-side only. Never exposed in frontend. Backend API proxies all minting requests. |
+| Low crypto literacy among users | High — blocks NFT claims and entry fee | High | Privy embedded wallets remove the need for external wallet setup. Mint Page provides easy access to test USDC. |
+| Gas fee spikes on Solana | Low — Solana fees are minimal | Low | Platform covers gas for NFT minting. Batch where possible. |
+| Concurrent user load during live sessions | High — degraded experience | Medium | SSE-based architecture (lighter than WebSockets). CDN for static assets. Load testing before launch. |
+| Fan has insufficient USDC to enter session | Medium — drop-off | High | Clear notification with direct link to Mint Page faucet. |
+| Fake USDC mint authority key exposure | High — unlimited minting | Low | Keypair kept server-side only. Never exposed in frontend. Backend API proxies all minting. |
+| Majority-vote gaming (coordinated voting) | Medium — distorted results | Low | Large enough player base makes coordination difficult. Monitor vote distributions for anomalies. |
 
 ---
 
-## 10. MVP Success Metrics
+## 11. Success Metrics
 
 | Metric | Target (per session) | Measurement |
 | :----- | :------------------- | :---------- |
-| Creator submission rate | 80%+ of creators submit all 3 videos | Submissions / Assigned tasks |
 | Fan participation | 50+ active voters per session | Unique voters per session |
 | Session completion rate | 70%+ of fans vote in all rounds | Fans completing all rounds / Total fans |
 | NFT mint rate | 60%+ of eligible fans mint their NFT | Minted NFTs / Eligible fans |
@@ -424,21 +449,22 @@ The following milestone plan assumes a team of 2–3 developers (1 frontend, 1 b
 
 ---
 
-## 11. Out of Scope (Post-MVP)
+## 12. Out of Scope (Post-MVP)
 
 The following features are explicitly deferred:
 
 - Native mobile apps (iOS / Android)
-- Automated TikTok verification (scraping or API-based hashtag/link validation)
+- Creator role and onboarding flow
+- TikTok integration (task assignment, submission, verification)
 - Built-in secondary NFT marketplace
-- Advanced analytics dashboard for creators
 - Multi-language support
-- Automated task generation (AI-based)
+- Automated video sourcing (AI-based)
 - Tokenomics and governance token
-- Debt repayment tracking or direct payment integrations
-- On-chain randomness for Blind Box reveal
+- On-chain randomness for Blind Box reveal (currently admin-triggered)
 - Real USDC (replacing fake/test USDC)
+- WebSocket-based real-time sync (currently using SSE)
+- Advanced analytics dashboard
 
 ---
 
-*End of Document — The Clearance PRD v1.1*
+*End of Document — Spotr TV PRD v2.0*

@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
 
   let title = "Join Live Session";
   let description =
-    "Join the next live voting session on The Clearance. Vote on creator content and earn rewards!";
+    "Join the next live voting session on Spotr TV. Vote on video matchups and earn rewards!";
   let scheduledLabel = "Join Now";
 
   if (sessionId) {
@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
     if (session) {
       title = `Join: ${session.title}`;
       const when = format(new Date(session.scheduledAt), "MMM d 'at' h:mm a");
-      description = `Week ${session.weekNumber} — ${when}. Join The Clearance live voting session and score 21+ for Gold Tier rewards!`;
+      description = `Week ${session.weekNumber} — ${when}. Join Spotr TV live voting session and score 21+ for Gold Tier rewards!`;
       scheduledLabel =
         session.status === "live" ? "Join Live Now" : `Join — ${when}`;
     }
@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
     const accountPubkey = new PublicKey(body.account);
 
     const memoData = JSON.stringify({
-      app: "the-clearance",
+      app: "spotr-tv",
       action: "join_session",
       session: sessionId || "next",
       wallet: accountPubkey.toBase58(),
@@ -129,7 +129,7 @@ export async function POST(req: NextRequest) {
       fields: {
         type: "transaction",
         transaction: tx,
-        message: "You're in! Head to The Clearance to start voting when the session goes live.",
+        message: "You're in! Head to Spotr TV to start voting when the session goes live.",
       },
     });
 

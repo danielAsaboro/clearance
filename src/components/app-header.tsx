@@ -23,7 +23,7 @@ export function AppHeader({ links = [] }: { links: { label: string; path: string
             <div className="w-7 h-7 bg-[#F5E642] rounded-lg flex items-center justify-center">
               <Eye className="w-4 h-4 text-black" />
             </div>
-            <span className="text-white font-bold text-sm">The Clearance</span>
+            <span className="text-white font-bold text-sm">Spotr TV</span>
           </Link>
           <div className="hidden md:flex items-center">
             <ul className="flex gap-4 flex-nowrap items-center">

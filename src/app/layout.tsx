@@ -21,13 +21,13 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'The Clearance',
+  title: 'Spotr TV',
   description: 'Predict trending content. Earn rewards. Own the moment.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'The Clearance',
+    title: 'Spotr TV',
   },
 }
 

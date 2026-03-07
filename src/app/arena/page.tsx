@@ -88,7 +88,7 @@ export default function Arena() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `clearance-session-week${session.weekNumber}.ics`;
+    a.download = `spotr-tv-session-week${session.weekNumber}.ics`;
     a.click();
     URL.revokeObjectURL(url);
   };
