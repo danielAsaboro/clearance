@@ -65,7 +65,7 @@ export default function Home() {
           <Eye className="w-10 h-10 text-black" strokeWidth={2.5} />
         </div>
 
-        <h1 className="text-4xl font-bold tracking-wider text-white">The Clearance</h1>
+        <h1 className="text-4xl font-bold tracking-wider text-white">Spotr TV</h1>
 
         <p className="text-[#888] text-center mt-6 text-sm leading-relaxed">
           Predict trending content. Earn rewards.

@@ -268,8 +268,11 @@ export default function RewardsPage() {
     }
   };
 
-  const mintedResults = results.filter(
+  const blindBoxResults = results.filter(
     (r) => r.nftMinted && (r.tier === "base" || r.tier === "gold")
+  );
+  const participationResults = results.filter(
+    (r) => r.nftMinted && r.tier === "participation"
   );
 
   return (
@@ -302,12 +305,12 @@ export default function RewardsPage() {
         <div className="flex items-center justify-center py-20">
           <div className="w-8 h-8 border-2 border-[#F5E642] border-t-transparent rounded-full animate-spin" />
         </div>
-      ) : mintedResults.length === 0 ? (
+      ) : blindBoxResults.length === 0 && participationResults.length === 0 ? (
         <div className="text-center py-16">
           <Gift className="w-16 h-16 text-[#555] mx-auto mb-4" />
-          <h2 className="text-white font-bold text-lg mb-2">No Blind Boxes Yet</h2>
+          <h2 className="text-white font-bold text-lg mb-2">No NFTs Yet</h2>
           <p className="text-[#888] text-sm mb-6">
-            Participate in live sessions and score 10+ to earn Blind Box NFTs!
+            Play a live session to earn NFT rewards!
           </p>
           <Link
             href="/arena"
@@ -318,8 +321,9 @@ export default function RewardsPage() {
         </div>
       ) : (
         <>
+          {blindBoxResults.length === 0 && participationResults.length > 0 ? null : (
           <div className="grid grid-cols-1 gap-6">
-            {mintedResults.map((result) => {
+            {blindBoxResults.map((result) => {
               const status = raffleStatus[result.id] ?? "idle";
               const needsRaffle = !result.nftRevealed && status === "idle";
               const isPolling = status === "polling";
@@ -408,6 +412,39 @@ export default function RewardsPage() {
               );
             })}
           </div>
+          )}
+
+          {/* Participation NFTs */}
+          {participationResults.length > 0 && (
+            <div className="mt-8">
+              <h3 className="text-white font-bold text-sm mb-4">Participation NFTs</h3>
+              <div className="grid grid-cols-1 gap-4">
+                {participationResults.map((result) => (
+                  <div
+                    key={result.id}
+                    className="bg-[#1A1A1A] rounded-2xl p-5 border border-[#2A2A2A]"
+                  >
+                    <p className="text-[#888] text-xs mb-1">
+                      {result.session?.title || "Session"} — Week{" "}
+                      {result.session?.weekNumber}
+                    </p>
+                    <p className="text-white font-bold text-sm mb-2">Participation NFT</p>
+                    {result.nftTokenId && (
+                      <a
+                        href={`https://explorer.solana.com/address/${result.nftTokenId}?cluster=${process.env.NEXT_PUBLIC_SOLANA_NETWORK || "devnet"}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 text-[#F5E642] text-xs hover:underline"
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                        View on Solana Explorer
+                      </a>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* DRiP Collectibles Section */}
           <div className="mt-8 bg-[#1A1A1A] rounded-2xl p-5 border border-[#2A2A2A]">

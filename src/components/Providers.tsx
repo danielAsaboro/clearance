@@ -13,7 +13,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
   const config = useMemo<PrivyClientConfig>(
     () => ({
-      loginMethods: ["email", "google", "tiktok", "twitter", "wallet"],
+      loginMethods: ["email", "google", "twitter", "wallet"],
       appearance: {
         theme: "dark",
         accentColor: "#F5E642",

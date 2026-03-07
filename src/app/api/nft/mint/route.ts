@@ -35,13 +35,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "NFT already minted" }, { status: 409 });
   }
 
-  if (gameResult.tier === "participation") {
-    return NextResponse.json(
-      { error: "Participation tier does not receive NFT" },
-      { status: 400 }
-    );
-  }
-
   if (!user.walletAddress) {
     return NextResponse.json(
       { error: "Wallet address required. Please connect your wallet." },
@@ -53,7 +46,7 @@ export async function POST(req: NextRequest) {
     const umi = getUmi();
     const signer = getMintAuthority();
 
-    const tier = gameResult.tier as "base" | "gold";
+    const tier = gameResult.tier as "participation" | "base" | "gold";
     const sessionWeek = gameResult.session.weekNumber;
     const collectionAddress = gameResult.session.collectionAddress || undefined;
 

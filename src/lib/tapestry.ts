@@ -37,26 +37,6 @@ export async function findOrCreateProfile(
   return res.json();
 }
 
-export async function followCreator(
-  followerWallet: string,
-  creatorWallet: string
-) {
-  const res = await tapestryFetch("/followers", {
-    method: "POST",
-    body: JSON.stringify({
-      startId: followerWallet,
-      endId: creatorWallet,
-      blockchain: "SOLANA",
-      execution: "FAST_UNCONFIRMED",
-    }),
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Tapestry follow failed: ${text}`);
-  }
-  return res.json();
-}
-
 export async function getFollowers(walletAddress: string) {
   const res = await tapestryFetch(
     `/profiles/followers/${walletAddress}`

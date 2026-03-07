@@ -10,8 +10,8 @@ function getResend(): Resend {
   return _resend;
 }
 
-const from = process.env.RESEND_FROM_EMAIL ?? "The Clearance <noreply@theclearance.ng>";
-const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://theclearance.ng";
+const from = process.env.RESEND_FROM_EMAIL ?? "Spotr TV <noreply@spotr.tv>";
+const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://spotr.tv";
 
 export async function sendSessionReminder(
   to: string,
@@ -50,7 +50,7 @@ export async function sendSessionReminder(
           <div style="text-align:center;">
             <a href="${appUrl}/arena" style="display:inline-block;background:#F5E642;color:#000;font-weight:bold;padding:14px 32px;border-radius:12px;text-decoration:none;font-size:14px;">Open Arena</a>
           </div>
-          <p style="color:#555;font-size:12px;text-align:center;margin-top:32px;">The Clearance</p>
+          <p style="color:#555;font-size:12px;text-align:center;margin-top:32px;">Spotr TV</p>
         </div>
       `,
     });
@@ -101,7 +101,7 @@ export async function sendResultsReady(
           <div style="text-align:center;">
             <a href="${appUrl}/rewards" style="display:inline-block;background:#F5E642;color:#000;font-weight:bold;padding:14px 32px;border-radius:12px;text-decoration:none;font-size:14px;">View Rewards</a>
           </div>
-          <p style="color:#555;font-size:12px;text-align:center;margin-top:32px;">The Clearance</p>
+          <p style="color:#555;font-size:12px;text-align:center;margin-top:32px;">Spotr TV</p>
         </div>
       `,
     });

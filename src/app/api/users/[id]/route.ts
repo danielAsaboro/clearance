@@ -38,7 +38,7 @@ export async function PATCH(
   }
 
   const body = await req.json();
-  const allowedFields = ["displayName", "tiktokUsername", "profilePhoto", "walletAddress"];
+  const allowedFields = ["displayName", "profilePhoto", "walletAddress"];
   const updateData: Record<string, unknown> = {};
 
   for (const field of allowedFields) {

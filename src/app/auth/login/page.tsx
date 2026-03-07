@@ -28,7 +28,7 @@ function LoginContent() {
       <div className="w-16 h-16 bg-[#F5E642] rounded-2xl flex items-center justify-center mb-4">
         <Eye className="w-8 h-8 text-black" strokeWidth={2.5} />
       </div>
-      <h1 className="text-3xl font-bold tracking-wider text-white mb-8">The Clearance</h1>
+      <h1 className="text-3xl font-bold tracking-wider text-white mb-8">Spotr TV</h1>
 
       <p className="text-[#888] text-sm text-center mb-8">
         Sign in to continue

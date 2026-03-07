@@ -38,8 +38,8 @@ export async function GET(req: NextRequest) {
     icon: `${new URL(req.url).origin}/icon-512x512.png`,
     title: "Claim USDC Reward",
     description: rewardAmount > 0
-      ? `You earned $${rewardAmount.toFixed(2)} USDC (${tier.toUpperCase()} Tier) on The Clearance! Claim your reward now.`
-      : "Claim your USDC reward from The Clearance.",
+      ? `You earned $${rewardAmount.toFixed(2)} USDC (${tier.toUpperCase()} Tier) on Spotr TV! Claim your reward now.`
+      : "Claim your USDC reward from Spotr TV.",
     label: rewardAmount > 0 ? `Claim $${rewardAmount.toFixed(2)}` : "Claim Reward",
     links: {
       actions: [
@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
 
     if (!resultId) {
       return NextResponse.json(
-        { message: "Missing result parameter. Visit The Clearance app to claim." },
+        { message: "Missing result parameter. Visit Spotr TV app to claim." },
         { status: 400, headers: ACTIONS_CORS_HEADERS }
       );
     }
@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
 
     if (!gameResult.nftRevealed) {
       return NextResponse.json(
-        { message: "Blind box must be revealed first. Visit The Clearance app." },
+        { message: "Blind box must be revealed first. Visit Spotr TV app." },
         { status: 400, headers: ACTIONS_CORS_HEADERS }
       );
     }
@@ -141,7 +141,7 @@ export async function POST(req: NextRequest) {
       fields: {
         type: "transaction",
         transaction: tx,
-        message: `Claiming $${gameResult.rewardAmount.toFixed(2)} USDC from The Clearance vault!`,
+        message: `Claiming $${gameResult.rewardAmount.toFixed(2)} USDC from Spotr TV vault!`,
       },
     });
 

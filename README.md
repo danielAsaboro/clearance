@@ -1,4 +1,4 @@
-# The Clearance
+# Spotr TV
 
 Gamified social-impact platform connecting debt-burdened Nigerian content creators with fans through weekly interactive voting sessions on Solana.
 
@@ -100,7 +100,7 @@ S3_ENDPOINT="..."
 RESEND_API_KEY="..."
 
 # Optional
-NEXT_PUBLIC_APP_URL="https://theclearance.ng"
+NEXT_PUBLIC_APP_URL="https://spotr.tv"
 DRIP_API_KEY="..."
 DRIP_API_URL="..."
 ```
@@ -141,7 +141,7 @@ npm run build
 ### Creator Flow
 1. Select "Creator" on home screen (role locked after onboarding)
 2. Complete 5-step onboarding (debt sources, TikTok username, consent)
-3. Receive 3 weekly content tasks with `#theclearanceNG` hashtag requirement
+3. Receive 3 weekly content tasks with `#SpotrTV` hashtag requirement
 4. Submit TikTok video URLs (auto-verified for hashtag via oEmbed)
 5. Admin reviews and verifies submissions
 

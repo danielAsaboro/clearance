@@ -28,10 +28,10 @@ export default function CompleteStep() {
   const [submitted, setSubmitted] = useState(false);
 
   const terms = [
-    "I understand The Clearance is a platform for predicting trending content",
+    "I understand Spotr TV is a platform for predicting trending content",
     "I will participate in good faith during live voting sessions",
     "I understand that rewards are based on prediction accuracy and participation",
-    "I acknowledge that The Clearance does not guarantee specific reward amounts",
+    "I acknowledge that Spotr TV does not guarantee specific reward amounts",
   ];
 
   const handleSubmit = async () => {
@@ -204,7 +204,7 @@ export default function CompleteStep() {
             You&apos;re In!
           </h1>
           <p className="text-[#888] text-sm mb-8">
-            Welcome to The Clearance. Your account is ready.
+            Welcome to Spotr TV. Your account is ready.
           </p>
 
           {/* Referral Code */}

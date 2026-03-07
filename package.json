@@ -18,7 +18,7 @@
     "start": "next start",
     "test": "jest --passWithNoTests"
   },
-  "displayName": "The Clearance",
+  "displayName": "Spotr TV",
   "description": "Predict trending content, earn rewards, and own the moment on Solana",
   "keywords": [
     "nextjs",

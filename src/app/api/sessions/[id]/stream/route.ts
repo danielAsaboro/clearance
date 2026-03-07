@@ -69,19 +69,19 @@ export async function GET(
         const now = Date.now();
         const start = new Date(currentSession.scheduledAt).getTime();
         const elapsed = Math.max(0, Math.floor((now - start) / 1000));
-        const currentRound = Math.min(
-          Math.floor(elapsed / ROUND_DURATION_SECONDS) + 1,
-          totalMatchups
-        );
-        const secondsIntoRound = elapsed % ROUND_DURATION_SECONDS;
-        const secondsRemaining = ROUND_DURATION_SECONDS - secondsIntoRound;
 
-        if (currentRound > totalMatchups) {
+        // All rounds complete — session over
+        const totalDuration = totalMatchups * ROUND_DURATION_SECONDS;
+        if (elapsed >= totalDuration) {
           sendEvent({ status: "ended", round: totalMatchups, secondsRemaining: 0, totalRounds: totalMatchups });
           controller.close();
           clearInterval(intervalId);
           return;
         }
+
+        const currentRound = Math.floor(elapsed / ROUND_DURATION_SECONDS) + 1;
+        const secondsIntoRound = elapsed % ROUND_DURATION_SECONDS;
+        const secondsRemaining = ROUND_DURATION_SECONDS - secondsIntoRound;
 
         sendEvent({
           status: "live",

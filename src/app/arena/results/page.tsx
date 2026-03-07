@@ -74,9 +74,11 @@ function ResultsContent() {
             reward={results.rewardAmount}
           />
 
-          {/* Blind Box Preview */}
+          {/* NFT Preview */}
           <div className="bg-[#1A1A1A] rounded-2xl p-6 border border-[#2A2A2A] mt-6 text-center">
-            <p className="text-white font-bold mb-2">Blind Box NFT</p>
+            <p className="text-white font-bold mb-2">
+              {results.tier === "participation" ? "Your NFT" : "Blind Box NFT"}
+            </p>
             {results.nftMinted ? (
               <Link
                 href="/rewards"
@@ -84,13 +86,16 @@ function ResultsContent() {
               >
                 View in your collection
               </Link>
-            ) : results.tier !== "participation" ? (
-              <p className="text-[#888] text-sm">
-                Your Blind Box will be minted soon!
-              </p>
+            ) : results.tier === "participation" ? (
+              <Link
+                href="/rewards"
+                className="text-[#F5E642] text-sm underline"
+              >
+                Mint your Participation NFT
+              </Link>
             ) : (
               <p className="text-[#888] text-sm">
-                Score higher to earn a Blind Box
+                Your Blind Box will be minted soon!
               </p>
             )}
           </div>
@@ -112,8 +117,8 @@ function ResultsContent() {
             <button
               onClick={() => {
                 navigator.share?.({
-                  title: "The Clearance Results",
-                  text: `I predicted ${results.correctVotes} matchups correctly on The Clearance! ${results.tier === "gold" ? "Gold Tier!" : ""}`,
+                  title: "Spotr TV Results",
+                  text: `I predicted ${results.correctVotes} matchups correctly on Spotr TV! ${results.tier === "gold" ? "Gold Tier!" : ""}`,
                 });
               }}
               className="w-full bg-[#1A1A1A] rounded-xl py-4 text-sm text-white flex items-center justify-center gap-2 border border-[#2A2A2A]"

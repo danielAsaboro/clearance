@@ -122,8 +122,8 @@ export function generateCalendarICS(session: {
     "BEGIN:VEVENT",
     `DTSTART:${fmt(start)}`,
     `DTEND:${fmt(end)}`,
-    `SUMMARY:${session.title} - The Clearance`,
-    "DESCRIPTION:Live voting session on The Clearance. Join to vote and earn rewards!",
+    `SUMMARY:${session.title} - Spotr TV`,
+    "DESCRIPTION:Live voting session on Spotr TV. Join to vote and earn rewards!",
     "END:VEVENT",
     "END:VCALENDAR",
   ].join("\r\n");

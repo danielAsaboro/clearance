@@ -157,7 +157,7 @@ describe("Session Engine", () => {
       expect(ics).toContain("BEGIN:VCALENDAR");
       expect(ics).toContain("END:VCALENDAR");
       expect(ics).toContain("BEGIN:VEVENT");
-      expect(ics).toContain("SUMMARY:Week 1 - The Clearance");
+      expect(ics).toContain("SUMMARY:Week 1 - Spotr TV");
       expect(ics).toContain("DTSTART:");
       expect(ics).toContain("DTEND:");
     });

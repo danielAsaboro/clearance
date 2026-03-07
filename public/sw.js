@@ -1,4 +1,4 @@
-const CACHE_NAME = "clearance-v1";
+const CACHE_NAME = "spotr-tv-v1";
 
 const PRECACHE_URLS = [
   "/",

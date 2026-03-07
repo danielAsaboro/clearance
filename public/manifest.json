@@ -1,6 +1,6 @@
 {
-  "name": "The Clearance",
-  "short_name": "The Clearance",
+  "name": "Spotr TV",
+  "short_name": "Spotr TV",
   "description": "Predict trending content. Earn rewards. Own the moment.",
   "start_url": "/",
   "display": "standalone",

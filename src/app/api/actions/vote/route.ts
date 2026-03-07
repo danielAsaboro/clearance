@@ -19,12 +19,12 @@ const connection = new Connection(
   process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "https://api.devnet.solana.com"
 );
 
-// GET /api/actions/vote — Blink metadata for voting on The Clearance
+// GET /api/actions/vote — Blink metadata for voting on Spotr TV
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const sessionId = searchParams.get("session");
 
-  let title = "Vote on The Clearance";
+  let title = "Vote on Spotr TV";
   let description =
     "Cast your vote on the latest session. Pick which video will trend and earn rewards!";
 
@@ -35,10 +35,10 @@ export async function GET(req: NextRequest) {
     if (session) {
       if (session.status === "ended") {
         title = `Session Ended: ${session.title}`;
-        description = `Week ${session.weekNumber} — This session has ended. Check your results on The Clearance!`;
+        description = `Week ${session.weekNumber} — This session has ended. Check your results on Spotr TV!`;
       } else {
         title = `Vote: ${session.title}`;
-        description = `Week ${session.weekNumber} — Predict which videos will trend in The Clearance. Score 75%+ correct for Gold Tier rewards!`;
+        description = `Week ${session.weekNumber} — Predict which videos will trend on Spotr TV. Score 75%+ correct for Gold Tier rewards!`;
       }
     }
   }
@@ -142,7 +142,7 @@ export async function POST(req: NextRequest) {
       fields: {
         type: "transaction",
         transaction: tx,
-        message: `Vote recorded: ${decision === "video_a" ? "Video A" : "Video B"}! Head to The Clearance for live voting.`,
+        message: `Vote recorded: ${decision === "video_a" ? "Video A" : "Video B"}! Head to Spotr TV for live voting.`,
       },
     });
 

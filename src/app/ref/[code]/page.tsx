@@ -21,13 +21,13 @@ export default async function ReferralPage({
       <div className="w-16 h-16 bg-[#F5E642] rounded-2xl flex items-center justify-center mb-4">
         <Eye className="w-8 h-8 text-black" strokeWidth={2.5} />
       </div>
-      <h1 className="text-3xl font-bold tracking-wider text-white mb-6">The Clearance</h1>
+      <h1 className="text-3xl font-bold tracking-wider text-white mb-6">Spotr TV</h1>
 
       <p className="text-white text-center text-lg font-bold mb-2">
         You&apos;ve been invited!
       </p>
       <p className="text-[#888] text-sm text-center mb-2">
-        Join The Clearance and start predicting trending content.
+        Join Spotr TV and start predicting trending content.
       </p>
       <p className="text-[#555] text-xs text-center mb-8">
         Referrals are recorded on Solana&apos;s social graph via Tapestry

@@ -42,20 +42,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Session is not live" }, { status: 400 });
   }
 
-  // Check for duplicate vote
-  const existingVote = await prisma.vote.findUnique({
+  // Upsert vote — allows changing pick while round is still active
+  const vote = await prisma.vote.upsert({
     where: { userId_matchupId: { userId: user.id, matchupId } },
-  });
-
-  if (existingVote) {
-    return NextResponse.json(
-      { error: "Already voted on this matchup" },
-      { status: 409 }
-    );
-  }
-
-  const vote = await prisma.vote.create({
-    data: {
+    update: { decision },
+    create: {
       userId: user.id,
       matchupId,
       decision,
