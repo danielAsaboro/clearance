@@ -15,6 +15,8 @@ interface SessionData {
   scheduledAt: string;
   status: string;
   lateJoinCutoff: string | null;
+  totalMatchups?: number;
+  roundDurationSeconds?: number;
 }
 
 export default function Arena() {

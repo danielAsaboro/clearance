@@ -119,8 +119,8 @@ echo -e "${BOLD}Deploying program...${NC}"
 solana program deploy \
   --url http://localhost:8899 \
   --keypair "$WALLET" \
-  --program-id anchor/target/deploy/clearance-keypair.json \
-  anchor/target/deploy/clearance.so
+  --program-id anchor/target/deploy/spotr-keypair.json \
+  anchor/target/deploy/spotr.so
 echo -e "${GREEN}  Program deployed.${NC}"
 
 # ── Create USDC mint on localnet ────────────────────────────────────
@@ -245,11 +245,11 @@ SOLANA_MINT_AUTHORITY_SECRET_KEY="$MINT_AUTH_SECRET" \
 NEXTJS_PID=$!
 
 # ── Summary ─────────────────────────────────────────────────────────
-PROGRAM_ID=$(solana-keygen pubkey anchor/target/deploy/clearance-keypair.json 2>/dev/null || echo "unknown")
+PROGRAM_ID=$(solana-keygen pubkey anchor/target/deploy/spotr-keypair.json 2>/dev/null || echo "unknown")
 
 echo ""
 echo -e "${BOLD}════════════════════════════════════════════════${NC}"
-echo -e "${GREEN}  Clearance local dev environment is running!${NC}"
+echo -e "${GREEN}  Spotr TV local dev environment is running!${NC}"
 echo -e "${BOLD}════════════════════════════════════════════════${NC}"
 echo -e "  App:          ${CYAN}http://localhost:3000${NC}"
 echo -e "  RPC:          ${CYAN}http://localhost:8899${NC}"

@@ -1,12 +1,12 @@
 [package]
-name = "clearance"
+name = "spotr"
 version = "0.1.0"
-description = "Clearance USDC vault program"
+description = "Spotr TV USDC vault program"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "clearance"
+name = "spotr"
 
 [features]
 default = []

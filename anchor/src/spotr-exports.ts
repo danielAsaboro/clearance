@@ -14,44 +14,44 @@ import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   getAssociatedTokenAddressSync,
 } from '@solana/spl-token'
-import ClearanceIDL from '../target/idl/clearance.json'
-import type { Clearance } from '../target/types/clearance'
+import SpotrIDL from '../target/idl/spotr.json'
+import type { Spotr } from '../target/types/spotr'
 
-export { Clearance, ClearanceIDL }
+export { Spotr, SpotrIDL }
 
-export const CLEARANCE_PROGRAM_ID = new PublicKey(ClearanceIDL.address)
+export const SPOTR_PROGRAM_ID = new PublicKey(SpotrIDL.address)
 
 const VRF_PROGRAM_ID = new PublicKey('Vrf1RNUjXmQGjmQrQLvJHs9SNkvDJEsRVFPkfSQUwGz')
 const VRF_DEFAULT_QUEUE = new PublicKey('Cuj97ggrhhidhbu39TijNVqE74xvKJ69gDervRUXAxGh')
 const [PROGRAM_IDENTITY_PDA] = PublicKey.findProgramAddressSync(
   [Buffer.from('identity')],
-  CLEARANCE_PROGRAM_ID,
+  SPOTR_PROGRAM_ID,
 )
 
 export const MPL_CORE_PROGRAM_ID = new PublicKey(
   'CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d',
 )
 
-export function getClearanceProgram(
+export function getSpotrProgram(
   provider: AnchorProvider,
   address?: PublicKey,
-): Program<Clearance> {
+): Program<Spotr> {
   return new Program(
     {
-      ...ClearanceIDL,
-      address: address ? address.toBase58() : ClearanceIDL.address,
-    } as Clearance,
+      ...SpotrIDL,
+      address: address ? address.toBase58() : SpotrIDL.address,
+    } as Spotr,
     provider,
   )
 }
 
-export function getClearanceProgramId(cluster: Cluster) {
+export function getSpotrProgramId(cluster: Cluster) {
   switch (cluster) {
     case 'devnet':
     case 'testnet':
     case 'mainnet-beta':
     default:
-      return CLEARANCE_PROGRAM_ID
+      return SPOTR_PROGRAM_ID
   }
 }
 
@@ -63,7 +63,7 @@ export function getVaultAddress(sessionId: bigint | number): [PublicKey, number]
   buf.writeBigUInt64LE(BigInt(sessionId))
   return PublicKey.findProgramAddressSync(
     [Buffer.from('vault'), buf],
-    CLEARANCE_PROGRAM_ID,
+    SPOTR_PROGRAM_ID,
   )
 }
 
@@ -76,7 +76,7 @@ export function getClaimRecordAddress(
 ): [PublicKey, number] {
   return PublicKey.findProgramAddressSync(
     [Buffer.from('claim'), vault.toBuffer(), user.toBuffer()],
-    CLEARANCE_PROGRAM_ID,
+    SPOTR_PROGRAM_ID,
   )
 }
 
@@ -89,7 +89,7 @@ export function getFanDepositRecordAddress(
 ): [PublicKey, number] {
   return PublicKey.findProgramAddressSync(
     [Buffer.from('deposit'), vault.toBuffer(), fan.toBuffer()],
-    CLEARANCE_PROGRAM_ID,
+    SPOTR_PROGRAM_ID,
   )
 }
 
@@ -106,7 +106,7 @@ export async function buildFanDepositTransaction({
   amount,
 }: {
   connection: Connection
-  program: Program<Clearance>
+  program: Program<Spotr>
   fanPublicKey: PublicKey
   sessionId: number
   usdcMint: PublicKey
@@ -152,7 +152,7 @@ export async function buildClaimWithNftTransaction({
   amount,
 }: {
   connection: Connection
-  program: Program<Clearance>
+  program: Program<Spotr>
   admin: Keypair
   userPublicKey: PublicKey
   sessionId: number
@@ -201,7 +201,7 @@ export function getRaffleRecordAddress(
 ): [PublicKey, number] {
   return PublicKey.findProgramAddressSync(
     [Buffer.from('raffle'), vault.toBuffer(), fan.toBuffer()],
-    CLEARANCE_PROGRAM_ID,
+    SPOTR_PROGRAM_ID,
   )
 }
 
@@ -219,7 +219,7 @@ export async function buildRequestRaffleTransaction({
   blockhash,
 }: {
   connection: Connection
-  program: Program<Clearance>
+  program: Program<Spotr>
   admin: Keypair
   fanPublicKey: PublicKey
   sessionId: number
@@ -275,7 +275,7 @@ export async function buildClaimWithRaffleTransaction({
   blockhash,
 }: {
   connection: Connection
-  program: Program<Clearance>
+  program: Program<Spotr>
   admin: Keypair
   fanPublicKey: PublicKey
   sessionId: number
@@ -331,7 +331,7 @@ export async function buildInitializeVaultTransaction({
   usdcMint,
 }: {
   connection: Connection
-  program: Program<Clearance>
+  program: Program<Spotr>
   admin: Keypair
   sessionId: number
   usdcMint: PublicKey
@@ -372,7 +372,7 @@ export async function buildAdminDepositTransaction({
   amount,
 }: {
   connection: Connection
-  program: Program<Clearance>
+  program: Program<Spotr>
   admin: Keypair
   sessionId: number
   usdcMint: PublicKey
@@ -411,7 +411,7 @@ export async function buildCallbackRaffleTransaction({
   randomness,
 }: {
   connection: Connection
-  program: Program<Clearance>
+  program: Program<Spotr>
   admin: Keypair
   fanPublicKey: PublicKey
   sessionId: number
@@ -436,7 +436,7 @@ export async function buildCallbackRaffleTransaction({
  * Fetch a RaffleRecord from the chain. Returns null if not found.
  */
 export async function fetchRaffleRecord(
-  program: Program<Clearance>,
+  program: Program<Spotr>,
   vaultPda: PublicKey,
   fanPubkey: PublicKey,
 ): Promise<{

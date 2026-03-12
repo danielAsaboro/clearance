@@ -34,10 +34,10 @@ export default function Home() {
       .then((data) => {
         setProfile(data);
         if (data?.role) {
-          document.cookie = `clearance_role=${data.role};path=/;max-age=${60 * 60 * 24 * 30}`;
+          document.cookie = `spotr_role=${data.role};path=/;max-age=${60 * 60 * 24 * 30}`;
         }
         if (data?.consentAccepted) {
-          document.cookie = `clearance_onboarded=1;path=/;max-age=${60 * 60 * 24 * 30}`;
+          document.cookie = `spotr_onboarded=1;path=/;max-age=${60 * 60 * 24 * 30}`;
         }
       })
       .catch(() => setProfile(null))

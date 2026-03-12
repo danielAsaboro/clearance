@@ -2,6 +2,26 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAuthUser } from "@/lib/auth-helpers";
 import { createSessionSchema } from "@/lib/validators";
+import { campaignConfig } from "@/lib/campaign-config";
+
+const sessionInclude = {
+  _count: { select: { gameResults: true, matchups: true } },
+  campaign: { select: { votingRoundDurationSecs: true } },
+} as const;
+
+function formatSession(session: {
+  campaign?: { votingRoundDurationSecs: number } | null;
+  _count: { gameResults: number; matchups: number };
+  [key: string]: unknown;
+}) {
+  const { campaign, _count, ...rest } = session;
+  return {
+    ...rest,
+    _count,
+    totalMatchups: _count.matchups,
+    roundDurationSeconds: campaign?.votingRoundDurationSecs ?? campaignConfig.votingRoundDurationSeconds,
+  };
+}
 
 // GET /api/sessions — Get current/next session
 export async function GET() {
@@ -10,27 +30,27 @@ export async function GET() {
   // Find live session
   const live = await prisma.weeklySession.findFirst({
     where: { status: "live" },
-    include: { _count: { select: { gameResults: true } } },
+    include: sessionInclude,
   });
 
   // Find next scheduled session
   const next = await prisma.weeklySession.findFirst({
     where: { status: "scheduled", scheduledAt: { gte: now } },
     orderBy: { scheduledAt: "asc" },
-    include: { _count: { select: { gameResults: true } } },
+    include: sessionInclude,
   });
 
   // Find last ended session
   const lastEnded = await prisma.weeklySession.findFirst({
     where: { status: "ended" },
     orderBy: { scheduledAt: "desc" },
-    include: { _count: { select: { gameResults: true } } },
+    include: sessionInclude,
   });
 
   return NextResponse.json({
-    current: live || null,
-    next: next || null,
-    lastEnded: lastEnded || null,
+    current: live ? formatSession(live) : null,
+    next: next ? formatSession(next) : null,
+    lastEnded: lastEnded ? formatSession(lastEnded) : null,
   });
 }
 

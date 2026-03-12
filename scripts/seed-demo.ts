@@ -18,6 +18,7 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
 
 const WEEK = 99;
+const ROUND_DURATION = parseInt(process.env.VOTING_ROUND_DURATION_IN_SECONDS ?? "30");
 
 const VIDEO_FILES = [
   // Original 9
@@ -75,7 +76,7 @@ function titleFromFilename(filename: string): string {
 }
 
 async function main() {
-  console.log("\n  Seed Demo — Clearance\n");
+  console.log("\n  Seed Demo — Spotr TV\n");
 
   // ── Cleanup previous demo data ──
   const existing = await prisma.weeklySession.findUnique({
@@ -151,12 +152,12 @@ async function main() {
         matchupNumber: i + 1,
         videoAId: videos[i * 2].id,
         videoBId: videos[i * 2 + 1].id,
-        duration: 30,
+        duration: ROUND_DURATION,
       },
     });
   }
-  const mins = ((numMatchups * 30) / 60).toFixed(1);
-  console.log(`  Created ${numMatchups} matchups (30s each = ${mins} min total).`);
+  const mins = ((numMatchups * ROUND_DURATION) / 60).toFixed(1);
+  console.log(`  Created ${numMatchups} matchups (${ROUND_DURATION}s each = ${mins} min total).`);
 
   // ── Done ──
   console.log("\n  ════════════════════════════════════════");

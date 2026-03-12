@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAuthUser } from "@/lib/auth-helpers";
 import { calculateMajorityWinners, calculateTier } from "@/lib/session-engine";
+import { campaignConfig } from "@/lib/campaign-config";
 
 // POST /api/admin/sessions/:id/finalize — Calculate majority winners & assign tiers
 export async function POST(
@@ -98,7 +99,7 @@ export async function POST(
         totalVotes: votes.length,
         correctVotes,
         tier,
-        rewardAmount: tier === "gold" ? 3.5 : tier === "base" ? 1.75 : 0,
+        rewardAmount: tier === "gold" ? campaignConfig.goldRewardUsdc : tier === "base" ? campaignConfig.baseRewardUsdc : 0,
       },
     });
   }

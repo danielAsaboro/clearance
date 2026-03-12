@@ -1,5 +1,5 @@
 /**
- * Clearance Boss Demo — Multi-Fan Raffle Smoke Test
+ * Spotr TV Boss Demo — Multi-Fan Raffle Smoke Test
  *
  * Runs the full raffle lifecycle with NUM_FANS fans going in simultaneously.
  * Works on both devnet (real VRF oracle) and localnet (simulated VRF callbacks).
@@ -49,7 +49,7 @@ import {
   publicKey as toUmiPublicKey,
 } from '@metaplex-foundation/umi'
 import {
-  getClearanceProgram,
+  getSpotrProgram,
   getVaultAddress,
   getRaffleRecordAddress,
   getFanDepositRecordAddress,
@@ -59,7 +59,7 @@ import {
   buildClaimWithRaffleTransaction,
   buildCallbackRaffleTransaction,
   fetchRaffleRecord,
-} from '../anchor/src/clearance-exports'
+} from '../anchor/src/spotr-exports'
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
@@ -95,7 +95,7 @@ function getAdminKeypair(): Keypair {
 
 function getProgram(admin: Keypair) {
   const provider = new AnchorProvider(connection, new NodeWallet(admin), { commitment: 'confirmed' })
-  return getClearanceProgram(provider)
+  return getSpotrProgram(provider)
 }
 
 function getUmi(admin: Keypair) {
@@ -151,7 +151,7 @@ async function main() {
   const div = '─'.repeat(W)
 
   console.log(`\n  ${bar}`)
-  console.log(`  Clearance Boss Demo  ·  ${NUM_FANS} Fans  ·  ${CLUSTER.toUpperCase()}`)
+  console.log(`  Spotr TV Boss Demo  ·  ${NUM_FANS} Fans  ·  ${CLUSTER.toUpperCase()}`)
   console.log(`  ${bar}\n`)
   console.log(`  RPC      : ${RPC_URL}`)
   console.log(`  Admin    : ${(getAdminKeypair()).publicKey.toBase58()}`)
@@ -280,8 +280,8 @@ async function main() {
     const asset = generateSigner(umi)
     await create(umi, {
       asset,
-      name            : `Clearance Blind Box #${i + 1}`,
-      uri             : `https://clearance.gg/metadata/${SESSION_ID}-fan${i + 1}.json`,
+      name            : `Spotr TV Blind Box #${i + 1}`,
+      uri             : `https://spotr.tv/metadata/${SESSION_ID}-fan${i + 1}.json`,
       owner           : toUmiPublicKey(fan.publicKey.toBase58()),
       updateAuthority : toUmiPublicKey(admin.publicKey.toBase58()),
     }).sendAndConfirm(umi)

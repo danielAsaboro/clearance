@@ -28,9 +28,12 @@ interface RoundState {
   round: number;
   secondsRemaining: number;
   totalRounds: number;
+  roundDuration: number;
 }
 
 type GamePhase = "confirming" | "joining" | "playing" | "insufficient";
+
+const ENTRY_FEE = process.env.NEXT_PUBLIC_ENTRY_FEE_USDC ?? "3.50";
 
 // ---------------------------------------------------------------------------
 // Entry Confirmation Modal
@@ -56,15 +59,15 @@ function EntryConfirmModal({
         </div>
 
         <div className="bg-[#0d0d0d] rounded-xl p-4 text-sm text-[#888] space-y-2">
-          <p className="text-white font-semibold">Entry Cost: $3.50 USDC</p>
+          <p className="text-white font-semibold">Entry Cost: ${ENTRY_FEE} USDC</p>
           <p>
             Joining this session costs{" "}
-            <span className="text-white font-medium">$3.50 USDC</span>, which is
+            <span className="text-white font-medium">${ENTRY_FEE} USDC</span>, which is
             added to the reward pool.
           </p>
           <p>
             You may win up to{" "}
-            <span className="text-white font-medium">$3.50 USDC</span> back.
+            <span className="text-white font-medium">${ENTRY_FEE} USDC</span> back.
           </p>
         </div>
 
@@ -120,7 +123,7 @@ function InsufficientBalanceScreen() {
           </h2>
           <p className="text-[#888] text-sm">
             You need at least{" "}
-            <span className="text-white font-medium">$3.50 USDC</span> to join
+            <span className="text-white font-medium">${ENTRY_FEE} USDC</span> to join
             this session.
           </p>
         </div>
@@ -146,12 +149,14 @@ function InsufficientBalanceScreen() {
 // ---------------------------------------------------------------------------
 function SyncedTimer({
   secondsRemaining,
+  roundDuration,
   active,
 }: {
   secondsRemaining: number;
+  roundDuration: number;
   active: boolean;
 }) {
-  const pct = Math.min(100, (secondsRemaining / 30) * 100);
+  const pct = Math.min(100, (secondsRemaining / roundDuration) * 100);
   const color = secondsRemaining <= 5 ? "#ef4444" : "#F5E642";
 
   return (
@@ -337,6 +342,7 @@ function GameContent() {
   const [loading, setLoading] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [muted, setMuted] = useState(true);
+  const [defaultRoundDuration, setDefaultRoundDuration] = useState<number | null>(null);
   const [interstitial, setInterstitial] = useState<{
     round: number;
     totalRounds: number;
@@ -358,7 +364,8 @@ function GameContent() {
     });
     if (res.ok) {
       const data = await res.json();
-      setMatchups(data);
+      setMatchups(data.matchups);
+      setDefaultRoundDuration(data.roundDurationSeconds);
     }
     setLoading(false);
   }, [sessionId, getAccessToken]);
@@ -417,21 +424,29 @@ function GameContent() {
     if (!sessionId) return;
     setPhase("joining");
 
-    const token = await getAccessToken();
-    const res = await fetch(`/api/sessions/${sessionId}/join`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    try {
+      const token = await getAccessToken();
+      const res = await fetch(`/api/sessions/${sessionId}/join`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    if (res.status === 400) {
-      const data = await res.json();
-      if (
-        data.error?.toLowerCase().includes("insufficient") ||
-        data.error?.toLowerCase().includes("wallet")
-      ) {
-        setPhase("insufficient");
-        return;
+      if (res.status === 400) {
+        const data = await res.json();
+        if (
+          data.error?.toLowerCase().includes("insufficient") ||
+          data.error?.toLowerCase().includes("wallet")
+        ) {
+          setPhase("insufficient");
+          return;
+        }
       }
+
+      if (!res.ok && res.status !== 201) {
+        console.error("[game] join failed:", res.status, await res.text().catch(() => ""));
+      }
+    } catch (err) {
+      console.error("[game] join error:", err);
     }
 
     await fetchMatchups();
@@ -522,7 +537,8 @@ function GameContent() {
   }
 
   const serverRound = roundState?.round ?? 1;
-  const secondsRemaining = roundState?.secondsRemaining ?? 30;
+  const roundDuration = roundState?.roundDuration ?? defaultRoundDuration ?? parseInt(process.env.NEXT_PUBLIC_VOTING_ROUND_DURATION_IN_SECONDS ?? "30");
+  const secondsRemaining = roundState?.secondsRemaining ?? roundDuration;
   const currentMatchup = matchups[serverRound - 1] ?? matchups[0];
   const totalRounds = roundState?.totalRounds ?? matchups.length;
 
@@ -543,7 +559,7 @@ function GameContent() {
         <div className="mb-3">
           <ProgressBar currentStep={serverRound} totalSteps={totalRounds} />
         </div>
-        <SyncedTimer secondsRemaining={secondsRemaining} active={voted === null} />
+        <SyncedTimer secondsRemaining={secondsRemaining} roundDuration={roundDuration} active={voted === null} />
       </div>
 
       {/* Matchup Area */}

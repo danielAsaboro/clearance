@@ -1,5 +1,5 @@
 /**
- * Full lifecycle demo — Clearance localnet.
+ * Full lifecycle demo — Spotr TV localnet.
  *
  * Exercises: admin setup → completed session (DB + on-chain) → player on-chain
  * flow (deposit → NFT mint → raffle → VRF → claim) → playable session.
@@ -9,7 +9,7 @@
  *   npx tsx scripts/setup-demo.ts
  *
  * Prerequisites:
- *   - Local validator running with Clearance program + mpl-core deployed
+ *   - Local validator running with Spotr program + mpl-core deployed
  *   - USDC mint created on localnet
  *   - Database accessible
  *   - Env vars: DATABASE_URL, SOLANA_MINT_AUTHORITY_SECRET_KEY, USDC_MINT_ADDRESS,
@@ -51,21 +51,22 @@ import {
 
 // ── Config ──────────────────────────────────────────────────────────
 
-const NUM_MATCHUPS = 5;
+const NUM_MATCHUPS = parseInt(process.env.VIDEOS_PER_LIVE_SESSION ?? "5");
 const DEPOSIT_USDC = 100;
-const ENTRY_FEE_USDC = 3.5;
+const ENTRY_FEE_USDC = parseFloat(process.env.ENTRY_FEE_USDC ?? "3.50");
+const ROUND_DURATION = parseInt(process.env.VOTING_ROUND_DURATION_IN_SECONDS ?? "30");
 
 const SAMPLE_VIDEO_URLS = [
-  "https://clearance-demo.s3.amazonaws.com/videos/sample-1.mp4",
-  "https://clearance-demo.s3.amazonaws.com/videos/sample-2.mp4",
-  "https://clearance-demo.s3.amazonaws.com/videos/sample-3.mp4",
-  "https://clearance-demo.s3.amazonaws.com/videos/sample-4.mp4",
-  "https://clearance-demo.s3.amazonaws.com/videos/sample-5.mp4",
-  "https://clearance-demo.s3.amazonaws.com/videos/sample-6.mp4",
-  "https://clearance-demo.s3.amazonaws.com/videos/sample-7.mp4",
-  "https://clearance-demo.s3.amazonaws.com/videos/sample-8.mp4",
-  "https://clearance-demo.s3.amazonaws.com/videos/sample-9.mp4",
-  "https://clearance-demo.s3.amazonaws.com/videos/sample-10.mp4",
+  "https://spotr-demo.s3.amazonaws.com/videos/sample-1.mp4",
+  "https://spotr-demo.s3.amazonaws.com/videos/sample-2.mp4",
+  "https://spotr-demo.s3.amazonaws.com/videos/sample-3.mp4",
+  "https://spotr-demo.s3.amazonaws.com/videos/sample-4.mp4",
+  "https://spotr-demo.s3.amazonaws.com/videos/sample-5.mp4",
+  "https://spotr-demo.s3.amazonaws.com/videos/sample-6.mp4",
+  "https://spotr-demo.s3.amazonaws.com/videos/sample-7.mp4",
+  "https://spotr-demo.s3.amazonaws.com/videos/sample-8.mp4",
+  "https://spotr-demo.s3.amazonaws.com/videos/sample-9.mp4",
+  "https://spotr-demo.s3.amazonaws.com/videos/sample-10.mp4",
 ];
 
 // Player voting patterns for the completed session
@@ -181,7 +182,7 @@ async function phase1_adminSetup(adminKeypair: Keypair) {
     update: { role: "admin", walletAddress: adminPubkey },
     create: {
       privyId: "demo-admin-local",
-      email: "admin@clearance.local",
+      email: "admin@spotr.local",
       displayName: "Demo Admin",
       role: "admin",
       walletAddress: adminPubkey,
@@ -218,7 +219,7 @@ async function phase2_completedSession(adminUserId: string) {
   } catch (err: any) {
     if (err.message?.includes("already in use")) {
       logStep("2", `Vault PDA (week ${WEEK}) already exists, continuing.`);
-      const { getVaultAddress } = await import("../anchor/src/clearance-exports");
+      const { getVaultAddress } = await import("../anchor/src/spotr-exports");
       const [pda] = getVaultAddress(WEEK);
       vaultAddress = pda.toBase58();
     } else {
@@ -264,7 +265,7 @@ async function phase2_completedSession(adminUserId: string) {
         matchupNumber: i + 1,
         videoAId: videoIds[i * 2],
         videoBId: videoIds[i * 2 + 1],
-        duration: 30,
+        duration: ROUND_DURATION,
       },
     });
     matchupIds.push(matchup.id);
@@ -414,8 +415,8 @@ async function phase3_onChainPlayerFlow(adminKeypair: Keypair) {
   const asset = generateSigner(umi);
   await create(umi, {
     asset,
-    name: "Clearance Blind Box — Week 1",
-    uri: "https://clearance.local/metadata/week1.json",
+    name: "Spotr TV Blind Box — Week 1",
+    uri: "https://spotr.tv/metadata/week1.json",
     owner: toUmiPublicKey(playerPubkey.toBase58()),
     updateAuthority: toUmiPublicKey(adminKeypair.publicKey.toBase58()),
   }).sendAndConfirm(umi);
@@ -520,7 +521,7 @@ async function phase4_playableSession(adminUserId: string) {
   } catch (err: any) {
     if (err.message?.includes("already in use")) {
       logStep("4", `Vault PDA (week ${WEEK}) already exists, continuing.`);
-      const { getVaultAddress } = await import("../anchor/src/clearance-exports");
+      const { getVaultAddress } = await import("../anchor/src/spotr-exports");
       const [pda] = getVaultAddress(WEEK);
       vaultAddress = pda.toBase58();
     } else {
@@ -564,7 +565,7 @@ async function phase4_playableSession(adminUserId: string) {
         matchupNumber: i + 1,
         videoAId: videoIds[i * 2],
         videoBId: videoIds[i * 2 + 1],
-        duration: 30,
+        duration: ROUND_DURATION,
       },
     });
   }
@@ -587,7 +588,7 @@ function phase5_summary(
   } | null
 ) {
   console.log("\n  ════════════════════════════════════════════════");
-  console.log("  Clearance Demo — Full Lifecycle Complete!");
+  console.log("  Spotr TV Demo — Full Lifecycle Complete!");
   console.log("  ════════════════════════════════════════════════\n");
 
   console.log("  Week 1 (completed):");
@@ -627,7 +628,7 @@ function phase5_summary(
 // ── Main ────────────────────────────────────────────────────────────
 
 async function main() {
-  console.log("\n  Setup Demo — Clearance Full Lifecycle\n");
+  console.log("\n  Setup Demo — Spotr TV Full Lifecycle\n");
 
   const adminKeypair = getAdminKeypair();
 

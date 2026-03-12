@@ -36,7 +36,7 @@ export default function MatchupBuilder({
   const [matchups, setMatchups] = useState<MatchupSlot[]>([]);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const totalSlots = 28;
+  const totalSlots = parseInt(process.env.NEXT_PUBLIC_MATCHUPS_PER_SESSION ?? "28");
 
   const fetchData = useCallback(async () => {
     const token = await getAccessToken();
