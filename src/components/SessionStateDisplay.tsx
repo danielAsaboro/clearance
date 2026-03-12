@@ -11,6 +11,8 @@ interface SessionData {
   title: string;
   scheduledAt: string;
   status: string;
+  totalMatchups?: number;
+  roundDurationSeconds?: number;
 }
 
 interface SessionStateDisplayProps {
@@ -104,11 +106,11 @@ export default function SessionStateDisplay({
         <p className="text-[#888] text-sm mb-6">Session starts soon. Get ready!</p>
         <div className="flex justify-center gap-6 text-center mb-6">
           <div>
-            <p className="text-white font-bold">28</p>
+            <p className="text-white font-bold">{session.totalMatchups ?? "—"}</p>
             <p className="text-[#888] text-xs">Rounds</p>
           </div>
           <div>
-            <p className="text-white font-bold">30s</p>
+            <p className="text-white font-bold">{session.roundDurationSeconds ?? "—"}s</p>
             <p className="text-[#888] text-xs">Per Round</p>
           </div>
         </div>

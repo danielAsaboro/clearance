@@ -20,7 +20,7 @@ const MPL_CORE_UA_TYPE_ADDRESS: u8 = 1;
 // ---------------------------------------------------------------------------
 
 #[program]
-pub mod clearance {
+pub mod spotr {
     use super::*;
 
     /// Create a per-session vault PDA and its associated USDC token account.
@@ -37,7 +37,7 @@ pub mod clearance {
 
     /// Admin deposits USDC into the vault token account.
     pub fn deposit(ctx: Context<Deposit>, amount: u64) -> Result<()> {
-        require!(amount > 0, ClearanceError::ZeroAmount);
+        require!(amount > 0, SpotrError::ZeroAmount);
 
         transfer(
             CpiContext::new(
@@ -55,7 +55,7 @@ pub mod clearance {
         vault.total_deposited = vault
             .total_deposited
             .checked_add(amount)
-            .ok_or(ClearanceError::Overflow)?;
+            .ok_or(SpotrError::Overflow)?;
 
         Ok(())
     }
@@ -63,14 +63,14 @@ pub mod clearance {
     /// User claims USDC from the vault. Admin co-signs to authorize the amount.
     /// A ClaimRecord PDA is created — if it already exists the tx fails (double-claim prevention).
     pub fn claim(ctx: Context<Claim>, amount: u64) -> Result<()> {
-        require!(amount > 0, ClearanceError::ZeroAmount);
+        require!(amount > 0, SpotrError::ZeroAmount);
 
         let vault = &ctx.accounts.vault;
         let available = vault
             .total_deposited
             .checked_sub(vault.total_claimed)
-            .ok_or(ClearanceError::Overflow)?;
-        require!(amount <= available, ClearanceError::InsufficientFunds);
+            .ok_or(SpotrError::Overflow)?;
+        require!(amount <= available, SpotrError::InsufficientFunds);
 
         // PDA signer seeds for the vault
         let session_bytes = vault.session_id.to_le_bytes();
@@ -96,7 +96,7 @@ pub mod clearance {
         vault.total_claimed = vault
             .total_claimed
             .checked_add(amount)
-            .ok_or(ClearanceError::Overflow)?;
+            .ok_or(SpotrError::Overflow)?;
 
         // Fill claim record
         let claim_record = &mut ctx.accounts.claim_record;
@@ -113,24 +113,24 @@ pub mod clearance {
     /// Admin co-signs to attest the NFT is revealed + frozen (checked server-side).
     /// The NFT asset is verified on-chain via raw byte parsing of its account data.
     pub fn claim_with_nft(ctx: Context<ClaimWithNft>, amount: u64) -> Result<()> {
-        require!(amount > 0, ClearanceError::ZeroAmount);
+        require!(amount > 0, SpotrError::ZeroAmount);
 
         // ---- Verify the NFT asset via raw byte parsing ----
         let nft_data = ctx.accounts.nft_asset.try_borrow_data()?;
         // Minimum size: 1 (key) + 32 (owner) + 1 (UA discriminator) + 32 (UA address) = 66 bytes
-        require!(nft_data.len() >= 66, ClearanceError::InvalidNftAccount);
+        require!(nft_data.len() >= 66, SpotrError::InvalidNftAccount);
         // Byte 0: Key discriminator must be Asset (1)
-        require!(nft_data[0] == MPL_CORE_KEY_ASSET, ClearanceError::InvalidNftAccount);
+        require!(nft_data[0] == MPL_CORE_KEY_ASSET, SpotrError::InvalidNftAccount);
         // Bytes 1..33: asset owner must be the claiming user
         let nft_owner = Pubkey::try_from(&nft_data[1..33])
-            .map_err(|_| error!(ClearanceError::InvalidNftAccount))?;
-        require!(nft_owner == ctx.accounts.user.key(), ClearanceError::NftOwnerMismatch);
+            .map_err(|_| error!(SpotrError::InvalidNftAccount))?;
+        require!(nft_owner == ctx.accounts.user.key(), SpotrError::NftOwnerMismatch);
         // Byte 33: UpdateAuthority discriminator must be Address (1)
-        require!(nft_data[33] == MPL_CORE_UA_TYPE_ADDRESS, ClearanceError::InvalidNftAuthority);
+        require!(nft_data[33] == MPL_CORE_UA_TYPE_ADDRESS, SpotrError::InvalidNftAuthority);
         // Bytes 34..66: update authority address must be the vault admin
         let nft_authority = Pubkey::try_from(&nft_data[34..66])
-            .map_err(|_| error!(ClearanceError::InvalidNftAccount))?;
-        require!(nft_authority == ctx.accounts.admin.key(), ClearanceError::InvalidNftAuthority);
+            .map_err(|_| error!(SpotrError::InvalidNftAccount))?;
+        require!(nft_authority == ctx.accounts.admin.key(), SpotrError::InvalidNftAuthority);
         // Drop the borrow before CPI
         drop(nft_data);
 
@@ -139,8 +139,8 @@ pub mod clearance {
         let available = vault
             .total_deposited
             .checked_sub(vault.total_claimed)
-            .ok_or(ClearanceError::Overflow)?;
-        require!(amount <= available, ClearanceError::InsufficientFunds);
+            .ok_or(SpotrError::Overflow)?;
+        require!(amount <= available, SpotrError::InsufficientFunds);
 
         let session_bytes = vault.session_id.to_le_bytes();
         let bump = &[vault.bump];
@@ -164,7 +164,7 @@ pub mod clearance {
         vault.total_claimed = vault
             .total_claimed
             .checked_add(amount)
-            .ok_or(ClearanceError::Overflow)?;
+            .ok_or(SpotrError::Overflow)?;
 
         let claim_record = &mut ctx.accounts.claim_record;
         claim_record.user = ctx.accounts.user.key();
@@ -179,7 +179,7 @@ pub mod clearance {
     /// Fan deposits $3.50 USDC entry fee directly into the vault.
     /// A FanDepositRecord PDA is created — if it already exists the tx fails (double-entry prevention).
     pub fn fan_deposit(ctx: Context<FanDeposit>, amount: u64) -> Result<()> {
-        require!(amount > 0, ClearanceError::ZeroAmount);
+        require!(amount > 0, SpotrError::ZeroAmount);
 
         transfer(
             CpiContext::new(
@@ -197,7 +197,7 @@ pub mod clearance {
         vault.total_deposited = vault
             .total_deposited
             .checked_add(amount)
-            .ok_or(ClearanceError::Overflow)?;
+            .ok_or(SpotrError::Overflow)?;
 
         let deposit_record = &mut ctx.accounts.deposit_record;
         deposit_record.user = ctx.accounts.fan.key();
@@ -253,7 +253,7 @@ pub mod clearance {
     /// Admin co-signs to attest the fan's tier.
     /// In production, triggers VRF oracle; in testing, callback is called directly.
     pub fn request_raffle(ctx: Context<RequestRaffle>, tier: u8) -> Result<()> {
-        require!(tier <= 2, ClearanceError::Unauthorized);
+        require!(tier <= 2, SpotrError::Unauthorized);
 
         let raffle = &mut ctx.accounts.raffle_record;
         raffle.fan = ctx.accounts.fan.key();
@@ -321,11 +321,11 @@ pub mod clearance {
         require!(
             ctx.accounts.vrf_program_identity.key()
                 == ephemeral_vrf_sdk::consts::VRF_PROGRAM_IDENTITY,
-            ClearanceError::Unauthorized
+            SpotrError::Unauthorized
         );
 
         let raffle = &mut ctx.accounts.raffle_record;
-        require!(!raffle.resolved, ClearanceError::AlreadyResolved);
+        require!(!raffle.resolved, SpotrError::AlreadyResolved);
 
         let high_payout = randomness[0] < 26; // ~10.2% chance
 
@@ -355,30 +355,30 @@ pub mod clearance {
     /// Reads reward_amount from RaffleRecord — no amount parameter.
     pub fn claim_with_raffle(ctx: Context<ClaimWithRaffle>) -> Result<()> {
         let amount = ctx.accounts.raffle_record.reward_amount;
-        require!(amount > 0, ClearanceError::ZeroAmount);
+        require!(amount > 0, SpotrError::ZeroAmount);
 
         // ---- Verify the NFT asset via raw byte parsing ----
         let nft_data = ctx.accounts.nft_asset.try_borrow_data()?;
-        require!(nft_data.len() >= 66, ClearanceError::InvalidNftAccount);
+        require!(nft_data.len() >= 66, SpotrError::InvalidNftAccount);
         require!(
             nft_data[0] == MPL_CORE_KEY_ASSET,
-            ClearanceError::InvalidNftAccount
+            SpotrError::InvalidNftAccount
         );
         let nft_owner = Pubkey::try_from(&nft_data[1..33])
-            .map_err(|_| error!(ClearanceError::InvalidNftAccount))?;
+            .map_err(|_| error!(SpotrError::InvalidNftAccount))?;
         require!(
             nft_owner == ctx.accounts.fan.key(),
-            ClearanceError::NftOwnerMismatch
+            SpotrError::NftOwnerMismatch
         );
         require!(
             nft_data[33] == MPL_CORE_UA_TYPE_ADDRESS,
-            ClearanceError::InvalidNftAuthority
+            SpotrError::InvalidNftAuthority
         );
         let nft_authority = Pubkey::try_from(&nft_data[34..66])
-            .map_err(|_| error!(ClearanceError::InvalidNftAccount))?;
+            .map_err(|_| error!(SpotrError::InvalidNftAccount))?;
         require!(
             nft_authority == ctx.accounts.admin.key(),
-            ClearanceError::InvalidNftAuthority
+            SpotrError::InvalidNftAuthority
         );
         drop(nft_data);
 
@@ -387,8 +387,8 @@ pub mod clearance {
         let available = vault
             .total_deposited
             .checked_sub(vault.total_claimed)
-            .ok_or(ClearanceError::Overflow)?;
-        require!(amount <= available, ClearanceError::InsufficientFunds);
+            .ok_or(SpotrError::Overflow)?;
+        require!(amount <= available, SpotrError::InsufficientFunds);
 
         let session_bytes = vault.session_id.to_le_bytes();
         let bump = &[vault.bump];
@@ -412,7 +412,7 @@ pub mod clearance {
         vault.total_claimed = vault
             .total_claimed
             .checked_add(amount)
-            .ok_or(ClearanceError::Overflow)?;
+            .ok_or(SpotrError::Overflow)?;
 
         let claim_record = &mut ctx.accounts.claim_record;
         claim_record.user = ctx.accounts.fan.key();
@@ -466,7 +466,7 @@ pub struct Deposit<'info> {
 
     #[account(
         mut,
-        has_one = admin @ ClearanceError::Unauthorized,
+        has_one = admin @ SpotrError::Unauthorized,
         seeds = [b"vault", vault.session_id.to_le_bytes().as_ref()],
         bump = vault.bump,
     )]
@@ -500,7 +500,7 @@ pub struct Claim<'info> {
 
     #[account(
         mut,
-        has_one = admin @ ClearanceError::Unauthorized,
+        has_one = admin @ SpotrError::Unauthorized,
         seeds = [b"vault", vault.session_id.to_le_bytes().as_ref()],
         bump = vault.bump,
     )]
@@ -532,7 +532,7 @@ pub struct Claim<'info> {
     pub user_token_account: Account<'info, TokenAccount>,
 
     #[account(
-        constraint = usdc_mint.key() == vault.usdc_mint @ ClearanceError::Unauthorized,
+        constraint = usdc_mint.key() == vault.usdc_mint @ SpotrError::Unauthorized,
     )]
     pub usdc_mint: Account<'info, Mint>,
     pub system_program: Program<'info, System>,
@@ -551,7 +551,7 @@ pub struct ClaimWithNft<'info> {
 
     #[account(
         mut,
-        has_one = admin @ ClearanceError::Unauthorized,
+        has_one = admin @ SpotrError::Unauthorized,
         seeds = [b"vault", vault.session_id.to_le_bytes().as_ref()],
         bump = vault.bump,
     )]
@@ -583,13 +583,13 @@ pub struct ClaimWithNft<'info> {
     pub user_token_account: Account<'info, TokenAccount>,
 
     #[account(
-        constraint = usdc_mint.key() == vault.usdc_mint @ ClearanceError::Unauthorized,
+        constraint = usdc_mint.key() == vault.usdc_mint @ SpotrError::Unauthorized,
     )]
     pub usdc_mint: Account<'info, Mint>,
 
     /// CHECK: Manually verified via raw byte parsing in the instruction handler.
     /// Account owner must be the Metaplex Core program.
-    #[account(constraint = nft_asset.owner == &MPL_CORE_PROGRAM_ID @ ClearanceError::InvalidNftAccount)]
+    #[account(constraint = nft_asset.owner == &MPL_CORE_PROGRAM_ID @ SpotrError::InvalidNftAccount)]
     pub nft_asset: AccountInfo<'info>,
 
     pub system_program: Program<'info, System>,
@@ -645,7 +645,7 @@ pub struct CloseVault<'info> {
 
     #[account(
         mut,
-        has_one = admin @ ClearanceError::Unauthorized,
+        has_one = admin @ SpotrError::Unauthorized,
         seeds = [b"vault", vault.session_id.to_le_bytes().as_ref()],
         bump = vault.bump,
         close = admin,
@@ -678,7 +678,7 @@ pub struct RequestRaffle<'info> {
     pub admin: Signer<'info>,
 
     #[account(
-        has_one = admin @ ClearanceError::Unauthorized,
+        has_one = admin @ SpotrError::Unauthorized,
         seeds = [b"vault", vault.session_id.to_le_bytes().as_ref()],
         bump = vault.bump,
     )]
@@ -730,7 +730,7 @@ pub struct ClaimWithRaffle<'info> {
 
     #[account(
         mut,
-        has_one = admin @ ClearanceError::Unauthorized,
+        has_one = admin @ SpotrError::Unauthorized,
         seeds = [b"vault", vault.session_id.to_le_bytes().as_ref()],
         bump = vault.bump,
     )]
@@ -739,8 +739,8 @@ pub struct ClaimWithRaffle<'info> {
     #[account(
         seeds = [b"raffle", vault.key().as_ref(), fan.key().as_ref()],
         bump = raffle_record.bump,
-        constraint = raffle_record.fan == fan.key() @ ClearanceError::Unauthorized,
-        constraint = raffle_record.resolved @ ClearanceError::RaffleNotResolved,
+        constraint = raffle_record.fan == fan.key() @ SpotrError::Unauthorized,
+        constraint = raffle_record.resolved @ SpotrError::RaffleNotResolved,
     )]
     pub raffle_record: Account<'info, RaffleRecord>,
 
@@ -770,12 +770,12 @@ pub struct ClaimWithRaffle<'info> {
     pub fan_token_account: Account<'info, TokenAccount>,
 
     #[account(
-        constraint = usdc_mint.key() == vault.usdc_mint @ ClearanceError::Unauthorized,
+        constraint = usdc_mint.key() == vault.usdc_mint @ SpotrError::Unauthorized,
     )]
     pub usdc_mint: Account<'info, Mint>,
 
     /// CHECK: Manually verified via raw byte parsing in the instruction handler.
-    #[account(constraint = nft_asset.owner == &MPL_CORE_PROGRAM_ID @ ClearanceError::InvalidNftAccount)]
+    #[account(constraint = nft_asset.owner == &MPL_CORE_PROGRAM_ID @ SpotrError::InvalidNftAccount)]
     pub nft_asset: AccountInfo<'info>,
 
     pub system_program: Program<'info, System>,
@@ -837,7 +837,7 @@ pub struct RaffleRecord {
 // ---------------------------------------------------------------------------
 
 #[error_code]
-pub enum ClearanceError {
+pub enum SpotrError {
     #[msg("Unauthorized: signer is not the vault admin")]
     Unauthorized,
     #[msg("Amount must be greater than zero")]

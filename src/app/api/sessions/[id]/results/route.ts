@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAuthUser } from "@/lib/auth-helpers";
 import { calculateTier, calculateMajorityWinners } from "@/lib/session-engine";
+import { campaignConfig } from "@/lib/campaign-config";
 
 // GET /api/sessions/:id/results — Get user's results for a session
 export async function GET(
@@ -15,13 +16,29 @@ export async function GET(
 
   const { id } = await params;
 
-  // Get the game result
+  // Get the game result — lazily create if the user has votes but no record
   let gameResult = await prisma.gameResult.findUnique({
     where: { userId_sessionId: { userId: user.id, sessionId: id } },
   });
 
   if (!gameResult) {
-    return NextResponse.json({ error: "No results found" }, { status: 404 });
+    // Check if user actually participated (has votes for this session)
+    const voteCount = await prisma.vote.count({
+      where: { userId: user.id, matchup: { sessionId: id } },
+    });
+
+    if (voteCount === 0) {
+      return NextResponse.json({ error: "No results found" }, { status: 404 });
+    }
+
+    // User voted but GameResult was never created (e.g. join endpoint error)
+    gameResult = await prisma.gameResult.create({
+      data: {
+        userId: user.id,
+        sessionId: id,
+        walletAddress: user.walletAddress,
+      },
+    });
   }
 
   // If results haven't been calculated yet, calculate them via majority vote
@@ -70,7 +87,7 @@ export async function GET(
         totalVotes: userVotes.length,
         correctVotes,
         tier,
-        rewardAmount: tier === "gold" ? 3.5 : tier === "base" ? 1.75 : 0,
+        rewardAmount: tier === "gold" ? campaignConfig.goldRewardUsdc : tier === "base" ? campaignConfig.baseRewardUsdc : 0,
       },
     });
   }

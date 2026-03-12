@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
+import { campaignConfig } from "@/lib/campaign-config";
 
-const ROUND_DURATION_SECONDS = 30;
 const TICK_INTERVAL_MS = 1000;
 
 // GET /api/sessions/:id/stream — SSE endpoint for server-authoritative matchup state
@@ -16,6 +16,7 @@ export async function GET(
     where: { id },
     include: {
       _count: { select: { matchups: true } },
+      campaign: { select: { votingRoundDurationSecs: true } },
     },
   });
 
@@ -24,6 +25,7 @@ export async function GET(
   }
 
   const totalMatchups = session._count.matchups;
+  const roundDuration = session.campaign?.votingRoundDurationSecs ?? campaignConfig.votingRoundDurationSeconds;
 
   const stream = new ReadableStream({
     start(controller) {
@@ -71,23 +73,24 @@ export async function GET(
         const elapsed = Math.max(0, Math.floor((now - start) / 1000));
 
         // All rounds complete — session over
-        const totalDuration = totalMatchups * ROUND_DURATION_SECONDS;
+        const totalDuration = totalMatchups * roundDuration;
         if (elapsed >= totalDuration) {
-          sendEvent({ status: "ended", round: totalMatchups, secondsRemaining: 0, totalRounds: totalMatchups });
+          sendEvent({ status: "ended", round: totalMatchups, secondsRemaining: 0, totalRounds: totalMatchups, roundDuration });
           controller.close();
           clearInterval(intervalId);
           return;
         }
 
-        const currentRound = Math.floor(elapsed / ROUND_DURATION_SECONDS) + 1;
-        const secondsIntoRound = elapsed % ROUND_DURATION_SECONDS;
-        const secondsRemaining = ROUND_DURATION_SECONDS - secondsIntoRound;
+        const currentRound = Math.floor(elapsed / roundDuration) + 1;
+        const secondsIntoRound = elapsed % roundDuration;
+        const secondsRemaining = roundDuration - secondsIntoRound;
 
         sendEvent({
           status: "live",
           round: currentRound,
           secondsRemaining,
           totalRounds: totalMatchups,
+          roundDuration,
         });
       };
 

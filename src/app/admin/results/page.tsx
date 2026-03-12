@@ -152,14 +152,14 @@ export default function AdminResults() {
           <p className="text-white font-bold text-lg">
             {data.tierDistribution.base}
           </p>
-          <p className="text-[#888] text-[10px]">Base ($1.75)</p>
+          <p className="text-[#888] text-[10px]">Base (${process.env.BASE_REWARD_USDC ?? "1.75"})</p>
         </div>
         <div className="bg-[#1A1A1A] rounded-xl p-3 text-center border border-yellow-400/20">
           <Trophy className="w-5 h-5 text-yellow-400 mx-auto mb-1" />
           <p className="text-white font-bold text-lg">
             {data.tierDistribution.gold}
           </p>
-          <p className="text-[#888] text-[10px]">Gold ($3.50)</p>
+          <p className="text-[#888] text-[10px]">Gold (${process.env.NEXT_PUBLIC_ENTRY_FEE_USDC ?? "3.50"})</p>
         </div>
       </div>
 

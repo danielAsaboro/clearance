@@ -69,7 +69,7 @@ function ResultsContent() {
         <div className="flex-1 flex flex-col">
           <ResultsCard
             correctVotes={results.correctVotes}
-            totalRounds={results.totalVotes || 28}
+            totalRounds={results.totalVotes || parseInt(process.env.NEXT_PUBLIC_MATCHUPS_PER_SESSION ?? "28")}
             tier={results.tier}
             reward={results.rewardAmount}
           />

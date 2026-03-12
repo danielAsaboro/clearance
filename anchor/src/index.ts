@@ -1,1 +1,1 @@
-export * from './clearance-exports'
+export * from './spotr-exports'

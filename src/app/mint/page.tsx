@@ -126,7 +126,7 @@ export default function MintPage() {
         {/* Info */}
         <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-4 text-sm text-[#888] space-y-1">
           <p>• Each mint gives you <span className="text-white font-medium">10 USDC</span></p>
-          <p>• Session entry costs <span className="text-white font-medium">$3.50 USDC</span></p>
+          <p>• Session entry costs <span className="text-white font-medium">${process.env.NEXT_PUBLIC_ENTRY_FEE_USDC ?? "3.50"} USDC</span></p>
           <p>• Funds are on Solana Devnet and have no real value</p>
           <p>• Limit: 3 mints per hour</p>
         </div>

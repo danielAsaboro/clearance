@@ -1,5 +1,5 @@
 {
-  "name": "clearance",
+  "name": "spotr-tv",
   "scripts": {
     "anchor": "cd anchor && anchor",
     "anchor-build": "cd anchor && anchor build",
@@ -7,7 +7,8 @@
     "anchor-test": "cd anchor && anchor test",
     "build": "next build",
     "ci": "npm run build && npm run lint && npm run format:check",
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
+    "dev:turbo": "next dev --turbopack",
     "dev:local": "bash scripts/dev-local.sh",
     "setup-demo": "npx tsx --env-file=.env.local scripts/setup-demo.ts",
     "smoke:devnet": "CLUSTER=devnet npx tsx --env-file=.env.local scripts/devnet-raffle-smoke.ts",

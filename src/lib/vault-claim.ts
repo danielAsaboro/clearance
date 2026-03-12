@@ -11,11 +11,11 @@ import {
   buildInitializeVaultTransaction,
   buildRequestRaffleTransaction,
   fetchRaffleRecord,
-  getClearanceProgram,
+  getSpotrProgram,
   getRaffleRecordAddress,
   getVaultAddress,
-  type Clearance,
-} from "../../anchor/src/clearance-exports";
+  type Spotr,
+} from "../../anchor/src/spotr-exports";
 
 const connection = new Connection(
   process.env.NEXT_PUBLIC_SOLANA_RPC_URL ?? "https://api.devnet.solana.com",
@@ -33,16 +33,16 @@ function getAdminKeypair(): Keypair {
   return Keypair.fromSecretKey(Uint8Array.from(JSON.parse(secret)));
 }
 
-let _program: Program<Clearance> | null = null;
+let _program: Program<Spotr> | null = null;
 
-function getProgram(): Program<Clearance> {
+function getProgram(): Program<Spotr> {
   if (_program) return _program;
   const admin = getAdminKeypair();
   const wallet = new NodeWallet(admin);
   const provider = new AnchorProvider(connection, wallet, {
     commitment: "confirmed",
   });
-  _program = getClearanceProgram(provider);
+  _program = getSpotrProgram(provider);
   return _program;
 }
 

@@ -20,7 +20,7 @@ Creators produce TikTok content tied to platform-assigned tasks. Fans vote in li
 
 ```
 ├── anchor/                 # Solana program (Anchor)
-│   ├── programs/clearance/ # Smart contract (vault, claim_with_nft)
+│   ├── programs/spotr/     # Smart contract (vault, claim_with_nft)
 │   ├── tests/              # 11 on-chain integration tests
 │   └── src/                # TypeScript exports & IDL
 ├── prisma/
