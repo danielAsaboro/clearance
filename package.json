@@ -10,6 +10,7 @@
     "dev": "next dev",
     "dev:turbo": "next dev --turbopack",
     "dev:local": "bash scripts/dev-local.sh",
+    "setup-mint": "npx tsx --env-file=.env.local scripts/setup-mint.ts",
     "setup-demo": "npx tsx --env-file=.env.local scripts/setup-demo.ts",
     "smoke:devnet": "CLUSTER=devnet npx tsx --env-file=.env.local scripts/devnet-raffle-smoke.ts",
     "smoke:localnet": "CLUSTER=localnet npx tsx --env-file=.env.local scripts/devnet-raffle-smoke.ts",
