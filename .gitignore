@@ -46,6 +46,7 @@ next-env.d.ts
 # local video uploads
 /public/uploads/
 /public/sample_videos/
+/mobile/*.apk
 
 # Anchor
 /anchor/.anchor
