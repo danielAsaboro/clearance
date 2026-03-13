@@ -13,7 +13,8 @@ const connection = new Connection(
   "confirmed"
 );
 
-const USDC_MINT_ADDRESS = process.env.USDC_MINT_ADDRESS ??
+const USDC_MINT_ADDRESS =
+  process.env.USDC_MINT_ADDRESS ??
   "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 
 // How much test USDC to give per request
