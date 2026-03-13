@@ -63,6 +63,12 @@ if [[ ! -f "$USDC_AUTHORITY_KEYPAIR" ]]; then
   MISSING+=("USDC mint authority keypair not found at $USDC_AUTHORITY_KEYPAIR")
 fi
 
+PROGRAM_KEYPAIR_SOURCE="anchor/keys/spotr-keypair.json"
+PROGRAM_DEPLOY_BASENAME="spotrtv"
+if [[ ! -f "$PROGRAM_KEYPAIR_SOURCE" ]]; then
+  MISSING+=("Program keypair not found at $PROGRAM_KEYPAIR_SOURCE")
+fi
+
 if [[ ${#MISSING[@]} -gt 0 ]]; then
   echo -e "${RED}Missing prerequisites:${NC}"
   for item in "${MISSING[@]}"; do
@@ -71,6 +77,10 @@ if [[ ${#MISSING[@]} -gt 0 ]]; then
   exit 1
 fi
 echo -e "${GREEN}  All prerequisites met.${NC}"
+
+# ── Sync canonical program keypair ──────────────────────────────────
+mkdir -p anchor/target/deploy
+cp "$PROGRAM_KEYPAIR_SOURCE" "anchor/target/deploy/${PROGRAM_DEPLOY_BASENAME}-keypair.json"
 
 # ── Build Anchor program with testing feature ───────────────────────
 echo -e "${BOLD}Building Anchor program with --features testing...${NC}"
@@ -116,11 +126,12 @@ echo -e "${GREEN}  Airdropped SOL to admin and USDC authority.${NC}"
 
 # ── Deploy program ──────────────────────────────────────────────────
 echo -e "${BOLD}Deploying program...${NC}"
+cp "$PROGRAM_KEYPAIR_SOURCE" "anchor/target/deploy/${PROGRAM_DEPLOY_BASENAME}-keypair.json"
 solana program deploy \
   --url http://localhost:8899 \
   --keypair "$WALLET" \
-  --program-id anchor/target/deploy/spotr-keypair.json \
-  anchor/target/deploy/spotr.so
+  --program-id "anchor/target/deploy/${PROGRAM_DEPLOY_BASENAME}-keypair.json" \
+  "anchor/target/deploy/${PROGRAM_DEPLOY_BASENAME}.so"
 echo -e "${GREEN}  Program deployed.${NC}"
 
 # ── Create USDC mint on localnet ────────────────────────────────────
@@ -245,7 +256,7 @@ SOLANA_MINT_AUTHORITY_SECRET_KEY="$MINT_AUTH_SECRET" \
 NEXTJS_PID=$!
 
 # ── Summary ─────────────────────────────────────────────────────────
-PROGRAM_ID=$(solana-keygen pubkey anchor/target/deploy/spotr-keypair.json 2>/dev/null || echo "unknown")
+PROGRAM_ID=$(solana-keygen pubkey "anchor/target/deploy/${PROGRAM_DEPLOY_BASENAME}-keypair.json" 2>/dev/null || echo "unknown")
 
 echo ""
 echo -e "${BOLD}════════════════════════════════════════════════${NC}"

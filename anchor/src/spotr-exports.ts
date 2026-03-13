@@ -14,10 +14,11 @@ import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   getAssociatedTokenAddressSync,
 } from '@solana/spl-token'
-import SpotrIDL from '../target/idl/spotr.json'
-import type { Spotr } from '../target/types/spotr'
+import ClearanceIDL from '../target/idl/clearance.json'
+import type { Clearance } from '../target/types/clearance'
 
-export { Spotr, SpotrIDL }
+export type Spotr = Clearance
+export const SpotrIDL: Spotr = ClearanceIDL as Spotr
 
 export const SPOTR_PROGRAM_ID = new PublicKey(SpotrIDL.address)
 

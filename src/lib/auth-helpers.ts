@@ -8,6 +8,18 @@ const privy = new PrivyClient(
   process.env.PRIVY_APP_SECRET!
 );
 
+function getLinkedSolanaWalletAddress(privyUser: Awaited<ReturnType<typeof privy.getUser>>) {
+  const solanaWallet = privyUser.linkedAccounts.find(
+    (account): account is typeof account & { address: string; chainType: "solana" } =>
+      account.type === "wallet" &&
+      "address" in account &&
+      "chainType" in account &&
+      account.chainType === "solana"
+  );
+
+  return solanaWallet?.address ?? null;
+}
+
 export async function getAuthUser(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
   if (!authHeader?.startsWith("Bearer ")) return null;
@@ -17,19 +29,37 @@ export async function getAuthUser(req: NextRequest) {
   try {
     const verifiedClaims = await privy.verifyAuthToken(token);
     const privyId = verifiedClaims.userId;
+    const shouldHydratePrivyProfile = async (user: { email: string | null; phone: string | null; walletAddress: string | null } | null) =>
+      !user || !user.email || !user.phone || !user.walletAddress;
 
     let user = await prisma.user.findUnique({ where: { privyId } });
 
-    if (!user) {
+    if (await shouldHydratePrivyProfile(user)) {
       const privyUser = await privy.getUser(privyId);
-      user = await prisma.user.create({
-        data: {
-          privyId,
-          email: privyUser.email?.address ?? null,
-          phone: privyUser.phone?.number ?? null,
-          referralCode: nanoid(8).toUpperCase(),
-        },
-      });
+      const email = privyUser.email?.address ?? null;
+      const phone = privyUser.phone?.number ?? null;
+      const walletAddress = getLinkedSolanaWalletAddress(privyUser);
+
+      if (!user) {
+        user = await prisma.user.create({
+          data: {
+            privyId,
+            email,
+            phone,
+            walletAddress,
+            referralCode: nanoid(8).toUpperCase(),
+          },
+        });
+      } else {
+        user = await prisma.user.update({
+          where: { id: user.id },
+          data: {
+            email: user.email ?? email,
+            phone: user.phone ?? phone,
+            walletAddress: user.walletAddress ?? walletAddress,
+          },
+        });
+      }
     }
 
     return user;

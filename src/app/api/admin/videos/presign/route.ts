@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth-helpers";
-import { getPresignedUploadUrl } from "@/lib/s3";
+import { getUploadIntent } from "@/lib/storage";
 import { nanoid } from "nanoid";
 import { checkRateLimit } from "@/lib/rate-limit";
 
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
   const ext = extMap[contentType] ?? "mp4";
   const key = `videos/${nanoid()}.${ext}`;
 
-  const { uploadUrl, publicUrl } = await getPresignedUploadUrl(key, contentType);
+  const { uploadUrl, publicUrl } = await getUploadIntent(key, contentType);
 
   return NextResponse.json({ uploadUrl, publicUrl });
 }

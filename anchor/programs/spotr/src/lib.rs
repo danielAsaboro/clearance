@@ -20,7 +20,7 @@ const MPL_CORE_UA_TYPE_ADDRESS: u8 = 1;
 // ---------------------------------------------------------------------------
 
 #[program]
-pub mod spotr {
+pub mod spotrtv {
     use super::*;
 
     /// Create a per-session vault PDA and its associated USDC token account.
