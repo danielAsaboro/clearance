@@ -43,6 +43,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# local video uploads
+/public/uploads/
+/public/sample_videos/
+
 # Anchor
 /anchor/.anchor
 /anchor/target/debug
