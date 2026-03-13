@@ -1,8 +1,14 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import type { NextConfig } from "next";
 import withPWA from "@ducanh2912/next-pwa";
 
+const projectRoot = path.dirname(fileURLToPath(import.meta.url));
+
 const nextConfig: NextConfig = {
-  turbopack: {},
+  turbopack: {
+    root: projectRoot,
+  },
   async headers() {
     return [
       {

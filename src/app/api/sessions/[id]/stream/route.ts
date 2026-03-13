@@ -44,6 +44,9 @@ export async function GET(
         try {
           const refreshed = await prisma.weeklySession.findUnique({
             where: { id },
+            include: {
+              campaign: { select: { votingRoundDurationSecs: true } },
+            },
           });
           if (!refreshed) {
             sendEvent({ status: "ended", round: 0, secondsRemaining: 0, totalRounds: totalMatchups });

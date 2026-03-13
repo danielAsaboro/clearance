@@ -1,12 +1,12 @@
 [package]
-name = "spotr"
+name = "spotrtv"
 version = "0.1.0"
 description = "Spotr TV USDC vault program"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "spotr"
+name = "spotrtv"
 
 [features]
 default = []

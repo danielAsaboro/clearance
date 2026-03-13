@@ -24,17 +24,17 @@ import {
   publicKey as toUmiPublicKey,
 } from '@metaplex-foundation/umi'
 import type { Umi } from '@metaplex-foundation/umi'
-import { Spotr } from '../target/types/spotr'
+import type { Clearance as Spotrtv } from '../target/types/clearance'
 
 const MPL_CORE_PROGRAM_ID = new PublicKey(
   'CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d',
 )
 
-describe('spotr', () => {
+describe('spotrtv', () => {
   const provider = anchor.AnchorProvider.env()
   anchor.setProvider(provider)
 
-  const program = anchor.workspace.Spotr as Program<Spotr>
+  const program = anchor.workspace.Spotrtv as Program<Spotrtv>
   const admin = provider.wallet as anchor.Wallet
   const user = Keypair.generate()
 

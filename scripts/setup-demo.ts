@@ -51,7 +51,9 @@ import {
 
 // ── Config ──────────────────────────────────────────────────────────
 
-const NUM_MATCHUPS = parseInt(process.env.VIDEOS_PER_LIVE_SESSION ?? "5");
+const LIVE_SESSION_MATCHUPS = parseInt(
+  process.env.VIDEOS_PER_LIVE_SESSION ?? "28"
+);
 const DEPOSIT_USDC = 100;
 const ENTRY_FEE_USDC = parseFloat(process.env.ENTRY_FEE_USDC ?? "3.50");
 const ROUND_DURATION = parseInt(process.env.VOTING_ROUND_DURATION_IN_SECONDS ?? "30");
@@ -99,6 +101,16 @@ const PLAYER_VOTES: {
   },
 ];
 
+const COMPLETED_SESSION_WINNERS: ("video_a" | "video_b")[] = [
+  "video_a",
+  "video_a",
+  "video_b",
+  "video_b",
+  "video_a",
+];
+
+const COMPLETED_SESSION_MATCHUPS = COMPLETED_SESSION_WINNERS.length;
+
 // ── Helpers ─────────────────────────────────────────────────────────
 
 const connection = new Connection(
@@ -119,6 +131,64 @@ function getAdminKeypair(): Keypair {
 
 function logStep(phase: string, step: string) {
   console.log(`  [${phase}] ${step}`);
+}
+
+function getDemoVideoUrl(index: number) {
+  const sampleUrl = SAMPLE_VIDEO_URLS[index % SAMPLE_VIDEO_URLS.length];
+  const sampleNumber = (index % SAMPLE_VIDEO_URLS.length) + 1;
+  return `${sampleUrl}?variant=${index + 1}&sample=${sampleNumber}`;
+}
+
+async function resetDemoSession(weekNumber: number, phase: string) {
+  const existing = await prisma.weeklySession.findUnique({
+    where: { weekNumber },
+    include: {
+      matchups: {
+        select: {
+          id: true,
+          videoAId: true,
+          videoBId: true,
+        },
+      },
+    },
+  });
+
+  if (!existing) {
+    return;
+  }
+
+  const matchupIds = existing.matchups.map((matchup) => matchup.id);
+  const videoIds = Array.from(
+    new Set(
+      existing.matchups.flatMap((matchup) => [matchup.videoAId, matchup.videoBId])
+    )
+  );
+
+  if (matchupIds.length > 0) {
+    await prisma.vote.deleteMany({
+      where: { matchupId: { in: matchupIds } },
+    });
+  }
+
+  await prisma.gameResult.deleteMany({
+    where: { sessionId: existing.id },
+  });
+
+  await prisma.matchup.deleteMany({
+    where: { sessionId: existing.id },
+  });
+
+  await prisma.weeklySession.delete({
+    where: { id: existing.id },
+  });
+
+  if (videoIds.length > 0) {
+    await prisma.video.deleteMany({
+      where: { id: { in: videoIds } },
+    });
+  }
+
+  logStep(phase, `Reset stale demo data for week ${weekNumber} (${existing.id}).`);
 }
 
 /** Deserialize a base64 tx, have the player sign, then send. */
@@ -201,15 +271,7 @@ async function phase2_completedSession(adminUserId: string) {
   console.log("\n  ── Phase 2: Completed Session (Week 1) ──\n");
 
   const WEEK = 1;
-
-  // Check if already exists
-  const existing = await prisma.weeklySession.findUnique({
-    where: { weekNumber: WEEK },
-  });
-  if (existing) {
-    logStep("2", `Week ${WEEK} session already exists (${existing.id}). Skipping.`);
-    return existing;
-  }
+  await resetDemoSession(WEEK, "2");
 
   // 2a. On-chain: initialize vault + deposit
   let vaultAddress: string;
@@ -245,20 +307,20 @@ async function phase2_completedSession(adminUserId: string) {
 
   // 2c. DB: Upload demo videos + create matchups
   const videoIds: string[] = [];
-  for (let i = 0; i < NUM_MATCHUPS * 2; i++) {
+  for (let i = 0; i < COMPLETED_SESSION_MATCHUPS * 2; i++) {
     const video = await prisma.video.create({
       data: {
         title: `Demo Video ${i + 1}`,
-        url: SAMPLE_VIDEO_URLS[i],
+        url: getDemoVideoUrl(i),
         uploadedById: adminUserId,
       },
     });
     videoIds.push(video.id);
   }
-  logStep("2", `Uploaded ${NUM_MATCHUPS * 2} demo videos.`);
+  logStep("2", `Uploaded ${COMPLETED_SESSION_MATCHUPS * 2} demo videos.`);
 
   const matchupIds: string[] = [];
-  for (let i = 0; i < NUM_MATCHUPS; i++) {
+  for (let i = 0; i < COMPLETED_SESSION_MATCHUPS; i++) {
     const matchup = await prisma.matchup.create({
       data: {
         sessionId: session.id,
@@ -270,7 +332,7 @@ async function phase2_completedSession(adminUserId: string) {
     });
     matchupIds.push(matchup.id);
   }
-  logStep("2", `Created ${NUM_MATCHUPS} matchups.`);
+  logStep("2", `Created ${COMPLETED_SESSION_MATCHUPS} matchups.`);
 
   // 2d. DB: Create player users + votes + game results
   for (const player of PLAYER_VOTES) {
@@ -287,7 +349,7 @@ async function phase2_completedSession(adminUserId: string) {
     });
 
     // Create votes
-    for (let i = 0; i < NUM_MATCHUPS; i++) {
+    for (let i = 0; i < COMPLETED_SESSION_MATCHUPS; i++) {
       await prisma.vote.upsert({
         where: { userId_matchupId: { userId: user.id, matchupId: matchupIds[i] } },
         update: {},
@@ -306,7 +368,7 @@ async function phase2_completedSession(adminUserId: string) {
       create: {
         userId: user.id,
         sessionId: session.id,
-        totalVotes: NUM_MATCHUPS,
+        totalVotes: COMPLETED_SESSION_MATCHUPS,
         correctVotes: player.correct,
         tier: player.tier,
       },
@@ -314,19 +376,21 @@ async function phase2_completedSession(adminUserId: string) {
 
     logStep(
       "2",
-      `${player.label}: ${player.correct}/${NUM_MATCHUPS} correct → ${player.tier} (user: ${user.id})`
+      `${player.label}: ${player.correct}/${COMPLETED_SESSION_MATCHUPS} correct → ${player.tier} (user: ${user.id})`
     );
   }
 
   // 2e. Set majority winners on matchups
   // Majority: video_a wins matchups 1,2,5; video_b wins matchups 3,4
-  const majorityWinners: ("video_a" | "video_b")[] = ["video_a", "video_a", "video_b", "video_b", "video_a"];
-  for (let i = 0; i < NUM_MATCHUPS; i++) {
+  for (let i = 0; i < COMPLETED_SESSION_MATCHUPS; i++) {
     const matchup = await prisma.matchup.findFirst({
       where: { sessionId: session.id, matchupNumber: i + 1 },
     });
     if (matchup) {
-      const winningVideoId = majorityWinners[i] === "video_a" ? matchup.videoAId : matchup.videoBId;
+      const winningVideoId =
+        COMPLETED_SESSION_WINNERS[i] === "video_a"
+          ? matchup.videoAId
+          : matchup.videoBId;
       await prisma.matchup.update({
         where: { id: matchup.id },
         data: { winningVideoId },
@@ -335,7 +399,9 @@ async function phase2_completedSession(adminUserId: string) {
   }
   logStep(
     "2",
-    `Set majority winners: ${majorityWinners.map((v) => v.toUpperCase().replace("VIDEO_", "")).join(",")}`
+    `Set majority winners: ${COMPLETED_SESSION_WINNERS.map((v) =>
+      v.toUpperCase().replace("VIDEO_", "")
+    ).join(",")}`
   );
 
   return session;
@@ -503,15 +569,7 @@ async function phase4_playableSession(adminUserId: string) {
   console.log("\n  ── Phase 4: Playable Session (Week 2) ──\n");
 
   const WEEK = 2;
-
-  // Check if already exists
-  const existing = await prisma.weeklySession.findUnique({
-    where: { weekNumber: WEEK },
-  });
-  if (existing) {
-    logStep("4", `Week ${WEEK} session already exists (${existing.id}). Skipping.`);
-    return existing;
-  }
+  await resetDemoSession(WEEK, "4");
 
   // 4a. On-chain: initialize vault + deposit
   let vaultAddress: string;
@@ -547,18 +605,18 @@ async function phase4_playableSession(adminUserId: string) {
 
   // 4c. DB: Upload videos + create matchups (no winners yet — determined by majority vote)
   const videoIds: string[] = [];
-  for (let i = 0; i < NUM_MATCHUPS * 2; i++) {
+  for (let i = 0; i < LIVE_SESSION_MATCHUPS * 2; i++) {
     const video = await prisma.video.create({
       data: {
         title: `Week 2 Video ${i + 1}`,
-        url: SAMPLE_VIDEO_URLS[i],
+        url: getDemoVideoUrl(COMPLETED_SESSION_MATCHUPS * 2 + i),
         uploadedById: adminUserId,
       },
     });
     videoIds.push(video.id);
   }
 
-  for (let i = 0; i < NUM_MATCHUPS; i++) {
+  for (let i = 0; i < LIVE_SESSION_MATCHUPS; i++) {
     await prisma.matchup.create({
       data: {
         sessionId: session.id,
@@ -569,7 +627,10 @@ async function phase4_playableSession(adminUserId: string) {
       },
     });
   }
-  logStep("4", `Created ${NUM_MATCHUPS} matchups (no winners — ready for voting).`);
+  logStep(
+    "4",
+    `Created ${LIVE_SESSION_MATCHUPS} matchups (no winners — ready for voting).`
+  );
 
   return session;
 }
