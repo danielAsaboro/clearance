@@ -4,6 +4,8 @@ import {
   submitVoteSchema,
   claimUsdcSchema,
   createVideoSchema,
+  createVideoUploadIntentSchema,
+  createVideoCategorySchema,
   createMatchupsSchema,
 } from "@/lib/validators";
 
@@ -145,7 +147,10 @@ describe("Validators", () => {
   describe("createVideoSchema", () => {
     it("accepts valid video data", () => {
       const result = createVideoSchema.safeParse({
-        url: "https://s3.example.com/videos/abc.mp4",
+        originalFilename: "clip.mp4",
+        sourceContentType: "video/mp4",
+        sourceBytes: 1024,
+        sourceKey: "videos/uploads/source/clip-abc123.mp4",
       });
       expect(result.success).toBe(true);
     });
@@ -153,24 +158,66 @@ describe("Validators", () => {
     it("accepts video with optional fields", () => {
       const result = createVideoSchema.safeParse({
         title: "Trending Dance",
-        url: "https://s3.example.com/videos/abc.mp4",
-        thumbnailUrl: "https://s3.example.com/thumbs/abc.jpg",
-        duration: 30,
+        tags: ["dance", "lagos"],
+        originalFilename: "clip.mov",
+        sourceContentType: "video/quicktime",
+        sourceBytes: 2048,
+        sourceKey: "videos/uploads/source/clip-xyz789.mov",
       });
       expect(result.success).toBe(true);
     });
 
-    it("rejects invalid URL", () => {
+    it("accepts video without a category", () => {
       const result = createVideoSchema.safeParse({
-        url: "not-a-url",
+        originalFilename: "clip.mp4",
+        sourceContentType: "video/mp4",
+        sourceKey: "videos/uploads/source/clip.mp4",
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it("rejects oversized tag payload", () => {
+      const result = createVideoSchema.safeParse({
+        tags: Array.from({ length: 13 }, (_, index) => `tag-${index}`),
+        originalFilename: "clip.mp4",
+        sourceContentType: "video/mp4",
+        sourceKey: "videos/uploads/source/clip.mp4",
       });
       expect(result.success).toBe(false);
     });
+  });
 
-    it("rejects negative duration", () => {
-      const result = createVideoSchema.safeParse({
-        url: "https://s3.example.com/videos/abc.mp4",
-        duration: -5,
+  describe("createVideoUploadIntentSchema", () => {
+    it("accepts supported video uploads", () => {
+      const result = createVideoUploadIntentSchema.safeParse({
+        filename: "promo.mp4",
+        contentType: "video/mp4",
+        size: 5_000_000,
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it("rejects unsupported content type", () => {
+      const result = createVideoUploadIntentSchema.safeParse({
+        filename: "promo.avi",
+        contentType: "video/x-msvideo",
+        size: 5_000_000,
+      });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe("createVideoCategorySchema", () => {
+    it("accepts a category name", () => {
+      const result = createVideoCategorySchema.safeParse({
+        name: "Comedy",
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it("rejects empty category name", () => {
+      const result = createVideoCategorySchema.safeParse({
+        name: "",
       });
       expect(result.success).toBe(false);
     });

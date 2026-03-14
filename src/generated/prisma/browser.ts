@@ -28,6 +28,11 @@ export type User = Prisma.UserModel
  */
 export type Video = Prisma.VideoModel
 /**
+ * Model VideoCategory
+ * 
+ */
+export type VideoCategory = Prisma.VideoCategoryModel
+/**
  * Model WeeklySession
  * 
  */

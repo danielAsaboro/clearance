@@ -28,10 +28,34 @@ export const claimUsdcSchema = z.object({
 });
 
 export const createVideoSchema = z.object({
-  title: z.string().max(200).optional(),
-  url: z.string().url(),
-  thumbnailUrl: z.string().url().optional(),
-  duration: z.number().int().positive().optional(),
+  title: z.string().trim().min(1).max(200).optional(),
+  categoryId: z.string().min(1).nullable().optional(),
+  tags: z.array(z.string().trim().min(1).max(50)).max(12).default([]),
+  originalFilename: z.string().trim().min(1).max(255),
+  sourceContentType: z.string().trim().min(1).max(100),
+  sourceBytes: z.number().int().positive().max(1024 * 1024 * 1024).optional(),
+  sourceKey: z.string().trim().min(1).max(500),
+});
+
+export const createVideoUploadIntentSchema = z.object({
+  filename: z.string().trim().min(1).max(255),
+  contentType: z.enum(["video/mp4", "video/webm", "video/quicktime"]),
+  size: z.number().int().positive().max(1024 * 1024 * 1024),
+});
+
+export const updateVideoSchema = z.object({
+  title: z.string().trim().min(1).max(200).nullable().optional(),
+  categoryId: z.string().min(1).nullable().optional(),
+  tags: z.array(z.string().trim().min(1).max(50)).max(12).optional(),
+  thumbnailUrl: z.string().url().nullable().optional(),
+});
+
+export const createVideoCategorySchema = z.object({
+  name: z.string().trim().min(1).max(80),
+});
+
+export const updateVideoCategorySchema = z.object({
+  name: z.string().trim().min(1).max(80),
 });
 
 export const createMatchupsSchema = z.object({
