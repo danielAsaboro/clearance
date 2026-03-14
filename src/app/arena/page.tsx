@@ -17,6 +17,7 @@ interface SessionData {
   lateJoinCutoff: string | null;
   totalMatchups?: number;
   roundDurationSeconds?: number;
+  isSample?: boolean;
 }
 
 export default function Arena() {

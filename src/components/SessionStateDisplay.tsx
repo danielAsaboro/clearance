@@ -13,6 +13,7 @@ interface SessionData {
   status: string;
   totalMatchups?: number;
   roundDurationSeconds?: number;
+  isSample?: boolean;
 }
 
 interface SessionStateDisplayProps {
@@ -139,7 +140,7 @@ export default function SessionStateDisplay({
         <h2 className="text-xl font-bold text-white mb-2">{session.title}</h2>
         <p className="text-[#888] text-sm mb-6">Session is happening now!</p>
         <Link
-          href={`/arena/game?session=${session.id}`}
+          href={`/arena/game?session=${session.id}${session.isSample ? "&sample=true" : ""}`}
           className="btn-yellow inline-block px-8 py-4 rounded-xl font-bold text-base"
         >
           <Radio className="w-5 h-5 inline mr-2" />

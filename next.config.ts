@@ -4,10 +4,25 @@ import type { NextConfig } from "next";
 import withPWA from "@ducanh2912/next-pwa";
 
 const projectRoot = path.dirname(fileURLToPath(import.meta.url));
+const localTailwindCssEntry = path.join(
+  projectRoot,
+  "node_modules",
+  "tailwindcss",
+  "index.css"
+);
 
 const nextConfig: NextConfig = {
   turbopack: {
     root: projectRoot,
+    resolveAlias: {
+      tailwindcss: localTailwindCssEntry,
+    },
+  },
+  webpack(config) {
+    config.resolve ??= {};
+    config.resolve.alias ??= {};
+    config.resolve.alias.tailwindcss = localTailwindCssEntry;
+    return config;
   },
   async headers() {
     return [

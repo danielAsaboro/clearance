@@ -15,6 +15,7 @@ import Link from "next/link";
 import ProgressBar from "@/components/ProgressBar";
 import { useOnboarding } from "@/lib/onboarding-context";
 import { usePrivy } from "@privy-io/react-auth";
+import { toast } from "sonner";
 
 const TOTAL_STEPS = 4;
 
@@ -56,11 +57,17 @@ export default function CompleteStep() {
         body: JSON.stringify(body),
       });
 
-      if (!res.ok) throw new Error("Failed to submit");
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => null);
+        const message = errorData?.error || "Failed to complete registration";
+        toast.error(message);
+        return;
+      }
 
       const result = await res.json();
       setReferralCode(result.referralCode);
       setSubmitted(true);
+      toast.success("Registration complete!");
 
       // Record referral
       try {
@@ -73,6 +80,7 @@ export default function CompleteStep() {
       }
     } catch (err) {
       console.error("Onboarding error:", err);
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);
     }
