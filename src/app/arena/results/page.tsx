@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { usePrivy } from "@privy-io/react-auth";
-import { ArrowLeft, Share2, Eye, Gift } from "lucide-react";
+import { ArrowLeft, Share2, Eye, Gift, Link2 } from "lucide-react";
 import Link from "next/link";
 import ResultsCard from "@/components/ResultsCard";
 
@@ -67,9 +67,20 @@ function ResultsContent() {
 
       {results ? (
         <div className="flex-1 flex flex-col">
+          {/* Taste Score heading */}
+          <div className="text-center mb-4">
+            <p className="text-[#888] text-xs tracking-wider uppercase mb-1">Taste Score</p>
+            <p className="text-white text-3xl font-bold">
+              {results.correctVotes}/{results.totalVotes}{" "}
+              <span className="text-[#F5E642] text-lg">
+                ({results.totalVotes > 0 ? Math.round((results.correctVotes / results.totalVotes) * 100) : 0}%)
+              </span>
+            </p>
+          </div>
+
           <ResultsCard
             correctVotes={results.correctVotes}
-            totalRounds={results.totalVotes || parseInt(process.env.NEXT_PUBLIC_MATCHUPS_PER_SESSION ?? "28")}
+            totalRounds={results.totalVotes || parseInt(process.env.NEXT_PUBLIC_ROUNDS_PER_SESSION!)}
             tier={results.tier}
             reward={results.rewardAmount}
           />
@@ -126,6 +137,21 @@ function ResultsContent() {
               <Share2 className="w-4 h-4" />
               Share Results
             </button>
+            {sessionId && (
+              <button
+                onClick={() => {
+                  const origin = window.location.origin;
+                  const actionUrl = `${origin}/api/actions/vote?session=${sessionId}`;
+                  const blinkUrl = `https://dial.to/?action=solana-action:${encodeURIComponent(actionUrl)}`;
+                  navigator.clipboard.writeText(blinkUrl);
+                  alert("Blink URL copied! Share it on Twitter/X.");
+                }}
+                className="w-full bg-[#1A1A1A] rounded-xl py-4 text-sm text-white flex items-center justify-center gap-2 border border-[#2A2A2A] hover:border-[#F5E642]/30 transition-colors"
+              >
+                <Link2 className="w-4 h-4 text-[#F5E642]" />
+                Share as Blink
+              </button>
+            )}
             <Link
               href="/arena"
               className="btn-yellow w-full rounded-xl py-4 text-base font-bold flex items-center justify-center"

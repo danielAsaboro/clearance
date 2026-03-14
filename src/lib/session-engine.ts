@@ -1,5 +1,8 @@
 import type { WeeklySession } from "@/generated/prisma/client";
-import { campaignConfig } from "@/lib/campaign-config";
+
+// Use NEXT_PUBLIC_ vars so this module works in both server and client bundles
+const DEFAULT_MATCHUPS = parseInt(process.env.NEXT_PUBLIC_ROUNDS_PER_SESSION!);
+const DEFAULT_ROUND_DURATION = parseInt(process.env.NEXT_PUBLIC_VOTING_ROUND_DURATION_IN_SECONDS!);
 
 export type SessionState = "future" | "today-waiting" | "live" | "ended";
 
@@ -23,7 +26,7 @@ export function getSessionState(session: WeeklySession): SessionState {
 
 export function getCurrentRound(
   session: WeeklySession,
-  roundDuration: number = campaignConfig.votingRoundDurationSeconds
+  roundDuration: number = DEFAULT_ROUND_DURATION
 ): number {
   if (session.status !== "live") return 0;
   const now = new Date();
@@ -31,7 +34,7 @@ export function getCurrentRound(
   const elapsed = Math.floor((now.getTime() - start.getTime()) / 1000);
   return Math.min(
     Math.floor(elapsed / roundDuration) + 1,
-    campaignConfig.matchupsPerSession
+    DEFAULT_MATCHUPS
   );
 }
 
@@ -49,7 +52,7 @@ export function canLateJoin(session: WeeklySession): boolean {
 
 export function calculateTier(
   correctVotes: number,
-  totalMatchups: number = campaignConfig.matchupsPerSession
+  totalMatchups: number = DEFAULT_MATCHUPS
 ): {
   tier: "participation" | "base" | "gold";
 } {
@@ -105,8 +108,8 @@ export function generateCalendarICS(session: {
   const start = new Date(session.scheduledAt);
   const end = new Date(
     start.getTime() +
-      campaignConfig.matchupsPerSession *
-        campaignConfig.votingRoundDurationSeconds *
+      DEFAULT_MATCHUPS *
+        DEFAULT_ROUND_DURATION *
         1000
   );
 

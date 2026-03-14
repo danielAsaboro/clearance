@@ -33,7 +33,7 @@ interface RoundState {
 
 type GamePhase = "confirming" | "joining" | "playing" | "insufficient";
 
-const ENTRY_FEE = process.env.NEXT_PUBLIC_ENTRY_FEE_USDC ?? "3.50";
+const ENTRY_FEE = process.env.NEXT_PUBLIC_ENTRY_FEE_USDC!;
 
 // ---------------------------------------------------------------------------
 // Entry Confirmation Modal
@@ -335,6 +335,7 @@ function GameContent() {
   const sessionId = searchParams.get("session");
   const { getAccessToken } = usePrivy();
 
+  const isSample = searchParams.get("sample") === "true";
   const [phase, setPhase] = useState<GamePhase>("confirming");
   const [matchups, setMatchups] = useState<Matchup[]>([]);
   const [roundState, setRoundState] = useState<RoundState | null>(null);
@@ -354,7 +355,7 @@ function GameContent() {
   const prevRound = useRef<number>(0);
   const lastPick = useRef<"video_a" | "video_b" | null>(null);
 
-  // Fetch matchups list
+  // Fetch matchups list — always use real endpoint since sample sessions have real DB records
   const fetchMatchups = useCallback(async () => {
     if (!sessionId) return;
     setLoading(true);
@@ -374,7 +375,10 @@ function GameContent() {
   useEffect(() => {
     if (phase !== "playing" || !sessionId) return;
 
-    const es = new EventSource(`/api/sessions/${sessionId}/stream`);
+    const streamUrl = isSample
+      ? `/api/sessions/sample/stream?sessionId=${sessionId}`
+      : `/api/sessions/${sessionId}/stream`;
+    const es = new EventSource(streamUrl);
 
     es.onmessage = (event) => {
       const data: RoundState = JSON.parse(event.data);
@@ -391,7 +395,7 @@ function GameContent() {
     };
 
     return () => es.close();
-  }, [phase, sessionId]);
+  }, [phase, sessionId, isSample]);
 
   // Auto-advance voted state when server round changes — show interstitial
   useEffect(() => {
@@ -537,7 +541,7 @@ function GameContent() {
   }
 
   const serverRound = roundState?.round ?? 1;
-  const roundDuration = roundState?.roundDuration ?? defaultRoundDuration ?? parseInt(process.env.NEXT_PUBLIC_VOTING_ROUND_DURATION_IN_SECONDS ?? "30");
+  const roundDuration = roundState?.roundDuration ?? defaultRoundDuration ?? parseInt(process.env.NEXT_PUBLIC_VOTING_ROUND_DURATION_IN_SECONDS!);
   const secondsRemaining = roundState?.secondsRemaining ?? roundDuration;
   const currentMatchup = matchups[serverRound - 1] ?? matchups[0];
   const totalRounds = roundState?.totalRounds ?? matchups.length;
@@ -548,13 +552,8 @@ function GameContent() {
       <div className="px-4 pt-4 pb-2">
         <div className="flex items-center justify-between mb-2">
           <span className="text-[#888] text-xs tracking-wider uppercase">
-            Matchup {serverRound} / {totalRounds}
+            Round {serverRound} / {totalRounds}
           </span>
-          <div className="flex items-center gap-1.5 bg-[#1A1A1A] rounded-full px-3 py-1.5 border border-[#2A2A2A]">
-            <BarChart3 className="w-4 h-4 text-[#F5E642]" />
-            <span className="text-white text-sm font-bold">{serverRound}</span>
-            <span className="text-[#555] text-sm">/ {totalRounds}</span>
-          </div>
         </div>
         <div className="mb-3">
           <ProgressBar currentStep={serverRound} totalSteps={totalRounds} />

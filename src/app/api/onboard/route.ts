@@ -44,6 +44,16 @@ export async function POST(req: NextRequest) {
 
   // Store email if provided and user doesn't already have one
   if (email && !authUser.email) {
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+      select: { id: true },
+    });
+    if (existingUser && existingUser.id !== authUser.id) {
+      return NextResponse.json(
+        { error: "Email is already in use" },
+        { status: 409 }
+      );
+    }
     updateData.email = email;
   }
 

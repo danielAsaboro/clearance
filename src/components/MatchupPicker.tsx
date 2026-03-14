@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import VideoPlayer from "@/components/VideoPlayer";
-import { Check, TrendingUp } from "lucide-react";
 
 interface VideoData {
   id: string;
@@ -26,98 +25,143 @@ export default function MatchupPicker({
   videoB,
   onPick,
   voted,
-  disabled = false,
   muted: mutedProp,
   onToggleMute: onToggleMuteProp,
 }: MatchupPickerProps) {
   const [activeVideo, setActiveVideo] = useState<"a" | "b">("a");
   const [localMuted, setLocalMuted] = useState(true);
+  const [hasScrolled, setHasScrolled] = useState(false);
 
   const muted = mutedProp !== undefined ? mutedProp : localMuted;
   const handleToggleMute = onToggleMuteProp ?? (() => setLocalMuted((m) => !m));
 
-  const currentVideo = activeVideo === "a" ? videoA : videoB;
+  const outerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const lastPickRef = useRef<"video_a" | "video_b" | null>(null);
+  const ignoringScrollRef = useRef(false);
+  const [slotHeight, setSlotHeight] = useState(0);
+
+  useEffect(() => {
+    const el = outerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => {
+      if (el.clientHeight > 0) setSlotHeight(el.clientHeight);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const handleScroll = useCallback(() => {
+    if (ignoringScrollRef.current) return;
+    const el = containerRef.current;
+    if (!el) return;
+    if (!hasScrolled) setHasScrolled(true);
+
+    const pos = Math.round(el.scrollTop / el.clientHeight);
+
+    // Positions: 0=A, 1=B, 2=A_clone (cyclic)
+    // When reaching clone, set vote then silently jump back to real A
+    if (pos >= 2) {
+      if (lastPickRef.current !== "video_a") {
+        lastPickRef.current = "video_a";
+        setActiveVideo("a");
+        onPick("video_a");
+      }
+      ignoringScrollRef.current = true;
+      el.scrollTop = 0;
+      requestAnimationFrame(() => {
+        ignoringScrollRef.current = false;
+      });
+      return;
+    }
+
+    const pick = pos === 1 ? "video_b" : "video_a";
+    const active = pick === "video_a" ? "a" : "b";
+    if (pick !== lastPickRef.current) {
+      lastPickRef.current = pick;
+      setActiveVideo(active);
+      onPick(pick);
+    }
+  }, [onPick, hasScrolled]);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    el.addEventListener("scroll", handleScroll, { passive: true });
+    return () => el.removeEventListener("scroll", handleScroll);
+  }, [handleScroll]);
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Toggle Bar */}
-      <div className="flex gap-2 mb-3">
-        <button
-          onClick={() => setActiveVideo("a")}
-          className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-colors ${
-            activeVideo === "a"
-              ? "bg-[#F5E642] text-black"
-              : "bg-[#1A1A1A] text-[#888] border border-[#2A2A2A]"
-          }`}
+    <div ref={outerRef} className="flex-1 min-h-0">
+      {slotHeight > 0 && (
+        <div
+          ref={containerRef}
+          style={{
+            height: slotHeight,
+            overflowY: "scroll",
+            scrollSnapType: "y mandatory",
+            scrollbarWidth: "none",
+          }}
         >
-          Video A
-        </button>
-        <button
-          onClick={() => setActiveVideo("b")}
-          className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-colors ${
-            activeVideo === "b"
-              ? "bg-[#F5E642] text-black"
-              : "bg-[#1A1A1A] text-[#888] border border-[#2A2A2A]"
-          }`}
-        >
-          Video B
-        </button>
-      </div>
+          {/* Slot 0 — Video A */}
+          <div style={{ height: slotHeight }} className="snap-start relative overflow-hidden">
+            <VideoPlayer
+              url={videoA.url}
+              thumbnailUrl={videoA.thumbnailUrl}
+              title={videoA.title}
+              autoplay
+              muted={activeVideo !== "a" || muted}
+              onToggleMute={activeVideo === "a" ? handleToggleMute : undefined}
+            />
+            {voted === "video_a" && (
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-black/60 text-[#F5E642] text-sm font-bold rounded-full pointer-events-none">
+                Your pick ✓
+              </div>
+            )}
+            {!hasScrolled && (
+              <div className="absolute bottom-8 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-black/60 text-white text-sm rounded-full pointer-events-none animate-bounce">
+                ↓ scroll to compare
+              </div>
+            )}
+          </div>
 
-      {/* Video Player */}
-      <div className="flex-1 min-h-0">
-        <VideoPlayer
-          key={currentVideo.id}
-          url={currentVideo.url}
-          thumbnailUrl={currentVideo.thumbnailUrl}
-          title={currentVideo.title}
-          autoplay
-          muted={muted}
-          onToggleMute={handleToggleMute}
-        />
-      </div>
+          {/* Slot 1 — Video B */}
+          <div style={{ height: slotHeight }} className="snap-start relative overflow-hidden">
+            <VideoPlayer
+              url={videoB.url}
+              thumbnailUrl={videoB.thumbnailUrl}
+              title={videoB.title}
+              autoplay
+              muted={activeVideo !== "b" || muted}
+              onToggleMute={activeVideo === "b" ? handleToggleMute : undefined}
+            />
+            {voted === "video_b" && (
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-black/60 text-[#F5E642] text-sm font-bold rounded-full pointer-events-none">
+                Your pick ✓
+              </div>
+            )}
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-black/60 text-white text-sm rounded-full pointer-events-none">
+              ↑ back · ↓ loop
+            </div>
+          </div>
 
-      {/* Pick Buttons */}
-      <div className="flex gap-2 mt-3">
-        <button
-          onClick={() => onPick("video_a")}
-          disabled={disabled}
-          className={`flex-1 py-3.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${
-            voted === "video_a"
-              ? "bg-[#F5E642] text-black"
-              : "bg-[#1A1A1A] text-white border border-[#2A2A2A] hover:border-[#F5E642]/50"
-          }`}
-        >
-          {voted === "video_a" ? (
-            <>
-              <Check className="w-4 h-4" /> Picked A
-            </>
-          ) : (
-            <>
-              <TrendingUp className="w-4 h-4" /> A will trend
-            </>
-          )}
-        </button>
-        <button
-          onClick={() => onPick("video_b")}
-          disabled={disabled}
-          className={`flex-1 py-3.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${
-            voted === "video_b"
-              ? "bg-[#F5E642] text-black"
-              : "bg-[#1A1A1A] text-white border border-[#2A2A2A] hover:border-[#F5E642]/50"
-          }`}
-        >
-          {voted === "video_b" ? (
-            <>
-              <Check className="w-4 h-4" /> Picked B
-            </>
-          ) : (
-            <>
-              <TrendingUp className="w-4 h-4" /> B will trend
-            </>
-          )}
-        </button>
-      </div>
+          {/* Slot 2 — Video A clone (cyclic anchor) */}
+          <div style={{ height: slotHeight }} className="snap-start relative overflow-hidden">
+            <VideoPlayer
+              url={videoA.url}
+              thumbnailUrl={videoA.thumbnailUrl}
+              title={videoA.title}
+              autoplay
+              muted={true}
+            />
+            {voted === "video_a" && (
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-black/60 text-[#F5E642] text-sm font-bold rounded-full pointer-events-none">
+                Your pick ✓
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
