@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth-helpers";
 import { getUploadIntent } from "@/lib/storage";
-import { nanoid } from "nanoid";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { createVideoUploadIntentSchema } from "@/lib/validators";
+import { buildVideoStorageKey } from "@/lib/video-admin";
 
-const ALLOWED_TYPES = ["video/mp4", "video/webm", "video/quicktime"];
-
-// POST /api/admin/videos/presign — Get presigned URL for video upload
 export async function POST(req: NextRequest) {
   const user = await getAuthUser(req);
   if (!user || user.role !== "admin") {
@@ -16,24 +14,27 @@ export async function POST(req: NextRequest) {
   const limited = checkRateLimit(`video-upload:${user.id}`, 20);
   if (limited) return limited;
 
-  const { contentType } = await req.json();
+  const body = await req.json();
+  const parsed = createVideoUploadIntentSchema.safeParse(body);
 
-  if (!contentType || !ALLOWED_TYPES.includes(contentType)) {
+  if (!parsed.success) {
     return NextResponse.json(
-      { error: "Invalid content type. Allowed: mp4, webm, quicktime" },
+      { error: "Validation failed", details: parsed.error.flatten() },
       { status: 400 }
     );
   }
 
-  const extMap: Record<string, string> = {
-    "video/mp4": "mp4",
-    "video/webm": "webm",
-    "video/quicktime": "mov",
-  };
-  const ext = extMap[contentType] ?? "mp4";
-  const key = `videos/${nanoid()}.${ext}`;
+  const sourceKey = buildVideoStorageKey({
+    originalFilename: parsed.data.filename,
+  });
+  const { uploadUrl, publicUrl } = await getUploadIntent(
+    sourceKey,
+    parsed.data.contentType
+  );
 
-  const { uploadUrl, publicUrl } = await getUploadIntent(key, contentType);
-
-  return NextResponse.json({ uploadUrl, publicUrl });
+  return NextResponse.json({
+    uploadUrl,
+    sourceKey,
+    sourceUrl: publicUrl,
+  });
 }

@@ -10,6 +10,7 @@
  */
 export type * from './models/User'
 export type * from './models/Video'
+export type * from './models/VideoCategory'
 export type * from './models/WeeklySession'
 export type * from './models/Matchup'
 export type * from './models/Vote'

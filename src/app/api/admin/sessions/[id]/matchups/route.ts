@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAuthUser } from "@/lib/auth-helpers";
 import { createMatchupsSchema } from "@/lib/validators";
+import { resolveVideoAssetUrls } from "@/lib/video-response";
 
 // GET /api/admin/sessions/:id/matchups — List matchups for a session
 export async function GET(
@@ -25,7 +26,13 @@ export async function GET(
     },
   });
 
-  return NextResponse.json(matchups);
+  return NextResponse.json(
+    matchups.map((matchup) => ({
+      ...matchup,
+      videoA: resolveVideoAssetUrls(matchup.videoA, req.nextUrl.origin),
+      videoB: resolveVideoAssetUrls(matchup.videoB, req.nextUrl.origin),
+    }))
+  );
 }
 
 // POST /api/admin/sessions/:id/matchups — Create matchups for a session

@@ -57,3 +57,5 @@ next-env.d.ts
 /anchor/keys/
 test-ledger
 **/*.rs.bk
+
+certificates

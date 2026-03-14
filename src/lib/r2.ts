@@ -1,5 +1,15 @@
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import fs from "node:fs";
+import { pipeline } from "node:stream/promises";
+import { Readable } from "node:stream";
+import type { ReadableStream as NodeReadableStream } from "node:stream/web";
+import { getStorageAssetPath } from "@/lib/storage-url";
 
 const s3 = new S3Client({
   region: process.env.S3_REGION ?? "auto",
@@ -11,7 +21,6 @@ const s3 = new S3Client({
 });
 
 const bucket = process.env.S3_BUCKET!;
-const publicUrl = process.env.S3_PUBLIC_URL!;
 
 export async function getPresignedUploadUrl(
   key: string,
@@ -27,6 +36,59 @@ export async function getPresignedUploadUrl(
 
   return {
     uploadUrl,
-    publicUrl: `${publicUrl}/${key}`,
+    publicUrl: getStorageAssetPath(key),
   };
+}
+
+export function getStoragePublicUrl(key: string) {
+  return getStorageAssetPath(key);
+}
+
+export async function uploadFileToR2(
+  key: string,
+  filePath: string,
+  contentType: string
+) {
+  await s3.send(
+    new PutObjectCommand({
+      Bucket: bucket,
+      Key: key,
+      Body: fs.createReadStream(filePath),
+      ContentType: contentType,
+    })
+  );
+
+  return getStoragePublicUrl(key);
+}
+
+export async function deleteObjectFromR2(key: string) {
+  await s3.send(
+    new DeleteObjectCommand({
+      Bucket: bucket,
+      Key: key,
+    })
+  );
+}
+
+export async function getObjectFromR2(key: string, range?: string) {
+  return s3.send(
+    new GetObjectCommand({
+      Bucket: bucket,
+      Key: key,
+      Range: range,
+    })
+  );
+}
+
+export async function downloadObjectFromR2(key: string, filePath: string) {
+  const response = await getObjectFromR2(key);
+
+  if (!response.Body) {
+    throw new Error(`Object ${key} has no body`);
+  }
+
+  await pipeline(
+    Readable.fromWeb(response.Body.transformToWebStream() as NodeReadableStream),
+    fs.createWriteStream(filePath)
+  );
 }

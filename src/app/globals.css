@@ -1,4 +1,4 @@
-@import "../../node_modules/tailwindcss/index.css";
+@import "tailwindcss";
 
 @theme inline {
   --color-background: #000000;
@@ -23,6 +23,12 @@ body {
   max-width: 480px;
   margin: 0 auto;
   position: relative;
+}
+
+/* Admin layout needs full width — the 480px mobile container
+   makes md:grid-cols-[220px_1fr] cards leave 0px for content */
+.app-container:has(> .admin-layout) {
+  max-width: none;
 }
 
 /* Custom scrollbar */

@@ -1,31 +1,93 @@
-import { NextRequest, NextResponse } from "next/server";
+import { after, NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAuthUser } from "@/lib/auth-helpers";
 import { createVideoSchema } from "@/lib/validators";
+import { createVideoSearchText, normalizeTags } from "@/lib/video-admin";
+import { getPublicUrlForKey } from "@/lib/storage";
+import {
+  queuePendingVideoProcessing,
+  queueVideoProcessingById,
+} from "@/lib/video-processing";
+import { resolveVideoAssetUrls } from "@/lib/video-response";
+import type { Prisma } from "@/generated/prisma/client";
 
-// GET /api/admin/videos — List all videos
+export const runtime = "nodejs";
+
 export async function GET(req: NextRequest) {
   const user = await getAuthUser(req);
   if (!user || user.role !== "admin") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const search = req.nextUrl.searchParams.get("search");
+  const search = req.nextUrl.searchParams.get("search")?.trim() ?? "";
+  const categoryId = req.nextUrl.searchParams.get("categoryId")?.trim() ?? "";
+  const tag = req.nextUrl.searchParams.get("tag")?.trim().toLowerCase() ?? "";
+  const status = req.nextUrl.searchParams.get("status")?.trim() ?? "";
+  const readyOnly = req.nextUrl.searchParams.get("readyOnly") === "true";
+
+  const where: Prisma.VideoWhereInput = {};
+
+  if (readyOnly) {
+    where.status = "ready";
+  } else if (status && ["processing", "ready", "failed"].includes(status)) {
+    where.status = status as "processing" | "ready" | "failed";
+  }
+
+  if (categoryId) {
+    where.categoryId = categoryId;
+  }
+
+  if (tag) {
+    where.tags = { has: tag };
+  }
+
+  if (search) {
+    where.OR = [
+      { title: { contains: search, mode: "insensitive" } },
+      { searchText: { contains: search.toLowerCase(), mode: "insensitive" } },
+      { category: { name: { contains: search, mode: "insensitive" } } },
+    ];
+  }
 
   const videos = await prisma.video.findMany({
-    where: search
-      ? { title: { contains: search, mode: "insensitive" } }
-      : undefined,
+    where,
     orderBy: { createdAt: "desc" },
     include: {
+      category: true,
       uploadedBy: { select: { displayName: true } },
+      _count: {
+        select: {
+          matchupsAsA: true,
+          matchupsAsB: true,
+        },
+      },
     },
   });
 
-  return NextResponse.json(videos);
+  const normalized = videos.map((video) => ({
+    ...resolveVideoAssetUrls(video, req.nextUrl.origin),
+    usedInMatchups: video._count.matchupsAsA + video._count.matchupsAsB,
+  }));
+
+  // Warn about ready videos missing metadata — indicates a processing bug
+  for (const video of videos) {
+    if (video.status === "ready" && video.duration == null && video.thumbnailUrl == null) {
+      console.warn(
+        `[video] Video ${video.id} is "ready" but has no duration or thumbnail — metadata may have been lost`
+      );
+    }
+  }
+
+  if (videos.some((video) => video.status === "processing" || video.status === "failed")) {
+    after(async () => {
+      console.log("[video] after() triggered: sweep for pending/failed videos");
+      await queuePendingVideoProcessing(2);
+    });
+  }
+
+  return NextResponse.json(normalized);
 }
 
-// POST /api/admin/videos — Create a video record after S3 upload
 export async function POST(req: NextRequest) {
   const user = await getAuthUser(req);
   if (!user || user.role !== "admin") {
@@ -42,12 +104,61 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const category = parsed.data.categoryId
+    ? await prisma.videoCategory.findUnique({
+        where: { id: parsed.data.categoryId },
+      })
+    : null;
+
+  if (parsed.data.categoryId && !category) {
+    return NextResponse.json({ error: "Category not found" }, { status: 404 });
+  }
+
+  const title =
+    parsed.data.title?.trim() ||
+    parsed.data.originalFilename.replace(/\.[^.]+$/, "").trim();
+  const tags = normalizeTags(parsed.data.tags);
+
   const video = await prisma.video.create({
     data: {
-      ...parsed.data,
+      title,
+      url: getPublicUrlForKey(parsed.data.sourceKey),
+      status: "processing",
+      tags,
+      searchText: createVideoSearchText({
+        title,
+        categoryName: category?.name,
+        tags,
+      }),
+      originalFilename: parsed.data.originalFilename,
+      sourceContentType: parsed.data.sourceContentType,
+      sourceBytes: parsed.data.sourceBytes,
+      sourceKey: parsed.data.sourceKey,
+      categoryId: category?.id ?? null,
       uploadedById: user.id,
+    },
+    include: {
+      category: true,
+      uploadedBy: { select: { displayName: true } },
+      _count: {
+        select: {
+          matchupsAsA: true,
+          matchupsAsB: true,
+        },
+      },
     },
   });
 
-  return NextResponse.json(video, { status: 201 });
+  after(() => {
+    console.log(`[video] after() triggered for ${video.id}`);
+    queueVideoProcessingById(video.id);
+  });
+
+  return NextResponse.json(
+    {
+      ...resolveVideoAssetUrls(video, req.nextUrl.origin),
+      usedInMatchups: 0,
+    },
+    { status: 201 }
+  );
 }

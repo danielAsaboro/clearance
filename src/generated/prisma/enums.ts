@@ -50,3 +50,12 @@ export const CampaignStatus = {
 } as const
 
 export type CampaignStatus = (typeof CampaignStatus)[keyof typeof CampaignStatus]
+
+
+export const VideoStatus = {
+  processing: 'processing',
+  ready: 'ready',
+  failed: 'failed'
+} as const
+
+export type VideoStatus = (typeof VideoStatus)[keyof typeof VideoStatus]

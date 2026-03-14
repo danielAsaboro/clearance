@@ -53,6 +53,7 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   User: 'User',
   Video: 'Video',
+  VideoCategory: 'VideoCategory',
   WeeklySession: 'WeeklySession',
   Matchup: 'Matchup',
   Vote: 'Vote',
@@ -104,11 +105,36 @@ export const VideoScalarFieldEnum = {
   url: 'url',
   thumbnailUrl: 'thumbnailUrl',
   duration: 'duration',
+  status: 'status',
+  tags: 'tags',
+  searchText: 'searchText',
+  originalFilename: 'originalFilename',
+  sourceContentType: 'sourceContentType',
+  sourceBytes: 'sourceBytes',
+  sourceKey: 'sourceKey',
+  playbackKey: 'playbackKey',
+  thumbnailKey: 'thumbnailKey',
+  width: 'width',
+  height: 'height',
+  processingError: 'processingError',
+  categoryId: 'categoryId',
   uploadedById: 'uploadedById',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type VideoScalarFieldEnum = (typeof VideoScalarFieldEnum)[keyof typeof VideoScalarFieldEnum]
+
+
+export const VideoCategoryScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  slug: 'slug',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type VideoCategoryScalarFieldEnum = (typeof VideoCategoryScalarFieldEnum)[keyof typeof VideoCategoryScalarFieldEnum]
 
 
 export const WeeklySessionScalarFieldEnum = {

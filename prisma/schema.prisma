@@ -35,6 +35,12 @@ enum CampaignStatus {
   completed
 }
 
+enum VideoStatus {
+  processing
+  ready
+  failed
+}
+
 model User {
   id               String   @id @default(cuid())
   email            String?  @unique
@@ -48,7 +54,7 @@ model User {
   referralCode     String   @unique
   referredBy       String?
   createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  updatedAt        DateTime @default(now()) @updatedAt
 
   categories       Json?
 
@@ -61,18 +67,43 @@ model User {
 }
 
 model Video {
-  id             String   @id @default(cuid())
-  title          String?
-  url            String
-  thumbnailUrl   String?
-  duration       Int?
-  uploadedById   String
-  uploadedBy     User     @relation(fields: [uploadedById], references: [id])
-  createdAt      DateTime @default(now())
+  id               String        @id @default(cuid())
+  title            String?
+  url              String
+  thumbnailUrl     String?
+  duration         Int?
+  status           VideoStatus   @default(ready)
+  tags             String[]      @default([])
+  searchText       String?
+  originalFilename String?
+  sourceContentType String?
+  sourceBytes      Int?
+  sourceKey        String?       @unique
+  playbackKey      String?
+  thumbnailKey     String?
+  width            Int?
+  height           Int?
+  processingError  String?
+  categoryId       String?
+  category         VideoCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  uploadedById     String
+  uploadedBy       User          @relation(fields: [uploadedById], references: [id])
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @default(now()) @updatedAt
 
   matchupsAsA    Matchup[] @relation("VideoA")
   matchupsAsB    Matchup[] @relation("VideoB")
   wonMatchups    Matchup[] @relation("WinningVideo")
+}
+
+model VideoCategory {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  videos Video[]
 }
 
 model WeeklySession {
@@ -167,7 +198,7 @@ model Campaign {
   votingRoundDurationSecs Int             @default(30)
   matchupsPerSession      Int             @default(28)
   createdAt               DateTime        @default(now())
-  updatedAt               DateTime        @updatedAt
+  updatedAt               DateTime        @default(now()) @updatedAt
 
   sessions    WeeklySession[]
   enrollments CampaignEnrollment[]

@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAuthUser } from "@/lib/auth-helpers";
 import { sendSessionReminder } from "@/lib/email";
+import { resolveVideoAssetUrls } from "@/lib/video-response";
 
 // GET /api/sessions/:id
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
@@ -28,7 +29,14 @@ export async function GET(
     return NextResponse.json({ error: "Session not found" }, { status: 404 });
   }
 
-  return NextResponse.json(session);
+  return NextResponse.json({
+    ...session,
+    matchups: session.matchups.map((matchup) => ({
+      ...matchup,
+      videoA: resolveVideoAssetUrls(matchup.videoA, req.nextUrl.origin),
+      videoB: resolveVideoAssetUrls(matchup.videoB, req.nextUrl.origin),
+    })),
+  });
 }
 
 // PATCH /api/sessions/:id — Admin update session status

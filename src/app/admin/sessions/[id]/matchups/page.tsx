@@ -42,7 +42,7 @@ export default function MatchupBuilder({
     const token = await getAccessToken();
 
     const [videosRes, matchupsRes] = await Promise.all([
-      fetch("/api/admin/videos", {
+      fetch("/api/admin/videos?readyOnly=true", {
         headers: { Authorization: `Bearer ${token}` },
       }),
       fetch(`/api/admin/sessions/${sessionId}/matchups`, {

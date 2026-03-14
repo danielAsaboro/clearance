@@ -49,6 +49,7 @@ export default function MintPage() {
     setTxSignature(null);
     try {
       const token = await getAccessToken();
+      if (!token) throw new Error("Session expired — please reconnect your wallet.");
       const res = await fetch("/api/usdc/mint", {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },

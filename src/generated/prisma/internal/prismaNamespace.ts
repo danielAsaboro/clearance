@@ -386,6 +386,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 export const ModelName = {
   User: 'User',
   Video: 'Video',
+  VideoCategory: 'VideoCategory',
   WeeklySession: 'WeeklySession',
   Matchup: 'Matchup',
   Vote: 'Vote',
@@ -408,7 +409,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "video" | "weeklySession" | "matchup" | "vote" | "gameResult" | "referral" | "campaign" | "campaignEnrollment"
+    modelProps: "user" | "video" | "videoCategory" | "weeklySession" | "matchup" | "vote" | "gameResult" | "referral" | "campaign" | "campaignEnrollment"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -557,6 +558,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.VideoCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.VideoCountAggregateOutputType> | number
+        }
+      }
+    }
+    VideoCategory: {
+      payload: Prisma.$VideoCategoryPayload<ExtArgs>
+      fields: Prisma.VideoCategoryFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.VideoCategoryFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VideoCategoryPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.VideoCategoryFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VideoCategoryPayload>
+        }
+        findFirst: {
+          args: Prisma.VideoCategoryFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VideoCategoryPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.VideoCategoryFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VideoCategoryPayload>
+        }
+        findMany: {
+          args: Prisma.VideoCategoryFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VideoCategoryPayload>[]
+        }
+        create: {
+          args: Prisma.VideoCategoryCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VideoCategoryPayload>
+        }
+        createMany: {
+          args: Prisma.VideoCategoryCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.VideoCategoryCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VideoCategoryPayload>[]
+        }
+        delete: {
+          args: Prisma.VideoCategoryDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VideoCategoryPayload>
+        }
+        update: {
+          args: Prisma.VideoCategoryUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VideoCategoryPayload>
+        }
+        deleteMany: {
+          args: Prisma.VideoCategoryDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.VideoCategoryUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.VideoCategoryUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VideoCategoryPayload>[]
+        }
+        upsert: {
+          args: Prisma.VideoCategoryUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VideoCategoryPayload>
+        }
+        aggregate: {
+          args: Prisma.VideoCategoryAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateVideoCategory>
+        }
+        groupBy: {
+          args: Prisma.VideoCategoryGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.VideoCategoryGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.VideoCategoryCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.VideoCategoryCountAggregateOutputType> | number
         }
       }
     }
@@ -1143,11 +1218,36 @@ export const VideoScalarFieldEnum = {
   url: 'url',
   thumbnailUrl: 'thumbnailUrl',
   duration: 'duration',
+  status: 'status',
+  tags: 'tags',
+  searchText: 'searchText',
+  originalFilename: 'originalFilename',
+  sourceContentType: 'sourceContentType',
+  sourceBytes: 'sourceBytes',
+  sourceKey: 'sourceKey',
+  playbackKey: 'playbackKey',
+  thumbnailKey: 'thumbnailKey',
+  width: 'width',
+  height: 'height',
+  processingError: 'processingError',
+  categoryId: 'categoryId',
   uploadedById: 'uploadedById',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type VideoScalarFieldEnum = (typeof VideoScalarFieldEnum)[keyof typeof VideoScalarFieldEnum]
+
+
+export const VideoCategoryScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  slug: 'slug',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type VideoCategoryScalarFieldEnum = (typeof VideoCategoryScalarFieldEnum)[keyof typeof VideoCategoryScalarFieldEnum]
 
 
 export const WeeklySessionScalarFieldEnum = {
@@ -1377,6 +1477,20 @@ export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel,
 
 
 /**
+ * Reference to a field of type 'VideoStatus'
+ */
+export type EnumVideoStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'VideoStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'VideoStatus[]'
+ */
+export type ListEnumVideoStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'VideoStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'SessionStatus'
  */
 export type EnumSessionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SessionStatus'>
@@ -1542,6 +1656,7 @@ export type PrismaClientOptions = ({
 export type GlobalOmitConfig = {
   user?: Prisma.UserOmit
   video?: Prisma.VideoOmit
+  videoCategory?: Prisma.VideoCategoryOmit
   weeklySession?: Prisma.WeeklySessionOmit
   matchup?: Prisma.MatchupOmit
   vote?: Prisma.VoteOmit

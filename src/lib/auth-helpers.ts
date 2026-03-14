@@ -26,9 +26,16 @@ export async function getAuthUser(req: NextRequest) {
 
   const token = authHeader.replace("Bearer ", "");
 
+  let privyId: string;
   try {
     const verifiedClaims = await privy.verifyAuthToken(token);
-    const privyId = verifiedClaims.userId;
+    privyId = verifiedClaims.userId;
+  } catch (err) {
+    console.warn("[auth] Privy token verification failed:", err);
+    return null;
+  }
+
+  try {
     const shouldHydratePrivyProfile = async (user: { email: string | null; phone: string | null; walletAddress: string | null } | null) =>
       !user || !user.email || !user.phone || !user.walletAddress;
 
@@ -63,7 +70,8 @@ export async function getAuthUser(req: NextRequest) {
     }
 
     return user;
-  } catch {
+  } catch (err) {
+    console.error("[auth] DB error during user hydration:", err);
     return null;
   }
 }
