@@ -8,11 +8,11 @@ import {
   LayoutDashboard,
   Radio,
   Trophy,
-  Eye,
   LogOut,
   ShieldX,
   Film,
 } from "lucide-react";
+import Image from "next/image";
 
 const authInitTimeoutMs = 4000;
 
@@ -199,9 +199,7 @@ export default function AdminLayout({
       {/* Top Header */}
       <div className="border-b border-[#2A2A2A] px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-[#F5E642] rounded-lg flex items-center justify-center">
-            <Eye className="w-4 h-4 text-black" />
-          </div>
+          <Image src="/spotr-logo.png" alt="Spotr TV" width={28} height={28} className="rounded-lg" />
           <span className="text-white font-bold text-sm">Spotr TV</span>
           <span className="text-[#888] text-xs ml-2 px-2 py-0.5 bg-[#1A1A1A] rounded-full">
             Admin

@@ -2,7 +2,8 @@
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import Link from 'next/link'
-import { Eye, Menu, X } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
+import Image from 'next/image'
 import { ThemeSelect } from '@/components/theme-select'
 import { ClusterUiSelect } from './cluster/cluster-ui'
 import ConnectWallet from '@/components/ConnectWallet'
@@ -26,9 +27,7 @@ export function AppHeader({ links = [], isAdmin = false }: { links: { label: str
       <div className="mx-auto flex justify-between items-center">
         <div className="flex items-center gap-4">
           <Link className="flex items-center gap-2 hover:opacity-80 transition-opacity" href="/">
-            <div className="w-7 h-7 bg-[#F5E642] rounded-lg flex items-center justify-center">
-              <Eye className="w-4 h-4 text-black" />
-            </div>
+            <Image src="/spotr-logo.png" alt="Spotr TV" width={28} height={28} className="rounded-lg" />
             <span className="text-white font-bold text-sm">SPOTR <span className="text-[#F5E642]">/</span> TV</span>
           </Link>
           <div className="hidden md:flex items-center">

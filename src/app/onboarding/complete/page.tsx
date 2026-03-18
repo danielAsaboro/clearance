@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
-  Eye,
   CheckCircle,
   Copy,
   Check,
@@ -12,6 +11,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import ProgressBar from "@/components/ProgressBar";
 import { useOnboarding } from "@/lib/onboarding-context";
 import { usePrivy } from "@privy-io/react-auth";
@@ -110,9 +110,7 @@ export default function CompleteStep() {
         ) : (
           <div className="w-10" />
         )}
-        <div className="w-8 h-8 bg-[#F5E642] rounded-full flex items-center justify-center">
-          <Eye className="w-4 h-4 text-black" />
-        </div>
+        <Image src="/spotr-logo.png" alt="Spotr TV" width={32} height={32} className="rounded-full" />
         <span className="text-[#888] text-xs tracking-wider">
           STEP {TOTAL_STEPS} OF {TOTAL_STEPS}
         </span>

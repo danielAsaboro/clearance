@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { usePrivy } from "@privy-io/react-auth";
-import { Eye, ShieldCheck, Lock } from "lucide-react";
+import { ShieldCheck, Lock } from "lucide-react";
+import Image from "next/image";
 
 export default function AdminRegisterPage() {
     const router = useRouter();
@@ -60,9 +61,7 @@ export default function AdminRegisterPage() {
         <div className="flex-1 bg-black flex flex-col items-center justify-center px-6">
             {/* Logo */}
             <div className="flex items-center gap-2 mb-10">
-                <div className="w-8 h-8 bg-[#F5E642] rounded-xl flex items-center justify-center">
-                    <Eye className="w-5 h-5 text-black" />
-                </div>
+                <Image src="/spotr-logo.png" alt="Spotr TV" width={32} height={32} className="rounded-xl" />
                 <span className="text-white font-bold text-base tracking-tight">Spotr TV</span>
             </div>
 
