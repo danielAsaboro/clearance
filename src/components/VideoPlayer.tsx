@@ -15,7 +15,6 @@ interface VideoPlayerProps {
 export default function VideoPlayer({
   url,
   thumbnailUrl,
-  title,
   autoplay = true,
   muted: mutedProp,
   onToggleMute,
@@ -43,7 +42,7 @@ export default function VideoPlayer({
   };
 
   return (
-    <div className="w-full aspect-[9/16] bg-[#1A1A1A] rounded-2xl overflow-hidden relative">
+    <div className="relative h-full w-full overflow-hidden bg-[#1a1a1a]">
       <video
         ref={videoRef}
         src={url}
@@ -52,7 +51,7 @@ export default function VideoPlayer({
         muted={muted}
         loop
         playsInline
-        className="w-full h-full object-cover"
+        className="h-full w-full object-cover"
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
       />
@@ -62,34 +61,24 @@ export default function VideoPlayer({
         <div className="absolute inset-0 flex items-center justify-center bg-black/40">
           <button
             onClick={handlePlay}
-            className="w-16 h-16 bg-[#F5E642] rounded-full flex items-center justify-center shadow-lg"
+            className="flex h-16 w-16 items-center justify-center rounded-full bg-[#f5d63d] shadow-lg"
           >
-            <Play className="w-8 h-8 text-black ml-1" fill="black" />
+            <Play className="ml-1 h-8 w-8 text-black" fill="black" />
           </button>
         </div>
       )}
 
-      {/* Mute toggle */}
       {playing && (
         <button
           onClick={toggleMute}
-          className="absolute bottom-3 right-3 w-8 h-8 bg-black/60 rounded-full flex items-center justify-center"
+          className="absolute bottom-6 right-5 flex h-8 w-8 items-center justify-center rounded-full bg-black/38 backdrop-blur-[1px]"
         >
           {muted ? (
-            <VolumeX className="w-4 h-4 text-white" />
+            <VolumeX className="h-4 w-4 text-white" />
           ) : (
-            <Volume2 className="w-4 h-4 text-white" />
+            <Volume2 className="h-4 w-4 text-white" />
           )}
         </button>
-      )}
-
-      {/* Title overlay */}
-      {title && (
-        <div className="absolute bottom-3 left-3 right-12">
-          <p className="text-white text-xs font-medium truncate bg-black/40 rounded-lg px-2 py-1">
-            {title}
-          </p>
-        </div>
       )}
     </div>
   );

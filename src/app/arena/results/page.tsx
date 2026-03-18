@@ -1,18 +1,21 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { usePrivy } from "@privy-io/react-auth";
-import { ArrowLeft, Share2, Eye, Gift, Link2 } from "lucide-react";
+import { Home, Share2, User } from "lucide-react";
 import Link from "next/link";
-import ResultsCard from "@/components/ResultsCard";
+import CircularProgress from "@/components/CircularProgress";
+import ProfileModal from "@/components/ProfileModal";
 
 interface GameResults {
   correctVotes: number;
   totalVotes: number;
+  totalRounds: number;
   tier: "participation" | "base" | "gold";
   rewardAmount: number;
   nftMinted: boolean;
+  tasteScore?: number;
 }
 
 function ResultsContent() {
@@ -21,6 +24,7 @@ function ResultsContent() {
   const { getAccessToken } = usePrivy();
   const [results, setResults] = useState<GameResults | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showProfile, setShowProfile] = useState(false);
 
   useEffect(() => {
     if (!sessionId) return;
@@ -30,9 +34,11 @@ function ResultsContent() {
       const res = await fetch(`/api/sessions/${sessionId}/results`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
       if (res.ok) {
         setResults(await res.json());
       }
+
       setLoading(false);
     };
 
@@ -41,130 +47,118 @@ function ResultsContent() {
 
   if (loading) {
     return (
-      <div className="flex-1 bg-black flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[#F5E642] border-t-transparent rounded-full animate-spin" />
+      <div className="flex flex-1 items-center justify-center bg-black">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#f5d63d] border-t-transparent" />
       </div>
     );
   }
 
+  const tasteScore = results?.tasteScore ?? (results ? results.correctVotes : 0);
+  const nftThreshold = 70;
+  const scorePct = Math.min(100, (tasteScore / nftThreshold) * 100);
+
   return (
-    <div className="flex-1 bg-black flex flex-col px-6 py-6">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-8">
-        <Link href="/arena">
-          <div className="w-10 h-10 rounded-full border border-[#333] flex items-center justify-center hover:border-[#F5E642]/50 transition-colors">
-            <ArrowLeft className="w-5 h-5 text-white" />
+    <div className="spotr-page flex flex-1 flex-col">
+      <div className="spotr-mobile-shell flex min-h-dvh flex-col px-5 pb-8 pt-4">
+        <div className="mb-6 flex items-center gap-2">
+          <Link
+            href="/"
+            className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#161616] text-white transition-colors hover:bg-[#1d1d1d]"
+          >
+            <Home className="h-4 w-4" />
+          </Link>
+          <button
+            onClick={() => setShowProfile(true)}
+            className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#161616] text-white transition-colors hover:bg-[#1d1d1d]"
+          >
+            <User className="h-4 w-4" />
+          </button>
+        </div>
+
+        {results ? (
+          <div className="flex flex-1 flex-col items-center">
+            <p className="mb-8 text-[13px] font-semibold uppercase tracking-[0.08em] text-[#d4b83a]">
+              Session Complete
+            </p>
+
+            <CircularProgress
+              value={results.correctVotes}
+              max={results.totalRounds ?? results.totalVotes}
+              size={130}
+              label="Correct Predictions"
+            />
+
+            <div className="mt-8 w-full rounded-[18px] bg-[#f5d63d] px-5 py-5 text-black">
+              <p className="text-center text-[11px] font-semibold uppercase tracking-[0.08em] text-black/55">
+                Your Taste Score
+              </p>
+              <p className="mt-2 text-center text-[72px] font-semibold leading-none tracking-[-0.08em]">
+                {tasteScore}
+              </p>
+              <p className="mt-3 text-[13px] text-black/68">
+                {tasteScore} / {nftThreshold} to NFT Whitelist
+              </p>
+              <div className="mt-2 h-[7px] overflow-hidden rounded-full bg-[#c3ac31]/42">
+                <div
+                  className="h-full rounded-full bg-[#c1ab38]"
+                  style={{ width: `${scorePct}%` }}
+                />
+              </div>
+              <p className="mt-3 text-center text-[12px] leading-4 text-black/60">
+                Share your Blink to recruit your tribe and boost this score together.
+              </p>
+            </div>
+
+            <div className="mt-3 w-full rounded-[16px] border border-[#8e7a24] bg-[#161616] px-4 py-4">
+              <div className="flex items-start gap-3">
+                <div className="mt-1 h-3 w-3 rounded-[3px] bg-[#f5d63d]" />
+                <div className="min-w-0">
+                  <p className="text-[14px] leading-5 text-[#d6d6d6]">
+                    Reach 70 collective points with your tribe to unlock{" "}
+                    <span className="font-semibold text-white">FREE NFT mint</span>
+                  </p>
+                  <p className="mt-2 text-[12px] font-semibold text-[#d0b33a]">
+                    Taste NFT Drop — May 14, 2026
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-4 grid grid-cols-4 gap-2">
+                {["Common", "Uncommon", "Rare", "Legendary"].map((tier) => (
+                  <div
+                    key={tier}
+                    className="rounded-[10px] bg-[#232323] px-2 py-2 text-center text-[11px] text-[#6b6b6b]"
+                  >
+                    {tier}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-auto flex w-full flex-col gap-4 pt-8">
+              <Link href="/blink" className="block w-full">
+                <button className="spotr-primary-button flex w-full items-center justify-center gap-2">
+                  <Share2 className="h-4 w-4" />
+                  Generate My Blink Link
+                </button>
+              </Link>
+
+              <Link href="/" className="block w-full">
+                <button className="spotr-secondary-button flex w-full items-center justify-center gap-2">
+                  <Home className="h-4 w-4" />
+                  Back to Home
+                </button>
+              </Link>
+            </div>
           </div>
-        </Link>
-        <div className="w-8 h-8 bg-[#F5E642] rounded-full flex items-center justify-center">
-          <Eye className="w-4 h-4 text-black" />
-        </div>
-        <div>
-          <h1 className="text-white font-bold text-lg">Session Results</h1>
-          <p className="text-[#888] text-xs">Your predictions</p>
-        </div>
+        ) : (
+          <div className="flex flex-1 items-center justify-center">
+            <p className="text-[14px] text-[#888]">No results found for this session.</p>
+          </div>
+        )}
       </div>
 
-      {results ? (
-        <div className="flex-1 flex flex-col">
-          {/* Taste Score heading */}
-          <div className="text-center mb-4">
-            <p className="text-[#888] text-xs tracking-wider uppercase mb-1">Taste Score</p>
-            <p className="text-white text-3xl font-bold">
-              {results.correctVotes}/{results.totalVotes}{" "}
-              <span className="text-[#F5E642] text-lg">
-                ({results.totalVotes > 0 ? Math.round((results.correctVotes / results.totalVotes) * 100) : 0}%)
-              </span>
-            </p>
-          </div>
-
-          <ResultsCard
-            correctVotes={results.correctVotes}
-            totalRounds={results.totalVotes || parseInt(process.env.NEXT_PUBLIC_ROUNDS_PER_SESSION!)}
-            tier={results.tier}
-            reward={results.rewardAmount}
-          />
-
-          {/* NFT Preview */}
-          <div className="bg-[#1A1A1A] rounded-2xl p-6 border border-[#2A2A2A] mt-6 text-center">
-            <p className="text-white font-bold mb-2">
-              {results.tier === "participation" ? "Your NFT" : "Blind Box NFT"}
-            </p>
-            {results.nftMinted ? (
-              <Link
-                href="/rewards"
-                className="text-[#F5E642] text-sm underline"
-              >
-                View in your collection
-              </Link>
-            ) : results.tier === "participation" ? (
-              <Link
-                href="/rewards"
-                className="text-[#F5E642] text-sm underline"
-              >
-                Mint your Participation NFT
-              </Link>
-            ) : (
-              <p className="text-[#888] text-sm">
-                Your Blind Box will be minted soon!
-              </p>
-            )}
-          </div>
-
-          {/* DRiP Collectible */}
-          <div className="bg-[#1A1A1A] rounded-2xl p-5 border border-purple-500/20 mt-4 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0">
-              <Gift className="w-5 h-5 text-purple-400" />
-            </div>
-            <div>
-              <p className="text-white text-sm font-bold">You earned a DRiP collectible!</p>
-              <p className="text-[#888] text-xs">
-                A participation collectible will be distributed to your wallet via DRiP.
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-auto pt-6 space-y-3">
-            <button
-              onClick={() => {
-                navigator.share?.({
-                  title: "Spotr TV Results",
-                  text: `I predicted ${results.correctVotes} matchups correctly on Spotr TV! ${results.tier === "gold" ? "Gold Tier!" : ""}`,
-                });
-              }}
-              className="w-full bg-[#1A1A1A] rounded-xl py-4 text-sm text-white flex items-center justify-center gap-2 border border-[#2A2A2A]"
-            >
-              <Share2 className="w-4 h-4" />
-              Share Results
-            </button>
-            {sessionId && (
-              <button
-                onClick={() => {
-                  const origin = window.location.origin;
-                  const actionUrl = `${origin}/api/actions/vote?session=${sessionId}`;
-                  const blinkUrl = `https://dial.to/?action=solana-action:${encodeURIComponent(actionUrl)}`;
-                  navigator.clipboard.writeText(blinkUrl);
-                  alert("Blink URL copied! Share it on Twitter/X.");
-                }}
-                className="w-full bg-[#1A1A1A] rounded-xl py-4 text-sm text-white flex items-center justify-center gap-2 border border-[#2A2A2A] hover:border-[#F5E642]/30 transition-colors"
-              >
-                <Link2 className="w-4 h-4 text-[#F5E642]" />
-                Share as Blink
-              </button>
-            )}
-            <Link
-              href="/arena"
-              className="btn-yellow w-full rounded-xl py-4 text-base font-bold flex items-center justify-center"
-            >
-              Back to Arena
-            </Link>
-          </div>
-        </div>
-      ) : (
-        <div className="flex-1 flex items-center justify-center">
-          <p className="text-[#888] text-sm">No results found for this session.</p>
-        </div>
-      )}
+      <ProfileModal open={showProfile} onClose={() => setShowProfile(false)} />
     </div>
   );
 }
@@ -173,8 +167,8 @@ export default function ResultsPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex-1 bg-black flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-[#F5E642] border-t-transparent rounded-full animate-spin" />
+        <div className="flex flex-1 items-center justify-center bg-black">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#f5d63d] border-t-transparent" />
         </div>
       }
     >

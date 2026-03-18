@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { campaignConfig } from "@/lib/campaign-config";
 
 const TICK_INTERVAL_MS = 1000;
+const RESULTS_DURATION = 5; // seconds of results overlay between rounds
 
 // GET /api/sessions/sample/stream — SSE endpoint for sample session
 // Per-player timing: starts "now" when the client connects and runs through all rounds.
@@ -36,7 +37,8 @@ export async function GET(req: NextRequest) {
 
       const tick = () => {
         const elapsed = Math.max(0, Math.floor((Date.now() - startTime) / 1000));
-        const totalDuration = totalMatchups * roundDuration;
+        const slotDuration = roundDuration + RESULTS_DURATION;
+        const totalDuration = totalMatchups * slotDuration;
 
         if (elapsed >= totalDuration) {
           sendEvent({ status: "ended", round: totalMatchups, secondsRemaining: 0, totalRounds: totalMatchups, roundDuration });
@@ -45,17 +47,18 @@ export async function GET(req: NextRequest) {
           return;
         }
 
-        const currentRound = Math.floor(elapsed / roundDuration) + 1;
-        const secondsIntoRound = elapsed % roundDuration;
-        const secondsRemaining = roundDuration - secondsIntoRound;
+        const slotIndex = Math.floor(elapsed / slotDuration);
+        const secondsIntoSlot = elapsed % slotDuration;
+        const currentRound = slotIndex + 1;
 
-        sendEvent({
-          status: "live",
-          round: currentRound,
-          secondsRemaining,
-          totalRounds: totalMatchups,
-          roundDuration,
-        });
+        if (secondsIntoSlot < roundDuration) {
+          // Voting phase
+          const secondsRemaining = roundDuration - secondsIntoSlot;
+          sendEvent({ status: "live", round: currentRound, secondsRemaining, totalRounds: totalMatchups, roundDuration });
+        } else {
+          // Results phase — hold at this round, timer frozen
+          sendEvent({ status: "results", round: currentRound, secondsRemaining: 0, totalRounds: totalMatchups, roundDuration });
+        }
       };
 
       tick();

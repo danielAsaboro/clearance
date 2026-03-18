@@ -76,12 +76,17 @@ export async function POST(req: NextRequest) {
   return response;
 }
 
-// GET /api/referrals — Get current user's referrals
+// GET /api/referrals — Get current user's referral code + tribe score
 export async function GET(req: NextRequest) {
   const authUser = await getAuthUser(req);
   if (!authUser) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const user = await prisma.user.findUnique({
+    where: { id: authUser.id },
+    select: { referralCode: true },
+  });
 
   const referrals = await prisma.referral.findMany({
     where: { referrerId: authUser.id },
@@ -89,5 +94,9 @@ export async function GET(req: NextRequest) {
     orderBy: { createdAt: "desc" },
   });
 
-  return NextResponse.json(referrals);
+  return NextResponse.json({
+    code: user?.referralCode ?? null,
+    tribeScore: referrals.length,
+    referrals,
+  });
 }

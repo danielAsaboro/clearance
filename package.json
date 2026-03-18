@@ -21,6 +21,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint",
+    "seed:videos": "npx tsx --env-file=.env.local scripts/seed-videos.ts",
     "videos:process": "npx tsx --env-file=.env.local scripts/process-videos.ts",
     "start": "next start",
     "test": "jest --passWithNoTests"

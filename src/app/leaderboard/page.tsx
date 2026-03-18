@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { ArrowLeft, Eye, Trophy, TrendingUp, Target } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Crown, Trophy, X } from "lucide-react";
 import Link from "next/link";
-import OnChainLeaderboard from "@/components/OnChainLeaderboard";
 
 interface PlayerRanking {
   rank: number;
@@ -16,17 +15,34 @@ interface PlayerRanking {
   winRate: number;
 }
 
-const rankBadge = (rank: number) => {
-  if (rank === 1) return { bg: "bg-yellow-400", text: "text-black", emoji: "1st" };
-  if (rank === 2) return { bg: "bg-gray-300", text: "text-black", emoji: "2nd" };
-  if (rank === 3) return { bg: "bg-amber-600", text: "text-white", emoji: "3rd" };
-  return { bg: "bg-[#2A2A2A]", text: "text-[#888]", emoji: `${rank}` };
-};
+const PODIUM_STYLES = [
+  {
+    ring: "border-[#69728b]",
+    icon: <Trophy className="h-5 w-5 text-[#838ca2]" />,
+    bar: "bg-[#4f5a75]",
+    height: 70,
+  },
+  {
+    ring: "border-[#f5d63d]",
+    icon: <Crown className="h-6 w-6 text-[#f5d63d]" />,
+    bar: "bg-[#74651d]",
+    height: 92,
+  },
+  {
+    ring: "border-[#9f631e]",
+    icon: <Trophy className="h-5 w-5 text-[#9f631e]" />,
+    bar: "bg-[#5a3417]",
+    height: 50,
+  },
+];
+
+function truncateWallet(name: string) {
+  return name.length > 10 ? `${name.slice(0, 4)}...${name.slice(-4)}` : name;
+}
 
 export default function LeaderboardPage() {
   const [rankings, setRankings] = useState<PlayerRanking[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"platform" | "onchain">("platform");
 
   useEffect(() => {
     fetch("/api/leaderboard")
@@ -35,186 +51,103 @@ export default function LeaderboardPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  const top3 = rankings.slice(0, 3);
+  const podium = top3.length >= 3 ? [top3[1], top3[0], top3[2]] : top3;
+  const rest = rankings.slice(3);
+
   return (
-    <div className="flex-1 bg-black px-6 py-6 pb-12">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <Link href="/">
-          <div className="w-10 h-10 rounded-full border border-[#333] flex items-center justify-center hover:border-[#F5E642]/50 transition-colors">
-            <ArrowLeft className="w-5 h-5 text-white" />
+    <div className="spotr-page min-h-dvh px-4 py-3 md:px-6">
+      <div className="mx-auto flex w-full max-w-[1180px] flex-col">
+        <div className="mb-5 flex items-start justify-between border-b border-white/10 pb-3">
+          <div>
+            <h1 className="text-[28px] font-semibold leading-none tracking-[-0.05em] text-white">LEADERBOARD</h1>
+            <p className="mt-1 text-[13px] text-[#6e6e6e]">Season 1 — March 2026</p>
           </div>
-        </Link>
-        <div className="w-8 h-8 bg-[#F5E642] rounded-full flex items-center justify-center">
-          <Eye className="w-4 h-4 text-black" />
-        </div>
-        <div>
-          <h1 className="text-white font-bold text-lg">Player Leaderboard</h1>
-          <p className="text-[#888] text-xs">Top predictors this season</p>
-        </div>
-      </div>
 
-      {/* Tab Toggle */}
-      <div className="flex gap-2 mb-6">
-        <button
-          onClick={() => setTab("platform")}
-          className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-colors ${
-            tab === "platform"
-              ? "bg-[#F5E642] text-black"
-              : "bg-[#1A1A1A] text-[#888] border border-[#2A2A2A]"
-          }`}
-        >
-          Platform Rankings
-        </button>
-        <button
-          onClick={() => setTab("onchain")}
-          className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-colors ${
-            tab === "onchain"
-              ? "bg-[#F5E642] text-black"
-              : "bg-[#1A1A1A] text-[#888] border border-[#2A2A2A]"
-          }`}
-        >
-          On-Chain Rankings
-        </button>
-      </div>
+          <Link href="/" className="text-[#9b9b9b] transition-colors hover:text-white">
+            <X className="h-4 w-4" />
+          </Link>
+        </div>
 
-      {tab === "onchain" ? (
-        <OnChainLeaderboard />
-      ) : loading ? (
-        <div className="flex items-center justify-center py-20">
-          <div className="w-8 h-8 border-2 border-[#F5E642] border-t-transparent rounded-full animate-spin" />
-        </div>
-      ) : rankings.length === 0 ? (
-        <div className="text-center py-16">
-          <Trophy className="w-16 h-16 text-[#555] mx-auto mb-4" />
-          <h2 className="text-white font-bold text-lg mb-2">No Rankings Yet</h2>
-          <p className="text-[#888] text-sm">
-            Rankings appear after the first session is finalized.
-          </p>
-        </div>
-      ) : (
-        <>
-          {/* Top 3 Podium */}
-          {rankings.length >= 3 && (
-            <div className="grid grid-cols-3 gap-2 mb-8">
-              {[rankings[1], rankings[0], rankings[2]].map((player, i) => {
-                const isCenter = i === 1;
-                return (
-                  <div
-                    key={player.userId}
-                    className={`flex flex-col items-center ${isCenter ? "-mt-4" : "mt-2"}`}
-                  >
-                    <div
-                      className={`w-14 h-14 ${isCenter ? "w-18 h-18" : ""} rounded-full border-2 ${
-                        player.rank === 1
-                          ? "border-yellow-400"
-                          : player.rank === 2
-                            ? "border-gray-300"
-                            : "border-amber-600"
-                      } overflow-hidden bg-[#1A1A1A] flex items-center justify-center mb-2`}
-                    >
-                      {player.profilePhoto ? (
-                        <img
-                          src={player.profilePhoto}
-                          alt={player.displayName}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-[#888] font-bold text-lg">
-                          {player.displayName.charAt(0)}
-                        </span>
-                      )}
+        {loading ? (
+          <div className="flex min-h-[360px] items-center justify-center">
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#f5d63d] border-t-transparent" />
+          </div>
+        ) : rankings.length === 0 ? (
+          <div className="flex min-h-[360px] flex-col items-center justify-center gap-3">
+            <Trophy className="h-10 w-10 text-[#545454]" />
+            <p className="text-[15px] text-[#8e8e8e]">No rankings yet.</p>
+          </div>
+        ) : (
+          <>
+            {podium.length >= 3 ? (
+              <div className="mb-6 mt-2 flex items-end justify-center gap-6 px-4">
+                {podium.map((player, index) => {
+                  const style = PODIUM_STYLES[index];
+                  return (
+                    <div key={player.userId} className="flex w-[120px] flex-col items-center">
+                      <div className="mb-2 flex h-10 items-end justify-center">{style.icon}</div>
+                      <div
+                        className={`mb-2 flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border bg-[#171717] ${style.ring}`}
+                      >
+                        {player.profilePhoto ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={player.profilePhoto}
+                            alt={player.displayName}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-[12px] font-semibold text-[#d9d9d9]">
+                            {player.displayName.charAt(0).toUpperCase()}
+                          </span>
+                        )}
+                      </div>
+                      <p className="max-w-full truncate text-[11px] text-[#8e8e8e]">
+                        {truncateWallet(player.displayName)}
+                      </p>
+                      <p className="mt-1 text-[30px] font-semibold leading-none tracking-[-0.05em] text-[#f5d63d]">
+                        {player.correctPredictions}
+                      </p>
+                      <div
+                        className={`mt-1 flex w-full items-end justify-center rounded-t-[8px] ${style.bar}`}
+                        style={{ height: style.height }}
+                      />
                     </div>
-                    <p className="text-white text-xs font-bold text-center truncate w-full">
-                      {player.displayName}
-                    </p>
-                    <p className="text-[#F5E642] text-xs font-bold">
-                      {player.correctPredictions} correct
-                    </p>
-                    <div
-                      className={`mt-1 px-2 py-0.5 rounded-full text-xs font-bold ${
-                        rankBadge(player.rank).bg
-                      } ${rankBadge(player.rank).text}`}
-                    >
-                      {rankBadge(player.rank).emoji}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+                  );
+                })}
+              </div>
+            ) : null}
 
-          {/* Full List */}
-          <div className="space-y-2">
-            {rankings.map((player) => {
-              const badge = rankBadge(player.rank);
-              return (
+            <div className="overflow-hidden rounded-[14px] border border-white/8 bg-[#121212]">
+              <div className="grid grid-cols-[44px_minmax(0,1fr)_74px_74px_74px] gap-2 border-b border-white/8 px-4 py-3 text-[11px] font-medium text-[#646464]">
+                <span>#</span>
+                <span>Wallet</span>
+                <span className="text-right">Score</span>
+                <span className="text-right">Acc%</span>
+                <span className="text-right">Games</span>
+              </div>
+
+              {rest.map((player) => (
                 <div
                   key={player.userId}
-                  className={`bg-[#1A1A1A] rounded-xl p-4 border ${
-                    player.rank <= 3 ? "border-[#F5E642]/20" : "border-[#2A2A2A]"
-                  } flex items-center gap-3`}
+                  className="grid grid-cols-[44px_minmax(0,1fr)_74px_74px_74px] gap-2 border-b border-white/6 px-4 py-[14px] text-[14px] last:border-b-0"
                 >
-                  {/* Rank */}
-                  <div
-                    className={`w-8 h-8 rounded-full ${badge.bg} flex items-center justify-center flex-shrink-0`}
-                  >
-                    <span className={`text-xs font-bold ${badge.text}`}>
-                      {badge.emoji}
-                    </span>
-                  </div>
-
-                  {/* Avatar */}
-                  <div className="w-10 h-10 rounded-full bg-[#2A2A2A] overflow-hidden flex items-center justify-center flex-shrink-0">
-                    {player.profilePhoto ? (
-                      <img
-                        src={player.profilePhoto}
-                        alt={player.displayName}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-[#555] font-bold">
-                        {player.displayName.charAt(0)}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-white font-bold text-sm truncate">
-                      {player.displayName}
-                    </p>
-                    <p className="text-[#888] text-xs">
-                      {player.sessionsPlayed} session{player.sessionsPlayed !== 1 ? "s" : ""} played
-                    </p>
-                  </div>
-
-                  {/* Stats */}
-                  <div className="flex items-center gap-3 flex-shrink-0">
-                    <div className="text-center">
-                      <div className="flex items-center gap-1">
-                        <TrendingUp className="w-3 h-3 text-[#F5E642]" />
-                        <span className="text-white text-sm font-bold">
-                          {player.correctPredictions}
-                        </span>
-                      </div>
-                      <p className="text-[#555] text-[10px]">correct</p>
-                    </div>
-                    <div className="text-center">
-                      <div className="flex items-center gap-1">
-                        <Target className="w-3 h-3 text-green-400" />
-                        <span className="text-white text-sm font-bold">
-                          {player.winRate}%
-                        </span>
-                      </div>
-                      <p className="text-[#555] text-[10px]">win rate</p>
-                    </div>
-                  </div>
+                  <span className="text-[#8d8d8d]">{player.rank}</span>
+                  <span className="truncate text-[#e4e4e4]">{truncateWallet(player.displayName)}</span>
+                  <span className="text-right font-semibold text-[#e4e4e4]">{player.correctPredictions}</span>
+                  <span className="text-right text-[#9b9b9b]">{player.winRate}%</span>
+                  <span className="text-right text-[#9b9b9b]">{player.sessionsPlayed}</span>
                 </div>
-              );
-            })}
-          </div>
-        </>
-      )}
+              ))}
+            </div>
+
+            <p className="mt-5 text-center text-[12px] text-[#646464]">
+              Top Taste Tribe at 7,000 collective points unlocks group NFT eligibility
+            </p>
+          </>
+        )}
+      </div>
     </div>
   );
 }

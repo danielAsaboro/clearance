@@ -1,21 +1,49 @@
 "use client";
 
-interface ProgressBarProps {
-  currentStep: number;
-  totalSteps: number;
+interface TimerBarProps {
+  secondsLeft: number;
+  roundDuration: number;
+  currentStep?: never;
+  totalSteps?: never;
 }
 
-export default function ProgressBar({ currentStep, totalSteps }: ProgressBarProps) {
-  return (
-    <div className="flex gap-2 w-full">
-      {Array.from({ length: totalSteps }).map((_, i) => (
+interface StepBarProps {
+  currentStep: number;
+  totalSteps: number;
+  secondsLeft?: never;
+  roundDuration?: never;
+}
+
+type ProgressBarProps = TimerBarProps | StepBarProps;
+
+export default function ProgressBar(props: ProgressBarProps) {
+  if ("secondsLeft" in props && props.secondsLeft !== undefined) {
+    const { secondsLeft, roundDuration } = props;
+    const pct = roundDuration > 0 ? Math.max(0, Math.min(1, secondsLeft / roundDuration)) * 100 : 0;
+    const isLow = secondsLeft <= 5;
+
+    return (
+      <div className="spotr-progress-track h-[5px]">
         <div
-          key={i}
-          className={`h-1 flex-1 rounded-full ${
-            i < currentStep ? "bg-[#F5E642]" : "bg-[#333]"
-          }`}
+          className="h-full rounded-full transition-[width] duration-1000 ease-linear"
+          style={{
+            width: `${pct}%`,
+            backgroundColor: isLow ? "#eb5a52" : "#f5d63d",
+          }}
         />
-      ))}
+      </div>
+    );
+  }
+
+  const { currentStep, totalSteps } = props as StepBarProps;
+  const pct = totalSteps > 0 ? (currentStep / totalSteps) * 100 : 0;
+
+  return (
+    <div className="spotr-progress-track h-[5px]">
+      <div
+        className="spotr-progress-fill transition-[width] duration-300 ease-out"
+        style={{ width: `${pct}%` }}
+      />
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter } from 'next/font/google'
+import { Inter, Space_Grotesk } from 'next/font/google'
 import { ClusterProvider } from '@/components/cluster/cluster-data-access'
 import Providers from '@/components/Providers'
 import { AppProviders } from '@/components/app-providers'
@@ -17,6 +17,11 @@ const links: { label: string; path: string }[] = [
 
 const inter = Inter({
   variable: '--font-geist-sans',
+  subsets: ['latin'],
+})
+
+const spaceGrotesk = Space_Grotesk({
+  variable: '--font-space-grotesk',
   subsets: ['latin'],
 })
 
@@ -65,7 +70,7 @@ export default function RootLayout({
       <head>
         <ServiceWorkerRegistration />
       </head>
-      <body className={`${inter.variable} antialiased bg-black`}>
+      <body className={`${inter.variable} ${spaceGrotesk.variable} antialiased bg-black`}>
         <ClusterProvider>
           <Providers>
             <AppProviders>
