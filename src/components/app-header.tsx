@@ -7,7 +7,7 @@ import { ThemeSelect } from '@/components/theme-select'
 import { ClusterUiSelect } from './cluster/cluster-ui'
 import ConnectWallet from '@/components/ConnectWallet'
 
-export function AppHeader({ links = [] }: { links: { label: string; path: string }[] }) {
+export function AppHeader({ links = [], isAdmin = false }: { links: { label: string; path: string }[]; isAdmin?: boolean }) {
   const pathname = usePathname()
   const [showMenu, setShowMenu] = useState(false)
 
@@ -15,6 +15,12 @@ export function AppHeader({ links = [] }: { links: { label: string; path: string
     return path === '/' ? pathname === '/' : pathname.startsWith(path)
   }
 
+  // Consumer routes: no header — each page handles its own navigation
+  if (!isAdmin) {
+    return null
+  }
+
+  // Admin routes: full header with nav links
   return (
     <header className="sticky top-0 z-50 px-4 py-2 bg-black border-b border-[#2A2A2A]">
       <div className="mx-auto flex justify-between items-center">
@@ -23,7 +29,7 @@ export function AppHeader({ links = [] }: { links: { label: string; path: string
             <div className="w-7 h-7 bg-[#F5E642] rounded-lg flex items-center justify-center">
               <Eye className="w-4 h-4 text-black" />
             </div>
-            <span className="text-white font-bold text-sm">Spotr TV</span>
+            <span className="text-white font-bold text-sm">SPOTR <span className="text-[#F5E642]">/</span> TV</span>
           </Link>
           <div className="hidden md:flex items-center">
             <ul className="flex gap-4 flex-nowrap items-center">

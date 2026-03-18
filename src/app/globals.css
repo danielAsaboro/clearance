@@ -3,26 +3,39 @@
 @theme inline {
   --color-background: #000000;
   --color-foreground: #ffffff;
-  --color-yellow: #F5E642;
-  --color-yellow-dark: #D4C836;
-  --color-card: #1A1A1A;
-  --color-card-light: #2A2A2A;
-  --color-muted: #888888;
+  --color-yellow: #f5d63d;
+  --color-yellow-dark: #c8ae2f;
+  --color-card: #161616;
+  --color-card-light: #232323;
+  --color-card-soft: #1d1d1d;
+  --color-muted: #8e8e8e;
+  --color-muted-strong: #5d5d5d;
+  --color-success: #45ca61;
+  --color-danger: #eb5a52;
+  --color-divider: #2a2a2a;
   --font-sans: var(--font-geist-sans);
+  --font-display: var(--font-space-grotesk);
   --font-mono: var(--font-geist-mono);
+}
+
+html,
+body {
+  min-height: 100%;
 }
 
 body {
   background: var(--color-background);
   color: var(--color-foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), sans-serif;
+  text-rendering: geometricPrecision;
 }
 
 /* Mobile-first container */
 .app-container {
-  max-width: 480px;
+  max-width: 100%;
   margin: 0 auto;
   position: relative;
+  width: 100%;
 }
 
 /* Admin layout needs full width — the 480px mobile container
@@ -38,20 +51,29 @@ body {
 
 /* Yellow button hover glow */
 .btn-yellow {
-  background: #F5E642;
+  background: var(--color-yellow);
   color: black;
-  transition: all 0.2s ease;
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease,
+    border-color 0.2s ease;
+  box-shadow: 0 0 16px rgba(245, 214, 61, 0.24);
+}
+
+.font-display {
+  font-family: var(--font-space-grotesk), var(--font-geist-sans), sans-serif;
 }
 
 .btn-yellow:hover {
-  background: #F5E642;
-  box-shadow: 0 0 20px rgba(245, 230, 66, 0.4), 0 0 40px rgba(245, 230, 66, 0.15);
+  background: var(--color-yellow);
+  box-shadow: 0 0 20px rgba(245, 214, 61, 0.36);
   transform: translateY(-1px);
 }
 
 .btn-yellow:active {
   transform: translateY(0px);
-  box-shadow: 0 0 10px rgba(245, 230, 66, 0.3);
+  box-shadow: 0 0 12px rgba(245, 214, 61, 0.28);
 }
 
 /* Dark button hover */
@@ -62,8 +84,8 @@ body {
 
 .btn-dark:hover {
   background: #222;
-  border-color: #F5E642;
-  box-shadow: 0 0 12px rgba(245, 230, 66, 0.15);
+  border-color: var(--color-yellow);
+  box-shadow: 0 0 12px rgba(245, 214, 61, 0.15);
 }
 
 /* Card hover */
@@ -74,6 +96,102 @@ body {
 .card-hover:hover {
   border-color: rgba(245, 230, 66, 0.4);
   box-shadow: 0 0 15px rgba(245, 230, 66, 0.1);
+}
+
+.spotr-mobile-shell {
+  width: min(100%, 430px);
+  margin: 0 auto;
+}
+
+.spotr-page {
+  min-height: 100dvh;
+  background: #000;
+}
+
+.spotr-panel {
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--color-card);
+}
+
+.spotr-panel-soft {
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--color-card-soft);
+}
+
+.spotr-outline-panel {
+  border-radius: 18px;
+  border: 1px solid rgba(245, 214, 61, 0.72);
+  background: rgba(245, 214, 61, 0.06);
+}
+
+.spotr-primary-button {
+  min-height: 52px;
+  border-radius: 14px;
+  border: 1px solid rgba(245, 214, 61, 0.9);
+  background: var(--color-yellow);
+  color: #0b0b0b;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  box-shadow: 0 0 18px rgba(245, 214, 61, 0.18);
+}
+
+.spotr-secondary-button {
+  min-height: 52px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.02);
+  color: #f4f4f4;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.spotr-wallet-pill {
+  min-height: 34px;
+  border-radius: 10px;
+  border: 1px solid rgba(245, 214, 61, 0.38);
+  background: rgba(245, 214, 61, 0.04);
+}
+
+.spotr-caption {
+  color: var(--color-muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.spotr-screen-footer {
+  color: #6d6d6d;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.spotr-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.spotr-progress-track {
+  overflow: hidden;
+  border-radius: 999px;
+  background: #353535;
+}
+
+.spotr-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--color-yellow);
+}
+
+.spotr-bottom-sheet {
+  border-radius: 26px 26px 0 0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #1b1b1b;
+  box-shadow: 0 -24px 60px rgba(0, 0, 0, 0.58);
 }
 
 /* Game transitions */
@@ -92,3 +210,17 @@ body {
 .anim-fade-in { animation: fadeIn 0.3s ease-out forwards; }
 .anim-zoom-in { animation: zoomIn 0.3s ease-out forwards; }
 .anim-slide-in { animation: slideIn 0.4s ease-out forwards; }
+
+/* Profile bottom sheet slide-up */
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.anim-slide-up { animation: slideUp 0.3s ease-out forwards; }
+
+/* Timer pulse-glow for urgency (≤5s) */
+@keyframes pulseGlow {
+  0%, 100% { opacity: 1; text-shadow: 0 0 8px rgba(239, 68, 68, 0.6); }
+  50% { opacity: 0.7; text-shadow: 0 0 16px rgba(239, 68, 68, 0.9); }
+}
+.anim-pulse-glow { animation: pulseGlow 0.8s ease-in-out infinite; }

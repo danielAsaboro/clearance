@@ -92,5 +92,7 @@ export async function GET(
     });
   }
 
-  return NextResponse.json(gameResult);
+  const totalRounds = await prisma.matchup.count({ where: { sessionId: id } });
+
+  return NextResponse.json({ ...gameResult, totalRounds });
 }
