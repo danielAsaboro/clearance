@@ -24,6 +24,7 @@ const connection = new Connection(
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const sessionId = searchParams.get("session");
+  const refCode = searchParams.get("ref");
 
   let title = "Join Live Session";
   let description =
@@ -54,7 +55,13 @@ export async function GET(req: NextRequest) {
         {
           type: "transaction" as const,
           label: scheduledLabel,
-          href: `${new URL(req.url).origin}/api/actions/join${sessionId ? `?session=${sessionId}` : ""}`,
+          href: (() => {
+            const params = new URLSearchParams();
+            if (sessionId) params.set("session", sessionId);
+            if (refCode) params.set("ref", refCode);
+            const qs = params.toString();
+            return `${new URL(req.url).origin}/api/actions/join${qs ? `?${qs}` : ""}`;
+          })(),
         },
       ],
     },
@@ -73,6 +80,7 @@ export async function POST(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const sessionId = searchParams.get("session");
+    const refCode = searchParams.get("ref");
 
     const body = await req.json();
     const accountPubkey = new PublicKey(body.account);
@@ -122,6 +130,28 @@ export async function POST(req: NextRequest) {
           .catch(() => {
             // Already joined — ignore
           });
+
+        // Record referral attribution if a ref code was passed and user has no referral yet
+        if (refCode) {
+          const existingReferral = await prisma.referral.findUnique({
+            where: { referredUserId: user.id },
+          });
+          if (!existingReferral) {
+            const referrer = await prisma.user.findUnique({ where: { referralCode: refCode } });
+            if (referrer && referrer.id !== user.id) {
+              await prisma.referral
+                .create({
+                  data: { referrerId: referrer.id, referredUserId: user.id, code: refCode },
+                })
+                .catch(() => {
+                  // Race condition — ignore
+                });
+              await prisma.user
+                .update({ where: { id: user.id }, data: { referredBy: refCode } })
+                .catch(() => {});
+            }
+          }
+        }
       }
     }
 

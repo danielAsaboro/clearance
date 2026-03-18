@@ -58,23 +58,25 @@ export default function MatchupPicker({
   const ignoringScrollRef = useRef(false);
   const flipLockRef = useRef(false);
 
+  /* Layout: [B_clone(0), A(1), B(2), A_clone(3)] — start at slot 1.
+     Scrolling down from B(2) lands on A_clone(3) → silently teleport to A(1).
+     Scrolling up from A(1) lands on B_clone(0) → silently teleport to B(2). */
+
+  // Start at slot 1 (A) on mount
+  useEffect(() => {
+    const scroller = containerRef.current;
+    if (scroller) scroller.scrollTop = scroller.clientHeight;
+  }, []);
+
   const handleScroll = useCallback(() => {
     const scroller = containerRef.current;
     if (!scroller || ignoringScrollRef.current) return;
 
     if (!hasScrolled) setHasScrolled(true);
 
-    const position = Math.round(scroller.scrollTop / scroller.clientHeight);
-    const pick = position === 1 ? "video_b" : "video_a";
-    setActiveVideo(pick === "video_a" ? "a" : "b");
-
-    if (position >= 2) {
-      ignoringScrollRef.current = true;
-      scroller.scrollTop = 0;
-      requestAnimationFrame(() => {
-        ignoringScrollRef.current = false;
-      });
-    }
+    const slot = Math.round(scroller.scrollTop / scroller.clientHeight);
+    // Update active video: slots 1,3 = A; slots 0,2 = B
+    setActiveVideo(slot % 2 === 1 ? "a" : "b");
   }, [hasScrolled]);
 
   useEffect(() => {
@@ -84,18 +86,33 @@ export default function MatchupPicker({
     return () => scroller.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
 
-  const scrollToSlot = (slot: number) => {
-    const scroller = containerRef.current;
-    if (!scroller) return;
-    scroller.scrollTo({ top: slot * scroller.clientHeight, behavior: "smooth" });
-  };
-
-  const flipTo = useCallback((slot: number) => {
+  const flipBy = useCallback((direction: 1 | -1) => {
     if (flipLockRef.current) return;
     flipLockRef.current = true;
     const scroller = containerRef.current;
-    if (scroller) scroller.scrollTo({ top: slot * scroller.clientHeight, behavior: "smooth" });
-    setTimeout(() => { flipLockRef.current = false; }, 350);
+    if (!scroller) { flipLockRef.current = false; return; }
+
+    const current = Math.round(scroller.scrollTop / scroller.clientHeight);
+    const target = current + direction;
+    scroller.scrollTo({ top: target * scroller.clientHeight, behavior: "smooth" });
+
+    // After animation settles, silently teleport off clone edges
+    setTimeout(() => {
+      if (!scroller) { flipLockRef.current = false; return; }
+      const landed = Math.round(scroller.scrollTop / scroller.clientHeight);
+      if (landed === 0) {
+        // On B_clone → jump to real B (slot 2)
+        ignoringScrollRef.current = true;
+        scroller.scrollTop = 2 * scroller.clientHeight;
+        requestAnimationFrame(() => { ignoringScrollRef.current = false; });
+      } else if (landed === 3) {
+        // On A_clone → jump to real A (slot 1)
+        ignoringScrollRef.current = true;
+        scroller.scrollTop = 1 * scroller.clientHeight;
+        requestAnimationFrame(() => { ignoringScrollRef.current = false; });
+      }
+      flipLockRef.current = false;
+    }, 400);
   }, []);
 
   useEffect(() => {
@@ -103,11 +120,11 @@ export default function MatchupPicker({
     if (!scroller) return;
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
-      flipTo(e.deltaY > 0 ? 1 : 0);
+      flipBy(e.deltaY > 0 ? 1 : -1);
     };
     scroller.addEventListener("wheel", onWheel, { passive: false });
     return () => scroller.removeEventListener("wheel", onWheel);
-  }, [flipTo]);
+  }, [flipBy]);
 
   useEffect(() => {
     const scroller = containerRef.current;
@@ -116,7 +133,7 @@ export default function MatchupPicker({
     const onTouchStart = (e: TouchEvent) => { startY = e.touches[0].clientY; };
     const onTouchEnd = (e: TouchEvent) => {
       const delta = startY - e.changedTouches[0].clientY;
-      if (Math.abs(delta) > 30) flipTo(delta > 0 ? 1 : 0);
+      if (Math.abs(delta) > 30) flipBy(delta > 0 ? 1 : -1);
     };
     scroller.addEventListener("touchstart", onTouchStart, { passive: true });
     scroller.addEventListener("touchend", onTouchEnd, { passive: true });
@@ -124,7 +141,7 @@ export default function MatchupPicker({
       scroller.removeEventListener("touchstart", onTouchStart);
       scroller.removeEventListener("touchend", onTouchEnd);
     };
-  }, [flipTo]);
+  }, [flipBy]);
 
   const renderAction = (videoKey: "video_a" | "video_b") => {
     if (voted === null) {
@@ -218,9 +235,15 @@ export default function MatchupPicker({
           scrollbarWidth: "none",
         }}
       >
+        {/* Slot 0: B clone (for upward wrap) */}
+        <div className="h-full shrink-0 snap-start overflow-hidden">
+          <VideoPlayer url={videoB.url} thumbnailUrl={videoB.thumbnailUrl} title={videoB.title} autoplay muted />
+        </div>
+        {/* Slot 1: A (real) */}
         {renderSlot(videoA, "VIDEO A", "video_a")}
+        {/* Slot 2: B (real) */}
         {renderSlot(videoB, "VIDEO B", "video_b")}
-        {/* Third slot loops Video A so scroll wraps seamlessly */}
+        {/* Slot 3: A clone (for downward wrap) */}
         <div className="h-full shrink-0 snap-start overflow-hidden">
           <VideoPlayer url={videoA.url} thumbnailUrl={videoA.thumbnailUrl} title={videoA.title} autoplay muted />
         </div>
@@ -228,13 +251,13 @@ export default function MatchupPicker({
 
       <div className="absolute right-4 top-1/2 z-20 flex -translate-y-1/2 flex-col gap-3">
         <button
-          onClick={() => flipTo(0)}
+          onClick={() => flipBy(-1)}
           className={`flex h-9 w-9 items-center justify-center rounded-full shadow-[0_0_0_1px_rgba(245,214,61,0.14)] ${activeVideo === "a" ? "bg-[#d4bc40] text-black" : "bg-[#353535] text-white"}`}
         >
           <ChevronUp className="h-4 w-4" />
         </button>
         <button
-          onClick={() => flipTo(1)}
+          onClick={() => flipBy(1)}
           className={`flex h-9 w-9 items-center justify-center rounded-full ${activeVideo === "b" ? "bg-[#d4bc40] text-black" : "bg-[#353535] text-white"}`}
         >
           <ChevronDown className="h-4 w-4" />
