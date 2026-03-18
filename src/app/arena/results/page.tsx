@@ -27,7 +27,10 @@ function ResultsContent() {
   const [showProfile, setShowProfile] = useState(false);
 
   useEffect(() => {
-    if (!sessionId) return;
+    if (!sessionId) {
+      setLoading(false);
+      return;
+    }
 
     const fetchResults = async () => {
       const token = await getAccessToken();
@@ -136,7 +139,7 @@ function ResultsContent() {
             </div>
 
             <div className="mt-auto flex w-full flex-col gap-4 pt-8">
-              <Link href="/blink" className="block w-full">
+              <Link href={`/blink?session=${sessionId}&score=${results.correctVotes}&total=${results.totalRounds}`} className="block w-full">
                 <button className="spotr-primary-button flex w-full items-center justify-center gap-2">
                   <Share2 className="h-4 w-4" />
                   Generate My Blink Link

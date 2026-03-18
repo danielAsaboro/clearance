@@ -1,12 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Check, Copy, Send } from "lucide-react";
 import { usePrivy } from "@privy-io/react-auth";
 import PageHeader from "@/components/PageHeader";
 import SpotrIcon from "@/components/SpotrIcon";
 
-export default function BlinkPage() {
+function BlinkContent() {
+  const searchParams = useSearchParams();
+  const sessionId = searchParams.get("session");
+  const score = searchParams.get("score");
+  const total = searchParams.get("total");
+
   const { getAccessToken, authenticated } = usePrivy();
   const [blinkCode, setBlinkCode] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -33,10 +39,19 @@ export default function BlinkPage() {
     })();
   }, [authenticated, getAccessToken]);
 
-  const blinkUrl = blinkCode ? `spotr.tv/blink/${blinkCode}` : "spotr.tv/blink/...";
-  const fullUrl = blinkCode
-    ? `${typeof window !== "undefined" ? window.location.origin : "https://spotr.tv"}/ref/${blinkCode}`
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://spotr.tv";
+
+  const actionUrl = blinkCode
+    ? `${origin}/api/actions/join${sessionId ? `?session=${sessionId}&ref=${blinkCode}` : `?ref=${blinkCode}`}`
     : "";
+
+  const fullUrl = blinkCode
+    ? `https://dial.to/?action=solana-action:${encodeURIComponent(actionUrl)}`
+    : "";
+
+  const blinkDisplay = blinkCode
+    ? `dial.to/?action=solana-action:${encodeURIComponent(actionUrl).slice(0, 18)}...`
+    : "dial.to/...";
 
   const truncateUrl = (url: string) => {
     const start = 22;
@@ -62,12 +77,17 @@ export default function BlinkPage() {
   };
 
   const handleShareX = () => {
-    const text = `I'm building my Taste Tribe on @SpotrTV. Join through my link and let's unlock NFT rewards together.\n\n${fullUrl}`;
+    const scoreText =
+      score && total ? `I scored ${score}/${total} on @SpotrTV. Play through my link 👇` : `I'm building my Taste Tribe on @SpotrTV. Join through my link and let's unlock NFT rewards together.`;
+    const text = `${scoreText}\n\n${fullUrl}`;
     window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(text)}`, "_blank");
   };
 
   const handleShareTelegram = () => {
-    const text = `Join my Taste Tribe on Spotr TV! ${fullUrl}`;
+    const text =
+      score && total
+        ? `I scored ${score}/${total} on Spotr TV! Join via my Blink link:`
+        : `Join my Taste Tribe on Spotr TV!`;
     window.open(
       `https://t.me/share/url?url=${encodeURIComponent(fullUrl)}&text=${encodeURIComponent(text)}`,
       "_blank",
@@ -76,10 +96,11 @@ export default function BlinkPage() {
 
   const nftThreshold = 70;
   const scorePct = Math.min(100, (tribeScore / nftThreshold) * 100);
+  const backHref = sessionId ? `/arena/results?session=${sessionId}` : "/arena/results";
 
   return (
     <div className="spotr-page flex flex-1 flex-col">
-      <PageHeader title="YOUR SPOTR BLINK" backHref="/arena/results" />
+      <PageHeader title="YOUR SPOTR BLINK" backHref={backHref} />
 
       <div className="spotr-mobile-shell flex flex-1 flex-col px-5 py-4">
         <div className="spotr-panel px-4 py-4">
@@ -89,7 +110,7 @@ export default function BlinkPage() {
         </div>
 
         <div className="spotr-panel mt-4 flex items-center justify-between gap-3 px-4 py-4">
-          <span className="text-[13px] font-medium text-[#d0b33a]">{truncateUrl(blinkUrl)}</span>
+          <span className="text-[13px] font-medium text-[#d0b33a]">{truncateUrl(blinkDisplay)}</span>
           <button
             onClick={handleCopy}
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-[#202020] text-[#9d9d9d]"
@@ -99,7 +120,7 @@ export default function BlinkPage() {
         </div>
 
         <div className="mt-4">
-          <p className="mb-2 text-[11px] text-[#707070]">Preview when shared on X/Telegram:</p>
+          <p className="mb-2 text-[11px] text-[#707070]">Preview when shared on X/Telegram/Phantom:</p>
           <div className="spotr-panel px-4 py-4">
             <div className="flex items-start gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px]">
@@ -163,5 +184,19 @@ export default function BlinkPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function BlinkPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex flex-1 items-center justify-center bg-black">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#f5d63d] border-t-transparent" />
+        </div>
+      }
+    >
+      <BlinkContent />
+    </Suspense>
   );
 }

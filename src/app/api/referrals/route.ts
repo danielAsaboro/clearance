@@ -88,15 +88,29 @@ export async function GET(req: NextRequest) {
     select: { referralCode: true },
   });
 
-  const referrals = await prisma.referral.findMany({
-    where: { referrerId: authUser.id },
-    include: { referredUser: { select: { displayName: true, createdAt: true } } },
-    orderBy: { createdAt: "desc" },
-  });
+  const [referrals, tribeAggregate] = await Promise.all([
+    prisma.referral.findMany({
+      where: { referrerId: authUser.id },
+      include: { referredUser: { select: { displayName: true, createdAt: true } } },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.gameResult.aggregate({
+      where: {
+        user: {
+          referralReceived: {
+            referrerId: authUser.id,
+          },
+        },
+      },
+      _sum: { correctVotes: true },
+    }),
+  ]);
+
+  const tribeScore = tribeAggregate._sum.correctVotes ?? 0;
 
   return NextResponse.json({
     code: user?.referralCode ?? null,
-    tribeScore: referrals.length,
+    tribeScore,
     referrals,
   });
 }
