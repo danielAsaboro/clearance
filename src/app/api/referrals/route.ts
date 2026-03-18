@@ -96,11 +96,16 @@ export async function GET(req: NextRequest) {
     }),
     prisma.gameResult.aggregate({
       where: {
-        user: {
-          referralReceived: {
-            referrerId: authUser.id,
+        OR: [
+          { userId: authUser.id },
+          {
+            user: {
+              referralReceived: {
+                referrerId: authUser.id,
+              },
+            },
           },
-        },
+        ],
       },
       _sum: { correctVotes: true },
     }),
