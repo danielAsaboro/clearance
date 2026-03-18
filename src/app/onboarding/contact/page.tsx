@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Eye, Mail, Wallet, Check } from "lucide-react";
+import { ArrowLeft, Mail, Wallet, Check } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import ProgressBar from "@/components/ProgressBar";
 import { useOnboarding } from "@/lib/onboarding-context";
 import { usePrivy } from "@privy-io/react-auth";
@@ -69,9 +70,7 @@ export default function ContactStep() {
             <ArrowLeft className="w-5 h-5 text-white" />
           </div>
         </Link>
-        <div className="w-8 h-8 bg-[#F5E642] rounded-full flex items-center justify-center">
-          <Eye className="w-4 h-4 text-black" />
-        </div>
+        <Image src="/spotr-logo.png" alt="Spotr TV" width={32} height={32} className="rounded-full" />
         <span className="text-[#888] text-xs tracking-wider">
           STEP 2 OF {TOTAL_STEPS}
         </span>

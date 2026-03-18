@@ -42,11 +42,10 @@ export default function Home() {
       .catch(() => setProfile(null));
   }, [authenticated, getAccessToken]);
 
+  // Bypass onboarding — go straight to arena
   const playHref = !authenticated
-    ? "/onboarding/categories"
-    : profile?.consentAccepted
-    ? "/arena"
-    : "/onboarding/categories";
+    ? "/auth/login"
+    : "/arena";
 
   const sessionComplete = authenticated && profile?.sessionComplete === true;
 
@@ -66,7 +65,7 @@ export default function Home() {
         </div>
 
         <div className="mb-10 w-full">
-          <div className="mx-auto w-full max-w-[312px] space-y-3">
+          <div className="mx-auto flex w-full max-w-[312px] flex-col gap-4">
             {sessionComplete ? (
               <div className="spotr-panel px-5 py-4 text-center">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#707070]">

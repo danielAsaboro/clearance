@@ -3,7 +3,7 @@
 import { useLogin, usePrivy } from "@privy-io/react-auth";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, Suspense } from "react";
-import { Eye } from "lucide-react";
+import Image from "next/image";
 
 function LoginContent() {
   const router = useRouter();
@@ -25,9 +25,7 @@ function LoginContent() {
 
   return (
     <div className="flex-1 bg-black flex flex-col items-center justify-center px-6">
-      <div className="w-16 h-16 bg-[#F5E642] rounded-2xl flex items-center justify-center mb-4">
-        <Eye className="w-8 h-8 text-black" strokeWidth={2.5} />
-      </div>
+      <Image src="/spotr-logo.png" alt="Spotr TV" width={64} height={64} className="rounded-2xl mb-4" />
       <h1 className="text-3xl font-bold tracking-wider text-white mb-8">Spotr TV</h1>
 
       <p className="text-[#888] text-sm text-center mb-8">
