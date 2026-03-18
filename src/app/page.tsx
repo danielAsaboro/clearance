@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { PlayCircle, Trophy } from "lucide-react";
+import { PlayCircle, Trophy, Home as HomeIcon, User } from "lucide-react";
 import SpotrIcon from "@/components/SpotrIcon";
 import { usePrivy } from "@privy-io/react-auth";
 import { useEffect, useState } from "react";
+import ProfileModal from "@/components/ProfileModal";
 
 interface UserProfile {
   id: string;
@@ -17,6 +18,7 @@ interface UserProfile {
 export default function Home() {
   const { authenticated, getAccessToken } = usePrivy();
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [showProfile, setShowProfile] = useState(false);
 
   useEffect(() => {
     if (!authenticated) {
@@ -52,6 +54,20 @@ export default function Home() {
   return (
     <div className="spotr-page flex flex-1 flex-col">
       <div className="spotr-mobile-shell flex min-h-dvh flex-col px-6 pb-8 pt-10">
+        <div className="mb-6 flex items-center gap-2">
+          <Link
+            href="/"
+            className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#161616] text-white transition-colors hover:bg-[#1d1d1d]"
+          >
+            <HomeIcon className="h-4 w-4" />
+          </Link>
+          <button
+            onClick={() => setShowProfile(true)}
+            className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#161616] text-white transition-colors hover:bg-[#1d1d1d]"
+          >
+            <User className="h-4 w-4" />
+          </button>
+        </div>
         <div className="flex flex-1 flex-col items-center pt-6 text-center">
           <SpotrIcon size={96} className="mb-6" />
 
@@ -97,6 +113,7 @@ export default function Home() {
 
         <p className="spotr-screen-footer text-center">Season 1 is LIVE • May 2026 NFT Drop</p>
       </div>
+      <ProfileModal open={showProfile} onClose={() => setShowProfile(false)} />
     </div>
   );
 }

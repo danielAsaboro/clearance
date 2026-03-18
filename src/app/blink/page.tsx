@@ -16,7 +16,7 @@ function BlinkContent() {
   const { getAccessToken, authenticated } = usePrivy();
   const [blinkCode, setBlinkCode] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const [tribeScore, setTribeScore] = useState(0);
+  const [tribeScore, setTribeScore] = useState<number | null>(null);
 
   useEffect(() => {
     if (!authenticated) return;
@@ -95,7 +95,7 @@ function BlinkContent() {
   };
 
   const nftThreshold = 70;
-  const scorePct = Math.min(100, (tribeScore / nftThreshold) * 100);
+  const scorePct = tribeScore !== null ? Math.min(100, (tribeScore / nftThreshold) * 100) : 0;
   const backHref = sessionId ? `/arena/results?session=${sessionId}` : "/arena/results";
 
   return (
@@ -169,7 +169,11 @@ function BlinkContent() {
           <div className="spotr-panel px-4 py-4">
             <p className="text-[12px] font-semibold uppercase tracking-[0.06em] text-[#d0b33a]">Taste Tribe Score</p>
             <p className="mt-2 text-[15px] text-[#8b8b8b]">
-              <span className="font-semibold text-[#bdbdbd]">{tribeScore}</span> / {nftThreshold} points
+              {tribeScore === null ? (
+                <span className="italic text-[#6d6d6d]">computing scores...</span>
+              ) : (
+                <><span className="font-semibold text-[#bdbdbd]">{tribeScore}</span> / {nftThreshold} points</>
+              )}
             </p>
             <div className="mt-3 h-[7px] overflow-hidden rounded-full bg-[#303030]">
               <div className="h-full rounded-full bg-[#d0b33a]" style={{ width: `${scorePct}%` }} />
