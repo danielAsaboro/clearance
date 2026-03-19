@@ -4,6 +4,7 @@ import { useLogin, usePrivy } from "@privy-io/react-auth";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, Suspense } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 function LoginContent() {
   const router = useRouter();
@@ -38,6 +39,10 @@ function LoginContent() {
       >
         Sign In
       </button>
+
+      <Link href="/arena" className="mt-4 text-[#888] text-sm underline-offset-2 hover:text-white transition-colors">
+        Skip for now
+      </Link>
 
       <p className="text-[#888] text-xs mt-6 text-center">
         Email or Solana wallet supported
