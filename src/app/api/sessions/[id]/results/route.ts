@@ -41,8 +41,15 @@ export async function GET(
     });
   }
 
-  // If results haven't been calculated yet, calculate them via majority vote
-  if (gameResult.tier === null) {
+  // Fetch session status to determine if results were admin-finalized
+  const session = await prisma.weeklySession.findUnique({
+    where: { id },
+    select: { status: true },
+  });
+
+  // Recalculate if: tier was never set, OR session is still live (not admin-finalized).
+  // Sample sessions are always "live", so their results always reflect current votes.
+  if (gameResult.tier === null || session?.status !== "ended") {
     // Get all matchups with their votes for this session
     const matchups = await prisma.matchup.findMany({
       where: { sessionId: id },

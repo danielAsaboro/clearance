@@ -34,11 +34,21 @@ function safeName(filename: string): string {
   return filename.replace(/\s+/g, "_").replace(/[^a-zA-Z0-9_.\-]/g, "_");
 }
 
-/** "ridge_wallet.mp4" → "Ridge Wallet" */
-function titleFromFilename(filename: string): string {
-  return filename
-    .replace(/\.mp4$/i, "")
-    .replace(/[_\-]+/g, " ")
+/** Extract @handle from filename (without extension). Returns null if none found. */
+function parseAccount(filename: string): string | null {
+  const noExt = filename.replace(/\.mp4$/i, "");
+  const tokens = noExt.replace(/[_\-]+/g, " ").trim().split(/\s+/);
+  const atToken = tokens.find((t) => t.startsWith("@"));
+  return atToken ? atToken.slice(1) : null;
+}
+
+/** Extract caption words (everything except the @handle token) */
+function parseCaption(filename: string): string {
+  const noExt = filename.replace(/\.mp4$/i, "");
+  const tokens = noExt.replace(/[_\-]+/g, " ").trim().split(/\s+/);
+  return tokens
+    .filter((t) => !t.startsWith("@"))
+    .join(" ")
     .replace(/\b\w/g, (c) => c.toUpperCase())
     .trim();
 }
@@ -81,7 +91,22 @@ async function main() {
       consentAccepted: true,
     },
   });
-  console.log(`👤  Seed user: ${seedUser.id}\n`);
+  console.log(`👤  Seed user (fallback): ${seedUser.id}\n`);
+
+  async function upsertAccountUser(handle: string): Promise<string> {
+    const user = await prisma.user.upsert({
+      where: { privyId: `seed_@${handle}` },
+      update: { displayName: `@${handle}` },
+      create: {
+        privyId: `seed_@${handle}`,
+        referralCode: `SEED_${handle.toUpperCase().slice(0, 8)}`,
+        role: "player",
+        displayName: `@${handle}`,
+        consentAccepted: true,
+      },
+    });
+    return user.id;
+  }
 
   // 4. Copy + upsert each video
   let created = 0;
@@ -94,7 +119,9 @@ async function main() {
     const destPath = path.join(UPLOADS_DIR, safe);
     const publicUrl = `${PUBLIC_PATH_PREFIX}/${safe}`;
     const sourceKey = `local:videos/${safe}`;
-    const title = titleFromFilename(safe);
+    const account = parseAccount(originalFilename);
+    const caption = parseCaption(originalFilename);
+    const uploadedById = account ? await upsertAccountUser(account) : seedUser.id;
 
     // Copy to public/uploads/videos/ if not already there
     if (!fs.existsSync(destPath)) {
@@ -110,7 +137,7 @@ async function main() {
     if (existing) {
       await prisma.video.update({
         where: { sourceKey },
-        data: { url: publicUrl, title, status: "ready" },
+        data: { url: publicUrl, title: caption, status: "ready" },
       });
       updated++;
       seededIds.push(existing.id);
@@ -118,12 +145,12 @@ async function main() {
       const v = await prisma.video.create({
         data: {
           url: publicUrl,
-          title,
+          title: caption,
           status: "ready",
           sourceKey,
           originalFilename: originalFilename,
           sourceContentType: "video/mp4",
-          uploadedById: seedUser.id,
+          uploadedById,
         },
       });
       created++;
