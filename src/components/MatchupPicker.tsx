@@ -9,6 +9,7 @@ interface VideoData {
   url: string;
   thumbnailUrl?: string | null;
   title?: string | null;
+  creatorHandle?: string | null;
 }
 
 interface MatchupPickerProps {
@@ -22,20 +23,12 @@ interface MatchupPickerProps {
   roundNumber?: number;
 }
 
-function parseVideoMeta(title: string | null | undefined) {
-  if (!title) return { username: "@spotr_creator", productTitle: "Sponsored Drop" };
-
-  const dashMatch = title.match(/^@?(\S+)\s*[—–-]\s*(.+)$/);
-  if (dashMatch) {
-    return { username: `@${dashMatch[1]}`, productTitle: dashMatch[2] };
-  }
-
-  const byMatch = title.match(/^@?(\S+)\s+(.+)$/);
-  if (byMatch) {
-    return { username: `@${byMatch[1]}`, productTitle: byMatch[2] };
-  }
-
-  return { username: "@spotr_creator", productTitle: title };
+function parseVideoMeta(video: VideoData) {
+  const username = video.creatorHandle
+    ? (video.creatorHandle.startsWith("@") ? video.creatorHandle : `@${video.creatorHandle}`)
+    : "@spotr_creator";
+  const productTitle = video.title ?? "Sponsored Drop";
+  return { username, productTitle };
 }
 
 export default function MatchupPicker({
@@ -176,7 +169,7 @@ export default function MatchupPicker({
   };
 
   const renderSlot = (video: VideoData, label: "VIDEO A" | "VIDEO B", videoKey: "video_a" | "video_b") => {
-    const meta = parseVideoMeta(video.title);
+    const meta = parseVideoMeta(video);
 
     return (
       <div className="relative h-full shrink-0 snap-start overflow-hidden">
