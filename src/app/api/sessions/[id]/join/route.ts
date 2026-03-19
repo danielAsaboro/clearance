@@ -52,14 +52,27 @@ export async function POST(
   const joinedAtRound = isLateJoin ? getCurrentRound(session) : 1;
 
   // Create GameResult upfront so it exists for the results page
-  const gameResult = await prisma.gameResult.create({
-    data: {
-      userId: user.id,
-      sessionId: id,
-      walletAddress: user.walletAddress,
-      lateJoin: isLateJoin,
-    },
-  });
+  let gameResult;
+  try {
+    gameResult = await prisma.gameResult.create({
+      data: {
+        userId: user.id,
+        sessionId: id,
+        walletAddress: user.walletAddress,
+        lateJoin: isLateJoin,
+      },
+    });
+  } catch (err: any) {
+    if (err?.code === 'P2002') {
+      // Another concurrent request created the record — fetch it
+      gameResult = await prisma.gameResult.findUnique({
+        where: { userId_sessionId: { userId: user.id, sessionId: id } },
+      });
+      if (!gameResult) throw err;
+      return NextResponse.json({ ...gameResult, joinedAtRound, alreadyJoined: true });
+    }
+    throw err;
+  }
 
   // Build unsigned fan_deposit transaction for fan to sign
   try {

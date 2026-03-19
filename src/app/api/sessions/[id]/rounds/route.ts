@@ -27,6 +27,7 @@ export async function GET(
             sourceKey: true,
             playbackKey: true,
             thumbnailKey: true,
+            uploadedBy: { select: { displayName: true } },
           },
         },
         videoB: {
@@ -38,6 +39,7 @@ export async function GET(
             sourceKey: true,
             playbackKey: true,
             thumbnailKey: true,
+            uploadedBy: { select: { displayName: true } },
           },
         },
       },

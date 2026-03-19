@@ -13,6 +13,7 @@ interface MatchupVideo {
   url: string;
   thumbnailUrl: string | null;
   title: string | null;
+  uploadedBy?: { displayName: string | null } | null;
 }
 
 interface Matchup {
@@ -453,8 +454,8 @@ function GameContent() {
         <div className="min-h-0 flex-1 flex flex-col">
           <MatchupPicker
             key={currentMatchup.id}
-            videoA={currentMatchup.videoA}
-            videoB={currentMatchup.videoB}
+            videoA={{ ...currentMatchup.videoA, creatorHandle: currentMatchup.videoA.uploadedBy?.displayName ?? null }}
+            videoB={{ ...currentMatchup.videoB, creatorHandle: currentMatchup.videoB.uploadedBy?.displayName ?? null }}
             onPick={handleVote}
             voted={voted}
             muted={muted}

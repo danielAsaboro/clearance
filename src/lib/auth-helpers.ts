@@ -48,15 +48,24 @@ export async function getAuthUser(req: NextRequest) {
       const walletAddress = getLinkedSolanaWalletAddress(privyUser);
 
       if (!user) {
-        user = await prisma.user.create({
-          data: {
-            privyId,
-            email,
-            phone,
-            walletAddress,
-            referralCode: nanoid(8).toUpperCase(),
-          },
-        });
+        try {
+          user = await prisma.user.create({
+            data: {
+              privyId,
+              email,
+              phone,
+              walletAddress,
+              referralCode: nanoid(8).toUpperCase(),
+            },
+          });
+        } catch (err: any) {
+          if (err?.code === 'P2002') {
+            // Another concurrent request created the user — fetch it
+            user = await prisma.user.findUnique({ where: { privyId } });
+          } else {
+            throw err;
+          }
+        }
       } else {
         user = await prisma.user.update({
           where: { id: user.id },
