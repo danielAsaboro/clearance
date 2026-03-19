@@ -22,7 +22,7 @@
  */
 
 import { config } from "dotenv";
-config({ path: ".env.dev" });
+config({ path: ".env.local" });
 config();
 
 // Force R2 storage mode so URL generation is correct
