@@ -39,9 +39,12 @@ export async function POST(
   });
 
   if (existing) {
-    const isLateJoin = session.status === "live" && canLateJoin(session);
-    const joinedAtRound = isLateJoin ? getCurrentRound(session) : 1;
-    return NextResponse.json({ ...existing, joinedAtRound, alreadyJoined: true });
+    // Clear old votes for this session
+    await prisma.vote.deleteMany({
+      where: { userId: user.id, matchup: { sessionId: id } },
+    });
+    // Delete old GameResult so a fresh one is created below
+    await prisma.gameResult.delete({ where: { id: existing.id } });
   }
 
   if (!user.walletAddress) {
