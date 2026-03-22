@@ -45,9 +45,6 @@ export function VideoPlayer({
         style={{ flex: 1 }}
       />
 
-      {/* Block native video touch → prevents iOS/Android fullscreen takeover */}
-      <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }} />
-
       {loading && (
         <View className="absolute inset-0 items-center justify-center bg-black/50">
           <ActivityIndicator size="large" color="#F5E642" />
