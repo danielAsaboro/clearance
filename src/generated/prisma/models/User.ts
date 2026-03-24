@@ -32,6 +32,7 @@ export type UserMinAggregateOutputType = {
   profilePhoto: string | null
   role: $Enums.UserRole | null
   consentAccepted: boolean | null
+  isGuest: boolean | null
   privyId: string | null
   walletAddress: string | null
   referralCode: string | null
@@ -48,6 +49,7 @@ export type UserMaxAggregateOutputType = {
   profilePhoto: string | null
   role: $Enums.UserRole | null
   consentAccepted: boolean | null
+  isGuest: boolean | null
   privyId: string | null
   walletAddress: string | null
   referralCode: string | null
@@ -64,6 +66,7 @@ export type UserCountAggregateOutputType = {
   profilePhoto: number
   role: number
   consentAccepted: number
+  isGuest: number
   privyId: number
   walletAddress: number
   referralCode: number
@@ -83,6 +86,7 @@ export type UserMinAggregateInputType = {
   profilePhoto?: true
   role?: true
   consentAccepted?: true
+  isGuest?: true
   privyId?: true
   walletAddress?: true
   referralCode?: true
@@ -99,6 +103,7 @@ export type UserMaxAggregateInputType = {
   profilePhoto?: true
   role?: true
   consentAccepted?: true
+  isGuest?: true
   privyId?: true
   walletAddress?: true
   referralCode?: true
@@ -115,6 +120,7 @@ export type UserCountAggregateInputType = {
   profilePhoto?: true
   role?: true
   consentAccepted?: true
+  isGuest?: true
   privyId?: true
   walletAddress?: true
   referralCode?: true
@@ -205,6 +211,7 @@ export type UserGroupByOutputType = {
   profilePhoto: string | null
   role: $Enums.UserRole
   consentAccepted: boolean
+  isGuest: boolean
   privyId: string
   walletAddress: string | null
   referralCode: string
@@ -243,6 +250,7 @@ export type UserWhereInput = {
   profilePhoto?: Prisma.StringNullableFilter<"User"> | string | null
   role?: Prisma.EnumUserRoleFilter<"User"> | $Enums.UserRole
   consentAccepted?: Prisma.BoolFilter<"User"> | boolean
+  isGuest?: Prisma.BoolFilter<"User"> | boolean
   privyId?: Prisma.StringFilter<"User"> | string
   walletAddress?: Prisma.StringNullableFilter<"User"> | string | null
   referralCode?: Prisma.StringFilter<"User"> | string
@@ -256,6 +264,7 @@ export type UserWhereInput = {
   referralsMade?: Prisma.ReferralListRelationFilter
   referralReceived?: Prisma.XOR<Prisma.ReferralNullableScalarRelationFilter, Prisma.ReferralWhereInput> | null
   enrollments?: Prisma.CampaignEnrollmentListRelationFilter
+  discountCodes?: Prisma.DiscountCodeListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -266,6 +275,7 @@ export type UserOrderByWithRelationInput = {
   profilePhoto?: Prisma.SortOrderInput | Prisma.SortOrder
   role?: Prisma.SortOrder
   consentAccepted?: Prisma.SortOrder
+  isGuest?: Prisma.SortOrder
   privyId?: Prisma.SortOrder
   walletAddress?: Prisma.SortOrderInput | Prisma.SortOrder
   referralCode?: Prisma.SortOrder
@@ -279,6 +289,7 @@ export type UserOrderByWithRelationInput = {
   referralsMade?: Prisma.ReferralOrderByRelationAggregateInput
   referralReceived?: Prisma.ReferralOrderByWithRelationInput
   enrollments?: Prisma.CampaignEnrollmentOrderByRelationAggregateInput
+  discountCodes?: Prisma.DiscountCodeOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -294,6 +305,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   profilePhoto?: Prisma.StringNullableFilter<"User"> | string | null
   role?: Prisma.EnumUserRoleFilter<"User"> | $Enums.UserRole
   consentAccepted?: Prisma.BoolFilter<"User"> | boolean
+  isGuest?: Prisma.BoolFilter<"User"> | boolean
   walletAddress?: Prisma.StringNullableFilter<"User"> | string | null
   referredBy?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
@@ -305,6 +317,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   referralsMade?: Prisma.ReferralListRelationFilter
   referralReceived?: Prisma.XOR<Prisma.ReferralNullableScalarRelationFilter, Prisma.ReferralWhereInput> | null
   enrollments?: Prisma.CampaignEnrollmentListRelationFilter
+  discountCodes?: Prisma.DiscountCodeListRelationFilter
 }, "id" | "email" | "privyId" | "referralCode">
 
 export type UserOrderByWithAggregationInput = {
@@ -315,6 +328,7 @@ export type UserOrderByWithAggregationInput = {
   profilePhoto?: Prisma.SortOrderInput | Prisma.SortOrder
   role?: Prisma.SortOrder
   consentAccepted?: Prisma.SortOrder
+  isGuest?: Prisma.SortOrder
   privyId?: Prisma.SortOrder
   walletAddress?: Prisma.SortOrderInput | Prisma.SortOrder
   referralCode?: Prisma.SortOrder
@@ -338,6 +352,7 @@ export type UserScalarWhereWithAggregatesInput = {
   profilePhoto?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   role?: Prisma.EnumUserRoleWithAggregatesFilter<"User"> | $Enums.UserRole
   consentAccepted?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
+  isGuest?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
   privyId?: Prisma.StringWithAggregatesFilter<"User"> | string
   walletAddress?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   referralCode?: Prisma.StringWithAggregatesFilter<"User"> | string
@@ -355,6 +370,7 @@ export type UserCreateInput = {
   profilePhoto?: string | null
   role?: $Enums.UserRole
   consentAccepted?: boolean
+  isGuest?: boolean
   privyId: string
   walletAddress?: string | null
   referralCode: string
@@ -368,6 +384,7 @@ export type UserCreateInput = {
   referralsMade?: Prisma.ReferralCreateNestedManyWithoutReferrerInput
   referralReceived?: Prisma.ReferralCreateNestedOneWithoutReferredUserInput
   enrollments?: Prisma.CampaignEnrollmentCreateNestedManyWithoutUserInput
+  discountCodes?: Prisma.DiscountCodeCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -378,6 +395,7 @@ export type UserUncheckedCreateInput = {
   profilePhoto?: string | null
   role?: $Enums.UserRole
   consentAccepted?: boolean
+  isGuest?: boolean
   privyId: string
   walletAddress?: string | null
   referralCode: string
@@ -391,6 +409,7 @@ export type UserUncheckedCreateInput = {
   referralsMade?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferrerInput
   referralReceived?: Prisma.ReferralUncheckedCreateNestedOneWithoutReferredUserInput
   enrollments?: Prisma.CampaignEnrollmentUncheckedCreateNestedManyWithoutUserInput
+  discountCodes?: Prisma.DiscountCodeUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -401,6 +420,7 @@ export type UserUpdateInput = {
   profilePhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   consentAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isGuest?: Prisma.BoolFieldUpdateOperationsInput | boolean
   privyId?: Prisma.StringFieldUpdateOperationsInput | string
   walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referralCode?: Prisma.StringFieldUpdateOperationsInput | string
@@ -414,6 +434,7 @@ export type UserUpdateInput = {
   referralsMade?: Prisma.ReferralUpdateManyWithoutReferrerNestedInput
   referralReceived?: Prisma.ReferralUpdateOneWithoutReferredUserNestedInput
   enrollments?: Prisma.CampaignEnrollmentUpdateManyWithoutUserNestedInput
+  discountCodes?: Prisma.DiscountCodeUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -424,6 +445,7 @@ export type UserUncheckedUpdateInput = {
   profilePhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   consentAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isGuest?: Prisma.BoolFieldUpdateOperationsInput | boolean
   privyId?: Prisma.StringFieldUpdateOperationsInput | string
   walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referralCode?: Prisma.StringFieldUpdateOperationsInput | string
@@ -437,6 +459,7 @@ export type UserUncheckedUpdateInput = {
   referralsMade?: Prisma.ReferralUncheckedUpdateManyWithoutReferrerNestedInput
   referralReceived?: Prisma.ReferralUncheckedUpdateOneWithoutReferredUserNestedInput
   enrollments?: Prisma.CampaignEnrollmentUncheckedUpdateManyWithoutUserNestedInput
+  discountCodes?: Prisma.DiscountCodeUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -447,6 +470,7 @@ export type UserCreateManyInput = {
   profilePhoto?: string | null
   role?: $Enums.UserRole
   consentAccepted?: boolean
+  isGuest?: boolean
   privyId: string
   walletAddress?: string | null
   referralCode: string
@@ -464,6 +488,7 @@ export type UserUpdateManyMutationInput = {
   profilePhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   consentAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isGuest?: Prisma.BoolFieldUpdateOperationsInput | boolean
   privyId?: Prisma.StringFieldUpdateOperationsInput | string
   walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referralCode?: Prisma.StringFieldUpdateOperationsInput | string
@@ -481,6 +506,7 @@ export type UserUncheckedUpdateManyInput = {
   profilePhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   consentAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isGuest?: Prisma.BoolFieldUpdateOperationsInput | boolean
   privyId?: Prisma.StringFieldUpdateOperationsInput | string
   walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referralCode?: Prisma.StringFieldUpdateOperationsInput | string
@@ -498,6 +524,7 @@ export type UserCountOrderByAggregateInput = {
   profilePhoto?: Prisma.SortOrder
   role?: Prisma.SortOrder
   consentAccepted?: Prisma.SortOrder
+  isGuest?: Prisma.SortOrder
   privyId?: Prisma.SortOrder
   walletAddress?: Prisma.SortOrder
   referralCode?: Prisma.SortOrder
@@ -515,6 +542,7 @@ export type UserMaxOrderByAggregateInput = {
   profilePhoto?: Prisma.SortOrder
   role?: Prisma.SortOrder
   consentAccepted?: Prisma.SortOrder
+  isGuest?: Prisma.SortOrder
   privyId?: Prisma.SortOrder
   walletAddress?: Prisma.SortOrder
   referralCode?: Prisma.SortOrder
@@ -531,6 +559,7 @@ export type UserMinOrderByAggregateInput = {
   profilePhoto?: Prisma.SortOrder
   role?: Prisma.SortOrder
   consentAccepted?: Prisma.SortOrder
+  isGuest?: Prisma.SortOrder
   privyId?: Prisma.SortOrder
   walletAddress?: Prisma.SortOrder
   referralCode?: Prisma.SortOrder
@@ -606,6 +635,20 @@ export type UserUpdateOneRequiredWithoutGameResultsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutGameResultsInput, Prisma.UserUpdateWithoutGameResultsInput>, Prisma.UserUncheckedUpdateWithoutGameResultsInput>
 }
 
+export type UserCreateNestedOneWithoutDiscountCodesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDiscountCodesInput, Prisma.UserUncheckedCreateWithoutDiscountCodesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDiscountCodesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutDiscountCodesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDiscountCodesInput, Prisma.UserUncheckedCreateWithoutDiscountCodesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDiscountCodesInput
+  upsert?: Prisma.UserUpsertWithoutDiscountCodesInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutDiscountCodesInput, Prisma.UserUpdateWithoutDiscountCodesInput>, Prisma.UserUncheckedUpdateWithoutDiscountCodesInput>
+}
+
 export type UserCreateNestedOneWithoutReferralsMadeInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutReferralsMadeInput, Prisma.UserUncheckedCreateWithoutReferralsMadeInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutReferralsMadeInput
@@ -656,6 +699,7 @@ export type UserCreateWithoutUploadedVideosInput = {
   profilePhoto?: string | null
   role?: $Enums.UserRole
   consentAccepted?: boolean
+  isGuest?: boolean
   privyId: string
   walletAddress?: string | null
   referralCode: string
@@ -668,6 +712,7 @@ export type UserCreateWithoutUploadedVideosInput = {
   referralsMade?: Prisma.ReferralCreateNestedManyWithoutReferrerInput
   referralReceived?: Prisma.ReferralCreateNestedOneWithoutReferredUserInput
   enrollments?: Prisma.CampaignEnrollmentCreateNestedManyWithoutUserInput
+  discountCodes?: Prisma.DiscountCodeCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutUploadedVideosInput = {
@@ -678,6 +723,7 @@ export type UserUncheckedCreateWithoutUploadedVideosInput = {
   profilePhoto?: string | null
   role?: $Enums.UserRole
   consentAccepted?: boolean
+  isGuest?: boolean
   privyId: string
   walletAddress?: string | null
   referralCode: string
@@ -690,6 +736,7 @@ export type UserUncheckedCreateWithoutUploadedVideosInput = {
   referralsMade?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferrerInput
   referralReceived?: Prisma.ReferralUncheckedCreateNestedOneWithoutReferredUserInput
   enrollments?: Prisma.CampaignEnrollmentUncheckedCreateNestedManyWithoutUserInput
+  discountCodes?: Prisma.DiscountCodeUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutUploadedVideosInput = {
@@ -716,6 +763,7 @@ export type UserUpdateWithoutUploadedVideosInput = {
   profilePhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   consentAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isGuest?: Prisma.BoolFieldUpdateOperationsInput | boolean
   privyId?: Prisma.StringFieldUpdateOperationsInput | string
   walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referralCode?: Prisma.StringFieldUpdateOperationsInput | string
@@ -728,6 +776,7 @@ export type UserUpdateWithoutUploadedVideosInput = {
   referralsMade?: Prisma.ReferralUpdateManyWithoutReferrerNestedInput
   referralReceived?: Prisma.ReferralUpdateOneWithoutReferredUserNestedInput
   enrollments?: Prisma.CampaignEnrollmentUpdateManyWithoutUserNestedInput
+  discountCodes?: Prisma.DiscountCodeUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUploadedVideosInput = {
@@ -738,6 +787,7 @@ export type UserUncheckedUpdateWithoutUploadedVideosInput = {
   profilePhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   consentAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isGuest?: Prisma.BoolFieldUpdateOperationsInput | boolean
   privyId?: Prisma.StringFieldUpdateOperationsInput | string
   walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referralCode?: Prisma.StringFieldUpdateOperationsInput | string
@@ -750,6 +800,7 @@ export type UserUncheckedUpdateWithoutUploadedVideosInput = {
   referralsMade?: Prisma.ReferralUncheckedUpdateManyWithoutReferrerNestedInput
   referralReceived?: Prisma.ReferralUncheckedUpdateOneWithoutReferredUserNestedInput
   enrollments?: Prisma.CampaignEnrollmentUncheckedUpdateManyWithoutUserNestedInput
+  discountCodes?: Prisma.DiscountCodeUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutVotesInput = {
@@ -760,6 +811,7 @@ export type UserCreateWithoutVotesInput = {
   profilePhoto?: string | null
   role?: $Enums.UserRole
   consentAccepted?: boolean
+  isGuest?: boolean
   privyId: string
   walletAddress?: string | null
   referralCode: string
@@ -772,6 +824,7 @@ export type UserCreateWithoutVotesInput = {
   referralsMade?: Prisma.ReferralCreateNestedManyWithoutReferrerInput
   referralReceived?: Prisma.ReferralCreateNestedOneWithoutReferredUserInput
   enrollments?: Prisma.CampaignEnrollmentCreateNestedManyWithoutUserInput
+  discountCodes?: Prisma.DiscountCodeCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutVotesInput = {
@@ -782,6 +835,7 @@ export type UserUncheckedCreateWithoutVotesInput = {
   profilePhoto?: string | null
   role?: $Enums.UserRole
   consentAccepted?: boolean
+  isGuest?: boolean
   privyId: string
   walletAddress?: string | null
   referralCode: string
@@ -794,6 +848,7 @@ export type UserUncheckedCreateWithoutVotesInput = {
   referralsMade?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferrerInput
   referralReceived?: Prisma.ReferralUncheckedCreateNestedOneWithoutReferredUserInput
   enrollments?: Prisma.CampaignEnrollmentUncheckedCreateNestedManyWithoutUserInput
+  discountCodes?: Prisma.DiscountCodeUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutVotesInput = {
@@ -820,6 +875,7 @@ export type UserUpdateWithoutVotesInput = {
   profilePhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   consentAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isGuest?: Prisma.BoolFieldUpdateOperationsInput | boolean
   privyId?: Prisma.StringFieldUpdateOperationsInput | string
   walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referralCode?: Prisma.StringFieldUpdateOperationsInput | string
@@ -832,6 +888,7 @@ export type UserUpdateWithoutVotesInput = {
   referralsMade?: Prisma.ReferralUpdateManyWithoutReferrerNestedInput
   referralReceived?: Prisma.ReferralUpdateOneWithoutReferredUserNestedInput
   enrollments?: Prisma.CampaignEnrollmentUpdateManyWithoutUserNestedInput
+  discountCodes?: Prisma.DiscountCodeUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutVotesInput = {
@@ -842,6 +899,7 @@ export type UserUncheckedUpdateWithoutVotesInput = {
   profilePhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   consentAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isGuest?: Prisma.BoolFieldUpdateOperationsInput | boolean
   privyId?: Prisma.StringFieldUpdateOperationsInput | string
   walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referralCode?: Prisma.StringFieldUpdateOperationsInput | string
@@ -854,6 +912,7 @@ export type UserUncheckedUpdateWithoutVotesInput = {
   referralsMade?: Prisma.ReferralUncheckedUpdateManyWithoutReferrerNestedInput
   referralReceived?: Prisma.ReferralUncheckedUpdateOneWithoutReferredUserNestedInput
   enrollments?: Prisma.CampaignEnrollmentUncheckedUpdateManyWithoutUserNestedInput
+  discountCodes?: Prisma.DiscountCodeUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutGameResultsInput = {
@@ -864,6 +923,7 @@ export type UserCreateWithoutGameResultsInput = {
   profilePhoto?: string | null
   role?: $Enums.UserRole
   consentAccepted?: boolean
+  isGuest?: boolean
   privyId: string
   walletAddress?: string | null
   referralCode: string
@@ -876,6 +936,7 @@ export type UserCreateWithoutGameResultsInput = {
   referralsMade?: Prisma.ReferralCreateNestedManyWithoutReferrerInput
   referralReceived?: Prisma.ReferralCreateNestedOneWithoutReferredUserInput
   enrollments?: Prisma.CampaignEnrollmentCreateNestedManyWithoutUserInput
+  discountCodes?: Prisma.DiscountCodeCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutGameResultsInput = {
@@ -886,6 +947,7 @@ export type UserUncheckedCreateWithoutGameResultsInput = {
   profilePhoto?: string | null
   role?: $Enums.UserRole
   consentAccepted?: boolean
+  isGuest?: boolean
   privyId: string
   walletAddress?: string | null
   referralCode: string
@@ -898,6 +960,7 @@ export type UserUncheckedCreateWithoutGameResultsInput = {
   referralsMade?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferrerInput
   referralReceived?: Prisma.ReferralUncheckedCreateNestedOneWithoutReferredUserInput
   enrollments?: Prisma.CampaignEnrollmentUncheckedCreateNestedManyWithoutUserInput
+  discountCodes?: Prisma.DiscountCodeUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutGameResultsInput = {
@@ -924,6 +987,7 @@ export type UserUpdateWithoutGameResultsInput = {
   profilePhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   consentAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isGuest?: Prisma.BoolFieldUpdateOperationsInput | boolean
   privyId?: Prisma.StringFieldUpdateOperationsInput | string
   walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referralCode?: Prisma.StringFieldUpdateOperationsInput | string
@@ -936,6 +1000,7 @@ export type UserUpdateWithoutGameResultsInput = {
   referralsMade?: Prisma.ReferralUpdateManyWithoutReferrerNestedInput
   referralReceived?: Prisma.ReferralUpdateOneWithoutReferredUserNestedInput
   enrollments?: Prisma.CampaignEnrollmentUpdateManyWithoutUserNestedInput
+  discountCodes?: Prisma.DiscountCodeUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutGameResultsInput = {
@@ -946,6 +1011,7 @@ export type UserUncheckedUpdateWithoutGameResultsInput = {
   profilePhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   consentAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isGuest?: Prisma.BoolFieldUpdateOperationsInput | boolean
   privyId?: Prisma.StringFieldUpdateOperationsInput | string
   walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referralCode?: Prisma.StringFieldUpdateOperationsInput | string
@@ -955,6 +1021,119 @@ export type UserUncheckedUpdateWithoutGameResultsInput = {
   categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   uploadedVideos?: Prisma.VideoUncheckedUpdateManyWithoutUploadedByNestedInput
   votes?: Prisma.VoteUncheckedUpdateManyWithoutUserNestedInput
+  referralsMade?: Prisma.ReferralUncheckedUpdateManyWithoutReferrerNestedInput
+  referralReceived?: Prisma.ReferralUncheckedUpdateOneWithoutReferredUserNestedInput
+  enrollments?: Prisma.CampaignEnrollmentUncheckedUpdateManyWithoutUserNestedInput
+  discountCodes?: Prisma.DiscountCodeUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutDiscountCodesInput = {
+  id?: string
+  email?: string | null
+  phone?: string | null
+  displayName?: string | null
+  profilePhoto?: string | null
+  role?: $Enums.UserRole
+  consentAccepted?: boolean
+  isGuest?: boolean
+  privyId: string
+  walletAddress?: string | null
+  referralCode: string
+  referredBy?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  uploadedVideos?: Prisma.VideoCreateNestedManyWithoutUploadedByInput
+  votes?: Prisma.VoteCreateNestedManyWithoutUserInput
+  gameResults?: Prisma.GameResultCreateNestedManyWithoutUserInput
+  referralsMade?: Prisma.ReferralCreateNestedManyWithoutReferrerInput
+  referralReceived?: Prisma.ReferralCreateNestedOneWithoutReferredUserInput
+  enrollments?: Prisma.CampaignEnrollmentCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutDiscountCodesInput = {
+  id?: string
+  email?: string | null
+  phone?: string | null
+  displayName?: string | null
+  profilePhoto?: string | null
+  role?: $Enums.UserRole
+  consentAccepted?: boolean
+  isGuest?: boolean
+  privyId: string
+  walletAddress?: string | null
+  referralCode: string
+  referredBy?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  uploadedVideos?: Prisma.VideoUncheckedCreateNestedManyWithoutUploadedByInput
+  votes?: Prisma.VoteUncheckedCreateNestedManyWithoutUserInput
+  gameResults?: Prisma.GameResultUncheckedCreateNestedManyWithoutUserInput
+  referralsMade?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferrerInput
+  referralReceived?: Prisma.ReferralUncheckedCreateNestedOneWithoutReferredUserInput
+  enrollments?: Prisma.CampaignEnrollmentUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutDiscountCodesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutDiscountCodesInput, Prisma.UserUncheckedCreateWithoutDiscountCodesInput>
+}
+
+export type UserUpsertWithoutDiscountCodesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutDiscountCodesInput, Prisma.UserUncheckedUpdateWithoutDiscountCodesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutDiscountCodesInput, Prisma.UserUncheckedCreateWithoutDiscountCodesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutDiscountCodesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutDiscountCodesInput, Prisma.UserUncheckedUpdateWithoutDiscountCodesInput>
+}
+
+export type UserUpdateWithoutDiscountCodesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profilePhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  consentAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isGuest?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  privyId?: Prisma.StringFieldUpdateOperationsInput | string
+  walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  referralCode?: Prisma.StringFieldUpdateOperationsInput | string
+  referredBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  uploadedVideos?: Prisma.VideoUpdateManyWithoutUploadedByNestedInput
+  votes?: Prisma.VoteUpdateManyWithoutUserNestedInput
+  gameResults?: Prisma.GameResultUpdateManyWithoutUserNestedInput
+  referralsMade?: Prisma.ReferralUpdateManyWithoutReferrerNestedInput
+  referralReceived?: Prisma.ReferralUpdateOneWithoutReferredUserNestedInput
+  enrollments?: Prisma.CampaignEnrollmentUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutDiscountCodesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profilePhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  consentAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isGuest?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  privyId?: Prisma.StringFieldUpdateOperationsInput | string
+  walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  referralCode?: Prisma.StringFieldUpdateOperationsInput | string
+  referredBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  categories?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  uploadedVideos?: Prisma.VideoUncheckedUpdateManyWithoutUploadedByNestedInput
+  votes?: Prisma.VoteUncheckedUpdateManyWithoutUserNestedInput
+  gameResults?: Prisma.GameResultUncheckedUpdateManyWithoutUserNestedInput
   referralsMade?: Prisma.ReferralUncheckedUpdateManyWithoutReferrerNestedInput
   referralReceived?: Prisma.ReferralUncheckedUpdateOneWithoutReferredUserNestedInput
   enrollments?: Prisma.CampaignEnrollmentUncheckedUpdateManyWithoutUserNestedInput
@@ -968,6 +1147,7 @@ export type UserCreateWithoutReferralsMadeInput = {
   profilePhoto?: string | null
   role?: $Enums.UserRole
   consentAccepted?: boolean
+  isGuest?: boolean
   privyId: string
   walletAddress?: string | null
   referralCode: string
@@ -980,6 +1160,7 @@ export type UserCreateWithoutReferralsMadeInput = {
   gameResults?: Prisma.GameResultCreateNestedManyWithoutUserInput
   referralReceived?: Prisma.ReferralCreateNestedOneWithoutReferredUserInput
   enrollments?: Prisma.CampaignEnrollmentCreateNestedManyWithoutUserInput
+  discountCodes?: Prisma.DiscountCodeCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutReferralsMadeInput = {
@@ -990,6 +1171,7 @@ export type UserUncheckedCreateWithoutReferralsMadeInput = {
   profilePhoto?: string | null
   role?: $Enums.UserRole
   consentAccepted?: boolean
+  isGuest?: boolean
   privyId: string
   walletAddress?: string | null
   referralCode: string
@@ -1002,6 +1184,7 @@ export type UserUncheckedCreateWithoutReferralsMadeInput = {
   gameResults?: Prisma.GameResultUncheckedCreateNestedManyWithoutUserInput
   referralReceived?: Prisma.ReferralUncheckedCreateNestedOneWithoutReferredUserInput
   enrollments?: Prisma.CampaignEnrollmentUncheckedCreateNestedManyWithoutUserInput
+  discountCodes?: Prisma.DiscountCodeUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutReferralsMadeInput = {
@@ -1017,6 +1200,7 @@ export type UserCreateWithoutReferralReceivedInput = {
   profilePhoto?: string | null
   role?: $Enums.UserRole
   consentAccepted?: boolean
+  isGuest?: boolean
   privyId: string
   walletAddress?: string | null
   referralCode: string
@@ -1029,6 +1213,7 @@ export type UserCreateWithoutReferralReceivedInput = {
   gameResults?: Prisma.GameResultCreateNestedManyWithoutUserInput
   referralsMade?: Prisma.ReferralCreateNestedManyWithoutReferrerInput
   enrollments?: Prisma.CampaignEnrollmentCreateNestedManyWithoutUserInput
+  discountCodes?: Prisma.DiscountCodeCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutReferralReceivedInput = {
@@ -1039,6 +1224,7 @@ export type UserUncheckedCreateWithoutReferralReceivedInput = {
   profilePhoto?: string | null
   role?: $Enums.UserRole
   consentAccepted?: boolean
+  isGuest?: boolean
   privyId: string
   walletAddress?: string | null
   referralCode: string
@@ -1051,6 +1237,7 @@ export type UserUncheckedCreateWithoutReferralReceivedInput = {
   gameResults?: Prisma.GameResultUncheckedCreateNestedManyWithoutUserInput
   referralsMade?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferrerInput
   enrollments?: Prisma.CampaignEnrollmentUncheckedCreateNestedManyWithoutUserInput
+  discountCodes?: Prisma.DiscountCodeUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutReferralReceivedInput = {
@@ -1077,6 +1264,7 @@ export type UserUpdateWithoutReferralsMadeInput = {
   profilePhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   consentAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isGuest?: Prisma.BoolFieldUpdateOperationsInput | boolean
   privyId?: Prisma.StringFieldUpdateOperationsInput | string
   walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referralCode?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1089,6 +1277,7 @@ export type UserUpdateWithoutReferralsMadeInput = {
   gameResults?: Prisma.GameResultUpdateManyWithoutUserNestedInput
   referralReceived?: Prisma.ReferralUpdateOneWithoutReferredUserNestedInput
   enrollments?: Prisma.CampaignEnrollmentUpdateManyWithoutUserNestedInput
+  discountCodes?: Prisma.DiscountCodeUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReferralsMadeInput = {
@@ -1099,6 +1288,7 @@ export type UserUncheckedUpdateWithoutReferralsMadeInput = {
   profilePhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   consentAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isGuest?: Prisma.BoolFieldUpdateOperationsInput | boolean
   privyId?: Prisma.StringFieldUpdateOperationsInput | string
   walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referralCode?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1111,6 +1301,7 @@ export type UserUncheckedUpdateWithoutReferralsMadeInput = {
   gameResults?: Prisma.GameResultUncheckedUpdateManyWithoutUserNestedInput
   referralReceived?: Prisma.ReferralUncheckedUpdateOneWithoutReferredUserNestedInput
   enrollments?: Prisma.CampaignEnrollmentUncheckedUpdateManyWithoutUserNestedInput
+  discountCodes?: Prisma.DiscountCodeUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutReferralReceivedInput = {
@@ -1132,6 +1323,7 @@ export type UserUpdateWithoutReferralReceivedInput = {
   profilePhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   consentAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isGuest?: Prisma.BoolFieldUpdateOperationsInput | boolean
   privyId?: Prisma.StringFieldUpdateOperationsInput | string
   walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referralCode?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1144,6 +1336,7 @@ export type UserUpdateWithoutReferralReceivedInput = {
   gameResults?: Prisma.GameResultUpdateManyWithoutUserNestedInput
   referralsMade?: Prisma.ReferralUpdateManyWithoutReferrerNestedInput
   enrollments?: Prisma.CampaignEnrollmentUpdateManyWithoutUserNestedInput
+  discountCodes?: Prisma.DiscountCodeUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReferralReceivedInput = {
@@ -1154,6 +1347,7 @@ export type UserUncheckedUpdateWithoutReferralReceivedInput = {
   profilePhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   consentAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isGuest?: Prisma.BoolFieldUpdateOperationsInput | boolean
   privyId?: Prisma.StringFieldUpdateOperationsInput | string
   walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referralCode?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1166,6 +1360,7 @@ export type UserUncheckedUpdateWithoutReferralReceivedInput = {
   gameResults?: Prisma.GameResultUncheckedUpdateManyWithoutUserNestedInput
   referralsMade?: Prisma.ReferralUncheckedUpdateManyWithoutReferrerNestedInput
   enrollments?: Prisma.CampaignEnrollmentUncheckedUpdateManyWithoutUserNestedInput
+  discountCodes?: Prisma.DiscountCodeUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutEnrollmentsInput = {
@@ -1176,6 +1371,7 @@ export type UserCreateWithoutEnrollmentsInput = {
   profilePhoto?: string | null
   role?: $Enums.UserRole
   consentAccepted?: boolean
+  isGuest?: boolean
   privyId: string
   walletAddress?: string | null
   referralCode: string
@@ -1188,6 +1384,7 @@ export type UserCreateWithoutEnrollmentsInput = {
   gameResults?: Prisma.GameResultCreateNestedManyWithoutUserInput
   referralsMade?: Prisma.ReferralCreateNestedManyWithoutReferrerInput
   referralReceived?: Prisma.ReferralCreateNestedOneWithoutReferredUserInput
+  discountCodes?: Prisma.DiscountCodeCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutEnrollmentsInput = {
@@ -1198,6 +1395,7 @@ export type UserUncheckedCreateWithoutEnrollmentsInput = {
   profilePhoto?: string | null
   role?: $Enums.UserRole
   consentAccepted?: boolean
+  isGuest?: boolean
   privyId: string
   walletAddress?: string | null
   referralCode: string
@@ -1210,6 +1408,7 @@ export type UserUncheckedCreateWithoutEnrollmentsInput = {
   gameResults?: Prisma.GameResultUncheckedCreateNestedManyWithoutUserInput
   referralsMade?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferrerInput
   referralReceived?: Prisma.ReferralUncheckedCreateNestedOneWithoutReferredUserInput
+  discountCodes?: Prisma.DiscountCodeUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutEnrollmentsInput = {
@@ -1236,6 +1435,7 @@ export type UserUpdateWithoutEnrollmentsInput = {
   profilePhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   consentAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isGuest?: Prisma.BoolFieldUpdateOperationsInput | boolean
   privyId?: Prisma.StringFieldUpdateOperationsInput | string
   walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referralCode?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1248,6 +1448,7 @@ export type UserUpdateWithoutEnrollmentsInput = {
   gameResults?: Prisma.GameResultUpdateManyWithoutUserNestedInput
   referralsMade?: Prisma.ReferralUpdateManyWithoutReferrerNestedInput
   referralReceived?: Prisma.ReferralUpdateOneWithoutReferredUserNestedInput
+  discountCodes?: Prisma.DiscountCodeUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEnrollmentsInput = {
@@ -1258,6 +1459,7 @@ export type UserUncheckedUpdateWithoutEnrollmentsInput = {
   profilePhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   consentAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isGuest?: Prisma.BoolFieldUpdateOperationsInput | boolean
   privyId?: Prisma.StringFieldUpdateOperationsInput | string
   walletAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referralCode?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1270,6 +1472,7 @@ export type UserUncheckedUpdateWithoutEnrollmentsInput = {
   gameResults?: Prisma.GameResultUncheckedUpdateManyWithoutUserNestedInput
   referralsMade?: Prisma.ReferralUncheckedUpdateManyWithoutReferrerNestedInput
   referralReceived?: Prisma.ReferralUncheckedUpdateOneWithoutReferredUserNestedInput
+  discountCodes?: Prisma.DiscountCodeUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -1283,6 +1486,7 @@ export type UserCountOutputType = {
   gameResults: number
   referralsMade: number
   enrollments: number
+  discountCodes: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1291,6 +1495,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   gameResults?: boolean | UserCountOutputTypeCountGameResultsArgs
   referralsMade?: boolean | UserCountOutputTypeCountReferralsMadeArgs
   enrollments?: boolean | UserCountOutputTypeCountEnrollmentsArgs
+  discountCodes?: boolean | UserCountOutputTypeCountDiscountCodesArgs
 }
 
 /**
@@ -1338,6 +1543,13 @@ export type UserCountOutputTypeCountEnrollmentsArgs<ExtArgs extends runtime.Type
   where?: Prisma.CampaignEnrollmentWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountDiscountCodesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DiscountCodeWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1347,6 +1559,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   profilePhoto?: boolean
   role?: boolean
   consentAccepted?: boolean
+  isGuest?: boolean
   privyId?: boolean
   walletAddress?: boolean
   referralCode?: boolean
@@ -1360,6 +1573,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   referralsMade?: boolean | Prisma.User$referralsMadeArgs<ExtArgs>
   referralReceived?: boolean | Prisma.User$referralReceivedArgs<ExtArgs>
   enrollments?: boolean | Prisma.User$enrollmentsArgs<ExtArgs>
+  discountCodes?: boolean | Prisma.User$discountCodesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1371,6 +1585,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   profilePhoto?: boolean
   role?: boolean
   consentAccepted?: boolean
+  isGuest?: boolean
   privyId?: boolean
   walletAddress?: boolean
   referralCode?: boolean
@@ -1388,6 +1603,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   profilePhoto?: boolean
   role?: boolean
   consentAccepted?: boolean
+  isGuest?: boolean
   privyId?: boolean
   walletAddress?: boolean
   referralCode?: boolean
@@ -1405,6 +1621,7 @@ export type UserSelectScalar = {
   profilePhoto?: boolean
   role?: boolean
   consentAccepted?: boolean
+  isGuest?: boolean
   privyId?: boolean
   walletAddress?: boolean
   referralCode?: boolean
@@ -1414,7 +1631,7 @@ export type UserSelectScalar = {
   categories?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "phone" | "displayName" | "profilePhoto" | "role" | "consentAccepted" | "privyId" | "walletAddress" | "referralCode" | "referredBy" | "createdAt" | "updatedAt" | "categories", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "phone" | "displayName" | "profilePhoto" | "role" | "consentAccepted" | "isGuest" | "privyId" | "walletAddress" | "referralCode" | "referredBy" | "createdAt" | "updatedAt" | "categories", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   uploadedVideos?: boolean | Prisma.User$uploadedVideosArgs<ExtArgs>
   votes?: boolean | Prisma.User$votesArgs<ExtArgs>
@@ -1422,6 +1639,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   referralsMade?: boolean | Prisma.User$referralsMadeArgs<ExtArgs>
   referralReceived?: boolean | Prisma.User$referralReceivedArgs<ExtArgs>
   enrollments?: boolean | Prisma.User$enrollmentsArgs<ExtArgs>
+  discountCodes?: boolean | Prisma.User$discountCodesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1436,6 +1654,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     referralsMade: Prisma.$ReferralPayload<ExtArgs>[]
     referralReceived: Prisma.$ReferralPayload<ExtArgs> | null
     enrollments: Prisma.$CampaignEnrollmentPayload<ExtArgs>[]
+    discountCodes: Prisma.$DiscountCodePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1445,6 +1664,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     profilePhoto: string | null
     role: $Enums.UserRole
     consentAccepted: boolean
+    isGuest: boolean
     privyId: string
     walletAddress: string | null
     referralCode: string
@@ -1852,6 +2072,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   referralsMade<T extends Prisma.User$referralsMadeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$referralsMadeArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReferralPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   referralReceived<T extends Prisma.User$referralReceivedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$referralReceivedArgs<ExtArgs>>): Prisma.Prisma__ReferralClient<runtime.Types.Result.GetResult<Prisma.$ReferralPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   enrollments<T extends Prisma.User$enrollmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$enrollmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CampaignEnrollmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  discountCodes<T extends Prisma.User$discountCodesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$discountCodesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DiscountCodePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1888,6 +2109,7 @@ export interface UserFieldRefs {
   readonly profilePhoto: Prisma.FieldRef<"User", 'String'>
   readonly role: Prisma.FieldRef<"User", 'UserRole'>
   readonly consentAccepted: Prisma.FieldRef<"User", 'Boolean'>
+  readonly isGuest: Prisma.FieldRef<"User", 'Boolean'>
   readonly privyId: Prisma.FieldRef<"User", 'String'>
   readonly walletAddress: Prisma.FieldRef<"User", 'String'>
   readonly referralCode: Prisma.FieldRef<"User", 'String'>
@@ -2419,6 +2641,30 @@ export type User$enrollmentsArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.CampaignEnrollmentScalarFieldEnum | Prisma.CampaignEnrollmentScalarFieldEnum[]
+}
+
+/**
+ * User.discountCodes
+ */
+export type User$discountCodesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DiscountCode
+   */
+  select?: Prisma.DiscountCodeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DiscountCode
+   */
+  omit?: Prisma.DiscountCodeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DiscountCodeInclude<ExtArgs> | null
+  where?: Prisma.DiscountCodeWhereInput
+  orderBy?: Prisma.DiscountCodeOrderByWithRelationInput | Prisma.DiscountCodeOrderByWithRelationInput[]
+  cursor?: Prisma.DiscountCodeWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DiscountCodeScalarFieldEnum | Prisma.DiscountCodeScalarFieldEnum[]
 }
 
 /**

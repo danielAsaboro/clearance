@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { nanoid } from "nanoid";
 import { prisma } from "@/lib/db";
 import { getAuthUser } from "@/lib/auth-helpers";
 import { calculateTier, calculateMajorityWinners } from "@/lib/session-engine";
@@ -101,5 +102,20 @@ export async function GET(
 
   const totalRounds = await prisma.matchup.count({ where: { sessionId: id } });
 
-  return NextResponse.json({ ...gameResult, totalRounds });
+  // Generate or fetch discount code for this user+session
+  let discountCode = await prisma.discountCode.findUnique({
+    where: { userId_sessionId: { userId: user.id, sessionId: id } },
+  });
+
+  if (!discountCode) {
+    discountCode = await prisma.discountCode.create({
+      data: {
+        code: nanoid(10).toUpperCase(),
+        userId: user.id,
+        sessionId: id,
+      },
+    });
+  }
+
+  return NextResponse.json({ ...gameResult, totalRounds, discountCode: discountCode.code });
 }

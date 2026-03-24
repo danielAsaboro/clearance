@@ -9,6 +9,7 @@ import { buildFanDepositTx } from "@/lib/vault-claim";
 
 // POST /api/sessions/:id/join — Fan joins a session
 // Returns an unsigned fan_deposit transaction for the fan to sign.
+// Guest users skip the deposit and play for free.
 // GameResult is created upfront so the results page can display it after the game ends.
 export async function POST(
   req: NextRequest,
@@ -47,12 +48,44 @@ export async function POST(
     await prisma.gameResult.delete({ where: { id: existing.id } });
   }
 
+  const isLateJoin = session.status === "live" && canLateJoin(session);
+  const joinedAtRound = isLateJoin ? getCurrentRound(session) : 1;
+
+  // Guest users: skip wallet check and deposit, play for free
+  if (user.isGuest) {
+    let gameResult;
+    try {
+      gameResult = await prisma.gameResult.create({
+        data: {
+          userId: user.id,
+          sessionId: id,
+          lateJoin: isLateJoin,
+          depositConfirmed: true, // guests play free
+        },
+      });
+    } catch (err: any) {
+      if (err?.code === "P2002") {
+        gameResult = await prisma.gameResult.findUnique({
+          where: { userId_sessionId: { userId: user.id, sessionId: id } },
+        });
+        if (!gameResult) throw err;
+        return NextResponse.json({ ...gameResult, joinedAtRound, alreadyJoined: true });
+      }
+      throw err;
+    }
+
+    return NextResponse.json({
+      ...gameResult,
+      joinedAtRound,
+      isGuest: true,
+      displayName: user.displayName,
+    });
+  }
+
+  // Authenticated users: require wallet
   if (!user.walletAddress) {
     return NextResponse.json({ error: "Wallet not connected" }, { status: 400 });
   }
-
-  const isLateJoin = session.status === "live" && canLateJoin(session);
-  const joinedAtRound = isLateJoin ? getCurrentRound(session) : 1;
 
   // Create GameResult upfront so it exists for the results page
   let gameResult;

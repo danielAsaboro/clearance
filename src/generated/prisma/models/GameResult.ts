@@ -55,6 +55,8 @@ export type GameResultMinAggregateOutputType = {
   usdcClaimed: boolean | null
   claimTxHash: string | null
   claimedAt: Date | null
+  depositConfirmed: boolean | null
+  depositTxHash: string | null
 }
 
 export type GameResultMaxAggregateOutputType = {
@@ -74,6 +76,8 @@ export type GameResultMaxAggregateOutputType = {
   usdcClaimed: boolean | null
   claimTxHash: string | null
   claimedAt: Date | null
+  depositConfirmed: boolean | null
+  depositTxHash: string | null
 }
 
 export type GameResultCountAggregateOutputType = {
@@ -93,6 +97,8 @@ export type GameResultCountAggregateOutputType = {
   usdcClaimed: number
   claimTxHash: number
   claimedAt: number
+  depositConfirmed: number
+  depositTxHash: number
   _all: number
 }
 
@@ -126,6 +132,8 @@ export type GameResultMinAggregateInputType = {
   usdcClaimed?: true
   claimTxHash?: true
   claimedAt?: true
+  depositConfirmed?: true
+  depositTxHash?: true
 }
 
 export type GameResultMaxAggregateInputType = {
@@ -145,6 +153,8 @@ export type GameResultMaxAggregateInputType = {
   usdcClaimed?: true
   claimTxHash?: true
   claimedAt?: true
+  depositConfirmed?: true
+  depositTxHash?: true
 }
 
 export type GameResultCountAggregateInputType = {
@@ -164,6 +174,8 @@ export type GameResultCountAggregateInputType = {
   usdcClaimed?: true
   claimTxHash?: true
   claimedAt?: true
+  depositConfirmed?: true
+  depositTxHash?: true
   _all?: true
 }
 
@@ -270,6 +282,8 @@ export type GameResultGroupByOutputType = {
   usdcClaimed: boolean
   claimTxHash: string | null
   claimedAt: Date | null
+  depositConfirmed: boolean
+  depositTxHash: string | null
   _count: GameResultCountAggregateOutputType | null
   _avg: GameResultAvgAggregateOutputType | null
   _sum: GameResultSumAggregateOutputType | null
@@ -312,6 +326,8 @@ export type GameResultWhereInput = {
   usdcClaimed?: Prisma.BoolFilter<"GameResult"> | boolean
   claimTxHash?: Prisma.StringNullableFilter<"GameResult"> | string | null
   claimedAt?: Prisma.DateTimeNullableFilter<"GameResult"> | Date | string | null
+  depositConfirmed?: Prisma.BoolFilter<"GameResult"> | boolean
+  depositTxHash?: Prisma.StringNullableFilter<"GameResult"> | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   session?: Prisma.XOR<Prisma.WeeklySessionScalarRelationFilter, Prisma.WeeklySessionWhereInput>
 }
@@ -333,6 +349,8 @@ export type GameResultOrderByWithRelationInput = {
   usdcClaimed?: Prisma.SortOrder
   claimTxHash?: Prisma.SortOrderInput | Prisma.SortOrder
   claimedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  depositConfirmed?: Prisma.SortOrder
+  depositTxHash?: Prisma.SortOrderInput | Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   session?: Prisma.WeeklySessionOrderByWithRelationInput
 }
@@ -358,6 +376,8 @@ export type GameResultWhereUniqueInput = Prisma.AtLeast<{
   usdcClaimed?: Prisma.BoolFilter<"GameResult"> | boolean
   claimTxHash?: Prisma.StringNullableFilter<"GameResult"> | string | null
   claimedAt?: Prisma.DateTimeNullableFilter<"GameResult"> | Date | string | null
+  depositConfirmed?: Prisma.BoolFilter<"GameResult"> | boolean
+  depositTxHash?: Prisma.StringNullableFilter<"GameResult"> | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   session?: Prisma.XOR<Prisma.WeeklySessionScalarRelationFilter, Prisma.WeeklySessionWhereInput>
 }, "id" | "userId_sessionId">
@@ -379,6 +399,8 @@ export type GameResultOrderByWithAggregationInput = {
   usdcClaimed?: Prisma.SortOrder
   claimTxHash?: Prisma.SortOrderInput | Prisma.SortOrder
   claimedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  depositConfirmed?: Prisma.SortOrder
+  depositTxHash?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.GameResultCountOrderByAggregateInput
   _avg?: Prisma.GameResultAvgOrderByAggregateInput
   _max?: Prisma.GameResultMaxOrderByAggregateInput
@@ -406,6 +428,8 @@ export type GameResultScalarWhereWithAggregatesInput = {
   usdcClaimed?: Prisma.BoolWithAggregatesFilter<"GameResult"> | boolean
   claimTxHash?: Prisma.StringNullableWithAggregatesFilter<"GameResult"> | string | null
   claimedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"GameResult"> | Date | string | null
+  depositConfirmed?: Prisma.BoolWithAggregatesFilter<"GameResult"> | boolean
+  depositTxHash?: Prisma.StringNullableWithAggregatesFilter<"GameResult"> | string | null
 }
 
 export type GameResultCreateInput = {
@@ -423,6 +447,8 @@ export type GameResultCreateInput = {
   usdcClaimed?: boolean
   claimTxHash?: string | null
   claimedAt?: Date | string | null
+  depositConfirmed?: boolean
+  depositTxHash?: string | null
   user: Prisma.UserCreateNestedOneWithoutGameResultsInput
   session: Prisma.WeeklySessionCreateNestedOneWithoutGameResultsInput
 }
@@ -444,6 +470,8 @@ export type GameResultUncheckedCreateInput = {
   usdcClaimed?: boolean
   claimTxHash?: string | null
   claimedAt?: Date | string | null
+  depositConfirmed?: boolean
+  depositTxHash?: string | null
 }
 
 export type GameResultUpdateInput = {
@@ -461,6 +489,8 @@ export type GameResultUpdateInput = {
   usdcClaimed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   claimTxHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  depositConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  depositTxHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutGameResultsNestedInput
   session?: Prisma.WeeklySessionUpdateOneRequiredWithoutGameResultsNestedInput
 }
@@ -482,6 +512,8 @@ export type GameResultUncheckedUpdateInput = {
   usdcClaimed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   claimTxHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  depositConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  depositTxHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type GameResultCreateManyInput = {
@@ -501,6 +533,8 @@ export type GameResultCreateManyInput = {
   usdcClaimed?: boolean
   claimTxHash?: string | null
   claimedAt?: Date | string | null
+  depositConfirmed?: boolean
+  depositTxHash?: string | null
 }
 
 export type GameResultUpdateManyMutationInput = {
@@ -518,6 +552,8 @@ export type GameResultUpdateManyMutationInput = {
   usdcClaimed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   claimTxHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  depositConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  depositTxHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type GameResultUncheckedUpdateManyInput = {
@@ -537,6 +573,8 @@ export type GameResultUncheckedUpdateManyInput = {
   usdcClaimed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   claimTxHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  depositConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  depositTxHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type GameResultListRelationFilter = {
@@ -571,6 +609,8 @@ export type GameResultCountOrderByAggregateInput = {
   usdcClaimed?: Prisma.SortOrder
   claimTxHash?: Prisma.SortOrder
   claimedAt?: Prisma.SortOrder
+  depositConfirmed?: Prisma.SortOrder
+  depositTxHash?: Prisma.SortOrder
 }
 
 export type GameResultAvgOrderByAggregateInput = {
@@ -596,6 +636,8 @@ export type GameResultMaxOrderByAggregateInput = {
   usdcClaimed?: Prisma.SortOrder
   claimTxHash?: Prisma.SortOrder
   claimedAt?: Prisma.SortOrder
+  depositConfirmed?: Prisma.SortOrder
+  depositTxHash?: Prisma.SortOrder
 }
 
 export type GameResultMinOrderByAggregateInput = {
@@ -615,6 +657,8 @@ export type GameResultMinOrderByAggregateInput = {
   usdcClaimed?: Prisma.SortOrder
   claimTxHash?: Prisma.SortOrder
   claimedAt?: Prisma.SortOrder
+  depositConfirmed?: Prisma.SortOrder
+  depositTxHash?: Prisma.SortOrder
 }
 
 export type GameResultSumOrderByAggregateInput = {
@@ -734,6 +778,8 @@ export type GameResultCreateWithoutUserInput = {
   usdcClaimed?: boolean
   claimTxHash?: string | null
   claimedAt?: Date | string | null
+  depositConfirmed?: boolean
+  depositTxHash?: string | null
   session: Prisma.WeeklySessionCreateNestedOneWithoutGameResultsInput
 }
 
@@ -753,6 +799,8 @@ export type GameResultUncheckedCreateWithoutUserInput = {
   usdcClaimed?: boolean
   claimTxHash?: string | null
   claimedAt?: Date | string | null
+  depositConfirmed?: boolean
+  depositTxHash?: string | null
 }
 
 export type GameResultCreateOrConnectWithoutUserInput = {
@@ -801,6 +849,8 @@ export type GameResultScalarWhereInput = {
   usdcClaimed?: Prisma.BoolFilter<"GameResult"> | boolean
   claimTxHash?: Prisma.StringNullableFilter<"GameResult"> | string | null
   claimedAt?: Prisma.DateTimeNullableFilter<"GameResult"> | Date | string | null
+  depositConfirmed?: Prisma.BoolFilter<"GameResult"> | boolean
+  depositTxHash?: Prisma.StringNullableFilter<"GameResult"> | string | null
 }
 
 export type GameResultCreateWithoutSessionInput = {
@@ -818,6 +868,8 @@ export type GameResultCreateWithoutSessionInput = {
   usdcClaimed?: boolean
   claimTxHash?: string | null
   claimedAt?: Date | string | null
+  depositConfirmed?: boolean
+  depositTxHash?: string | null
   user: Prisma.UserCreateNestedOneWithoutGameResultsInput
 }
 
@@ -837,6 +889,8 @@ export type GameResultUncheckedCreateWithoutSessionInput = {
   usdcClaimed?: boolean
   claimTxHash?: string | null
   claimedAt?: Date | string | null
+  depositConfirmed?: boolean
+  depositTxHash?: string | null
 }
 
 export type GameResultCreateOrConnectWithoutSessionInput = {
@@ -881,6 +935,8 @@ export type GameResultCreateManyUserInput = {
   usdcClaimed?: boolean
   claimTxHash?: string | null
   claimedAt?: Date | string | null
+  depositConfirmed?: boolean
+  depositTxHash?: string | null
 }
 
 export type GameResultUpdateWithoutUserInput = {
@@ -898,6 +954,8 @@ export type GameResultUpdateWithoutUserInput = {
   usdcClaimed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   claimTxHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  depositConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  depositTxHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   session?: Prisma.WeeklySessionUpdateOneRequiredWithoutGameResultsNestedInput
 }
 
@@ -917,6 +975,8 @@ export type GameResultUncheckedUpdateWithoutUserInput = {
   usdcClaimed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   claimTxHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  depositConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  depositTxHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type GameResultUncheckedUpdateManyWithoutUserInput = {
@@ -935,6 +995,8 @@ export type GameResultUncheckedUpdateManyWithoutUserInput = {
   usdcClaimed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   claimTxHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  depositConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  depositTxHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type GameResultCreateManySessionInput = {
@@ -953,6 +1015,8 @@ export type GameResultCreateManySessionInput = {
   usdcClaimed?: boolean
   claimTxHash?: string | null
   claimedAt?: Date | string | null
+  depositConfirmed?: boolean
+  depositTxHash?: string | null
 }
 
 export type GameResultUpdateWithoutSessionInput = {
@@ -970,6 +1034,8 @@ export type GameResultUpdateWithoutSessionInput = {
   usdcClaimed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   claimTxHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  depositConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  depositTxHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutGameResultsNestedInput
 }
 
@@ -989,6 +1055,8 @@ export type GameResultUncheckedUpdateWithoutSessionInput = {
   usdcClaimed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   claimTxHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  depositConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  depositTxHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type GameResultUncheckedUpdateManyWithoutSessionInput = {
@@ -1007,6 +1075,8 @@ export type GameResultUncheckedUpdateManyWithoutSessionInput = {
   usdcClaimed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   claimTxHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  depositConfirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  depositTxHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -1028,6 +1098,8 @@ export type GameResultSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   usdcClaimed?: boolean
   claimTxHash?: boolean
   claimedAt?: boolean
+  depositConfirmed?: boolean
+  depositTxHash?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   session?: boolean | Prisma.WeeklySessionDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["gameResult"]>
@@ -1049,6 +1121,8 @@ export type GameResultSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   usdcClaimed?: boolean
   claimTxHash?: boolean
   claimedAt?: boolean
+  depositConfirmed?: boolean
+  depositTxHash?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   session?: boolean | Prisma.WeeklySessionDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["gameResult"]>
@@ -1070,6 +1144,8 @@ export type GameResultSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   usdcClaimed?: boolean
   claimTxHash?: boolean
   claimedAt?: boolean
+  depositConfirmed?: boolean
+  depositTxHash?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   session?: boolean | Prisma.WeeklySessionDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["gameResult"]>
@@ -1091,9 +1167,11 @@ export type GameResultSelectScalar = {
   usdcClaimed?: boolean
   claimTxHash?: boolean
   claimedAt?: boolean
+  depositConfirmed?: boolean
+  depositTxHash?: boolean
 }
 
-export type GameResultOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "sessionId" | "totalVotes" | "correctVotes" | "tier" | "rewardAmount" | "nftMinted" | "nftTokenId" | "nftRevealed" | "walletAddress" | "joinedAt" | "lateJoin" | "usdcClaimed" | "claimTxHash" | "claimedAt", ExtArgs["result"]["gameResult"]>
+export type GameResultOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "sessionId" | "totalVotes" | "correctVotes" | "tier" | "rewardAmount" | "nftMinted" | "nftTokenId" | "nftRevealed" | "walletAddress" | "joinedAt" | "lateJoin" | "usdcClaimed" | "claimTxHash" | "claimedAt" | "depositConfirmed" | "depositTxHash", ExtArgs["result"]["gameResult"]>
 export type GameResultInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   session?: boolean | Prisma.WeeklySessionDefaultArgs<ExtArgs>
@@ -1130,6 +1208,8 @@ export type $GameResultPayload<ExtArgs extends runtime.Types.Extensions.Internal
     usdcClaimed: boolean
     claimTxHash: string | null
     claimedAt: Date | null
+    depositConfirmed: boolean
+    depositTxHash: string | null
   }, ExtArgs["result"]["gameResult"]>
   composites: {}
 }
@@ -1571,6 +1651,8 @@ export interface GameResultFieldRefs {
   readonly usdcClaimed: Prisma.FieldRef<"GameResult", 'Boolean'>
   readonly claimTxHash: Prisma.FieldRef<"GameResult", 'String'>
   readonly claimedAt: Prisma.FieldRef<"GameResult", 'DateTime'>
+  readonly depositConfirmed: Prisma.FieldRef<"GameResult", 'Boolean'>
+  readonly depositTxHash: Prisma.FieldRef<"GameResult", 'String'>
 }
     
 

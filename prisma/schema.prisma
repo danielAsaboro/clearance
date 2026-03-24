@@ -49,6 +49,7 @@ model User {
   profilePhoto     String?
   role             UserRole @default(player)
   consentAccepted  Boolean  @default(false)
+  isGuest          Boolean  @default(false)
   privyId          String   @unique
   walletAddress    String?
   referralCode     String   @unique
@@ -64,6 +65,7 @@ model User {
   referralsMade    Referral[] @relation("Referrer")
   referralReceived Referral?  @relation("Referred")
   enrollments      CampaignEnrollment[]
+  discountCodes    DiscountCode[]
 }
 
 model Video {
@@ -120,6 +122,7 @@ model WeeklySession {
 
   matchups       Matchup[]
   gameResults    GameResult[]
+  discountCodes  DiscountCode[]
 }
 
 model Matchup {
@@ -168,9 +171,24 @@ model GameResult {
   walletAddress String?
   joinedAt      DateTime      @default(now())
   lateJoin      Boolean       @default(false)
-  usdcClaimed   Boolean       @default(false)
-  claimTxHash   String?
-  claimedAt     DateTime?
+  usdcClaimed       Boolean       @default(false)
+  claimTxHash       String?
+  claimedAt         DateTime?
+  depositConfirmed  Boolean       @default(false)
+  depositTxHash     String?
+
+  @@unique([userId, sessionId])
+}
+
+model DiscountCode {
+  id        String        @id @default(cuid())
+  code      String        @unique
+  userId    String
+  user      User          @relation(fields: [userId], references: [id])
+  sessionId String
+  session   WeeklySession @relation(fields: [sessionId], references: [id])
+  usedAt    DateTime?
+  createdAt DateTime      @default(now())
 
   @@unique([userId, sessionId])
 }

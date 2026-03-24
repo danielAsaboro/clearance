@@ -71,7 +71,7 @@ export default function VideoPlayer({
       {playing && (
         <button
           onClick={toggleMute}
-          className="absolute bottom-6 right-5 flex h-8 w-8 items-center justify-center rounded-full bg-black/38 backdrop-blur-[1px]"
+          className="absolute bottom-20 right-5 z-30 flex h-8 w-8 items-center justify-center rounded-full bg-black/38 backdrop-blur-[1px]"
         >
           {muted ? (
             <VolumeX className="h-4 w-4 text-white" />

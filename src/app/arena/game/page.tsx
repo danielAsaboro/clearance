@@ -3,7 +3,10 @@
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { usePrivy } from "@privy-io/react-auth";
-import { AlertCircle } from "lucide-react";
+import { useWallets, useSignTransaction } from "@privy-io/react-auth/solana";
+import { useCluster, getPrivySolanaChain } from "@/components/cluster/cluster-data-access";
+import { Connection } from "@solana/web3.js";
+import { AlertCircle, Loader2, User, Wallet } from "lucide-react";
 import Link from "next/link";
 import MatchupPicker from "@/components/MatchupPicker";
 import ProgressBar from "@/components/ProgressBar";
@@ -40,9 +43,22 @@ interface RoundResults {
   correctCount: number;
 }
 
-type GamePhase = "joining" | "playing" | "insufficient";
+type GamePhase = "joining" | "confirming" | "playing" | "insufficient";
 
 const ENTRY_FEE = process.env.NEXT_PUBLIC_ENTRY_FEE_USDC!;
+
+const GUEST_TOKEN_KEY = "spotr_guest_token";
+const GUEST_NAME_KEY = "spotr_guest_name";
+
+function getStoredGuestToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem(GUEST_TOKEN_KEY);
+}
+
+function storeGuestSession(token: string, name: string) {
+  localStorage.setItem(GUEST_TOKEN_KEY, token);
+  localStorage.setItem(GUEST_NAME_KEY, name);
+}
 
 function InsufficientBalanceScreen() {
   return (
@@ -204,7 +220,10 @@ function GameContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session");
-  const { getAccessToken } = usePrivy();
+  const { getAccessToken, authenticated } = usePrivy();
+  const { wallets } = useWallets();
+  const { signTransaction } = useSignTransaction();
+  const { cluster } = useCluster();
 
   const isSample = searchParams.get("sample") === "true";
   const [phase, setPhase] = useState<GamePhase>("joining");
@@ -218,19 +237,59 @@ function GameContent() {
   const [correctCount, setCorrectCount] = useState(0);
   const [interstitial, setInterstitial] = useState<(RoundResults & { completedRound: number }) | null>(null);
   const [displayedRound, setDisplayedRound] = useState(1);
+  const [guestName, setGuestName] = useState<string | null>(null);
+  const [unsignedTx, setUnsignedTx] = useState<string | null>(null);
+  const [depositError, setDepositError] = useState<string | null>(null);
+  const [signingDeposit, setSigningDeposit] = useState(false);
 
   const prevStatusRef = useRef<string>("");
   const completedRoundRef = useRef(0);
   const redirectScheduled = useRef(false);
+  const guestTokenRef = useRef<string | null>(getStoredGuestToken());
+
+  // Returns auth headers for API calls — Privy token or guest token
+  const getAuthHeaders = useCallback(async (): Promise<Record<string, string>> => {
+    if (authenticated) {
+      const token = await getAccessToken();
+      return token ? { Authorization: `Bearer ${token}` } : {};
+    }
+
+    // Guest path
+    if (guestTokenRef.current) {
+      return { "X-Guest-Token": guestTokenRef.current };
+    }
+
+    // Create a new guest
+    try {
+      const res = await fetch("/api/auth/guest", { method: "POST" });
+      if (res.ok) {
+        const data = await res.json();
+        guestTokenRef.current = data.guestToken;
+        storeGuestSession(data.guestToken, data.displayName);
+        setGuestName(data.displayName);
+        return { "X-Guest-Token": data.guestToken };
+      }
+    } catch (err) {
+      console.error("[game] guest creation failed:", err);
+    }
+
+    return {};
+  }, [authenticated, getAccessToken]);
+
+  // Load stored guest name on mount
+  useEffect(() => {
+    if (!authenticated) {
+      const storedName = typeof window !== "undefined" ? localStorage.getItem(GUEST_NAME_KEY) : null;
+      if (storedName) setGuestName(storedName);
+    }
+  }, [authenticated]);
 
   const fetchMatchups = useCallback(async () => {
     if (!sessionId) return;
 
     setLoading(true);
-    const token = await getAccessToken();
-    const res = await fetch(`/api/sessions/${sessionId}/rounds`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const headers = await getAuthHeaders();
+    const res = await fetch(`/api/sessions/${sessionId}/rounds`, { headers });
 
     if (res.ok) {
       const data = await res.json();
@@ -239,7 +298,7 @@ function GameContent() {
     }
 
     setLoading(false);
-  }, [sessionId, getAccessToken]);
+  }, [sessionId, getAuthHeaders]);
 
   useEffect(() => {
     if (!sessionId) return;
@@ -248,11 +307,36 @@ function GameContent() {
       setPhase("joining");
 
       try {
-        const token = await getAccessToken();
+        const headers = await getAuthHeaders();
         const res = await fetch(`/api/sessions/${sessionId}/join`, {
           method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
+          headers,
         });
+
+        if (res.ok || res.status === 201) {
+          const data = await res.json();
+
+          // Guest users: skip deposit, go straight to playing
+          if (data.isGuest && data.displayName) {
+            setGuestName(data.displayName);
+            await fetchMatchups();
+            setPhase("playing");
+            return;
+          }
+
+          // Authenticated users with unsigned tx: need to confirm deposit
+          if (data.unsignedTx && data.requiresSignature) {
+            setUnsignedTx(data.unsignedTx);
+            await fetchMatchups();
+            setPhase("confirming");
+            return;
+          }
+
+          // Fallback (no tx returned, dev mode): go to playing
+          await fetchMatchups();
+          setPhase("playing");
+          return;
+        }
 
         if (res.status === 400) {
           const data = await res.json();
@@ -271,7 +355,59 @@ function GameContent() {
       await fetchMatchups();
       setPhase("playing");
     })();
-  }, [fetchMatchups, getAccessToken, sessionId]);
+  }, [fetchMatchups, getAuthHeaders, sessionId]);
+
+  // Handle deposit signing and confirmation
+  const handleSignDeposit = useCallback(async () => {
+    if (!unsignedTx || !sessionId || !wallets.length) return;
+
+    setSigningDeposit(true);
+    setDepositError(null);
+
+    try {
+      const wallet = wallets[0];
+      const txBytes = Uint8Array.from(Buffer.from(unsignedTx, "base64"));
+
+      // Sign the transaction via Privy
+      const { signedTransaction } = await signTransaction({
+        transaction: txBytes,
+        wallet,
+        chain: getPrivySolanaChain(cluster),
+      });
+
+      // Submit to Solana
+      const conn = new Connection(
+        process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "https://api.devnet.solana.com",
+        "confirmed"
+      );
+      const signature = await conn.sendRawTransaction(signedTransaction, {
+        skipPreflight: false,
+      });
+
+      // Wait for confirmation
+      await conn.confirmTransaction(signature, "confirmed");
+
+      // Confirm deposit on backend
+      const headers = await getAuthHeaders();
+      const confirmRes = await fetch(`/api/sessions/${sessionId}/confirm-deposit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...headers },
+        body: JSON.stringify({ txSignature: signature }),
+      });
+
+      if (confirmRes.ok) {
+        setPhase("playing");
+      } else {
+        const data = await confirmRes.json();
+        setDepositError(data.error || "Failed to confirm deposit");
+      }
+    } catch (err: any) {
+      console.error("[game] deposit signing failed:", err);
+      setDepositError(err?.message || "Transaction signing failed");
+    } finally {
+      setSigningDeposit(false);
+    }
+  }, [unsignedTx, sessionId, wallets, signTransaction, cluster, getAuthHeaders]);
 
   useEffect(() => {
     if (phase !== "playing" || !sessionId) return;
@@ -304,10 +440,8 @@ function GameContent() {
       if (!sessionId) return null;
 
       try {
-        const token = await getAccessToken();
-        const res = await fetch(`/api/sessions/${sessionId}/rounds/${round}/results`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const headers = await getAuthHeaders();
+        const res = await fetch(`/api/sessions/${sessionId}/rounds/${round}/results`, { headers });
 
         if (res.ok) {
           return (await res.json()) as RoundResults;
@@ -318,7 +452,7 @@ function GameContent() {
 
       return null;
     },
-    [getAccessToken, sessionId],
+    [getAuthHeaders, sessionId],
   );
 
   useEffect(() => {
@@ -352,12 +486,12 @@ function GameContent() {
     if (!currentMatchup) return;
 
     try {
-      const token = await getAccessToken();
+      const headers = await getAuthHeaders();
       await fetch("/api/votes", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          ...headers,
         },
         body: JSON.stringify({
           matchupId: currentMatchup.id,
@@ -385,6 +519,47 @@ function GameContent() {
       <div className="spotr-page flex flex-1 flex-col items-center justify-center gap-4 anim-fade-in">
         <p className="text-[24px] font-semibold tracking-[-0.04em] text-white">Session Complete</p>
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#f5d63d] border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (phase === "confirming") {
+    return (
+      <div className="spotr-page flex flex-1 flex-col items-center justify-center px-5">
+        <div className="spotr-mobile-shell flex flex-col items-center gap-5 text-center">
+          <Wallet className="h-11 w-11 text-[#f5d63d]" />
+          <div>
+            <h2 className="text-[24px] font-semibold tracking-[-0.04em] text-white">Confirm Entry Fee</h2>
+            <p className="mt-2 text-[14px] leading-5 text-[#888]">
+              Sign the transaction to pay <span className="font-semibold text-white">${ENTRY_FEE} USDC</span> and start playing.
+            </p>
+          </div>
+          {depositError && (
+            <p className="rounded-[10px] bg-[#eb5a52]/10 px-4 py-2 text-[13px] text-[#eb5a52]">
+              {depositError}
+            </p>
+          )}
+          <button
+            onClick={handleSignDeposit}
+            disabled={signingDeposit}
+            className="spotr-primary-button flex w-full items-center justify-center gap-2 disabled:opacity-50"
+          >
+            {signingDeposit ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Confirming...
+              </>
+            ) : (
+              <>
+                <Wallet className="h-4 w-4" />
+                Sign & Pay ${ENTRY_FEE} USDC
+              </>
+            )}
+          </button>
+          <Link href="/arena" className="text-[14px] text-[#666]">
+            Back to Arena
+          </Link>
+        </div>
       </div>
     );
   }
@@ -431,7 +606,15 @@ function GameContent() {
             <span className="text-[#f5d63d]">
               ROUND {displayedRound} / {totalRounds}
             </span>
-            <span className="text-[#d8d8d8]">{correctCount} correct</span>
+            <div className="flex items-center gap-2">
+              {guestName && !authenticated && (
+                <span className="flex items-center gap-1 rounded-full bg-[#222] px-3 py-1 text-[11px] font-medium text-[#9b9b9b]">
+                  <User className="h-3 w-3" />
+                  {guestName}
+                </span>
+              )}
+              <span className="text-[#d8d8d8]">{correctCount} correct</span>
+            </div>
           </div>
 
           <div className="flex items-start gap-3">

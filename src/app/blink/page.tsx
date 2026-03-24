@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { Check, Copy, Send } from "lucide-react";
 import { usePrivy } from "@privy-io/react-auth";
 import PageHeader from "@/components/PageHeader";
+import ShareQR from "@/components/ShareQR";
 import SpotrIcon from "@/components/SpotrIcon";
 
 function BlinkContent() {
@@ -164,6 +165,12 @@ function BlinkContent() {
             {copied ? "Copied!" : "Copy Link"}
           </button>
         </div>
+
+        {fullUrl && (
+          <div className="mt-6 flex justify-center">
+            <ShareQR url={fullUrl} label="Scan to Join" size={180} />
+          </div>
+        )}
 
         <div className="mt-auto pt-10">
           <div className="spotr-panel px-4 py-4">

@@ -4,7 +4,7 @@ export const CAMPAIGN = {
   liveSessionsPerCycle: 3,
   matchupsPerSession: 28,
   votingRoundDurationSeconds: 30,
-  entryFeeUsdc: 3.5,
+  entryFeeUsdc: 10,
   goldRewardUsdc: 3.5,
   baseRewardUsdc: 1.75,
 } as const;

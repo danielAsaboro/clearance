@@ -391,6 +391,7 @@ export const ModelName = {
   Matchup: 'Matchup',
   Vote: 'Vote',
   GameResult: 'GameResult',
+  DiscountCode: 'DiscountCode',
   Referral: 'Referral',
   Campaign: 'Campaign',
   CampaignEnrollment: 'CampaignEnrollment'
@@ -409,7 +410,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "video" | "videoCategory" | "weeklySession" | "matchup" | "vote" | "gameResult" | "referral" | "campaign" | "campaignEnrollment"
+    modelProps: "user" | "video" | "videoCategory" | "weeklySession" | "matchup" | "vote" | "gameResult" | "discountCode" | "referral" | "campaign" | "campaignEnrollment"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -931,6 +932,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    DiscountCode: {
+      payload: Prisma.$DiscountCodePayload<ExtArgs>
+      fields: Prisma.DiscountCodeFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DiscountCodeFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DiscountCodePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DiscountCodeFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DiscountCodePayload>
+        }
+        findFirst: {
+          args: Prisma.DiscountCodeFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DiscountCodePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DiscountCodeFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DiscountCodePayload>
+        }
+        findMany: {
+          args: Prisma.DiscountCodeFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DiscountCodePayload>[]
+        }
+        create: {
+          args: Prisma.DiscountCodeCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DiscountCodePayload>
+        }
+        createMany: {
+          args: Prisma.DiscountCodeCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DiscountCodeCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DiscountCodePayload>[]
+        }
+        delete: {
+          args: Prisma.DiscountCodeDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DiscountCodePayload>
+        }
+        update: {
+          args: Prisma.DiscountCodeUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DiscountCodePayload>
+        }
+        deleteMany: {
+          args: Prisma.DiscountCodeDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DiscountCodeUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DiscountCodeUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DiscountCodePayload>[]
+        }
+        upsert: {
+          args: Prisma.DiscountCodeUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DiscountCodePayload>
+        }
+        aggregate: {
+          args: Prisma.DiscountCodeAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDiscountCode>
+        }
+        groupBy: {
+          args: Prisma.DiscountCodeGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DiscountCodeGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DiscountCodeCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DiscountCodeCountAggregateOutputType> | number
+        }
+      }
+    }
     Referral: {
       payload: Prisma.$ReferralPayload<ExtArgs>
       fields: Prisma.ReferralFieldRefs
@@ -1200,6 +1275,7 @@ export const UserScalarFieldEnum = {
   profilePhoto: 'profilePhoto',
   role: 'role',
   consentAccepted: 'consentAccepted',
+  isGuest: 'isGuest',
   privyId: 'privyId',
   walletAddress: 'walletAddress',
   referralCode: 'referralCode',
@@ -1305,10 +1381,24 @@ export const GameResultScalarFieldEnum = {
   lateJoin: 'lateJoin',
   usdcClaimed: 'usdcClaimed',
   claimTxHash: 'claimTxHash',
-  claimedAt: 'claimedAt'
+  claimedAt: 'claimedAt',
+  depositConfirmed: 'depositConfirmed',
+  depositTxHash: 'depositTxHash'
 } as const
 
 export type GameResultScalarFieldEnum = (typeof GameResultScalarFieldEnum)[keyof typeof GameResultScalarFieldEnum]
+
+
+export const DiscountCodeScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  userId: 'userId',
+  sessionId: 'sessionId',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type DiscountCodeScalarFieldEnum = (typeof DiscountCodeScalarFieldEnum)[keyof typeof DiscountCodeScalarFieldEnum]
 
 
 export const ReferralScalarFieldEnum = {
@@ -1661,6 +1751,7 @@ export type GlobalOmitConfig = {
   matchup?: Prisma.MatchupOmit
   vote?: Prisma.VoteOmit
   gameResult?: Prisma.GameResultOmit
+  discountCode?: Prisma.DiscountCodeOmit
   referral?: Prisma.ReferralOmit
   campaign?: Prisma.CampaignOmit
   campaignEnrollment?: Prisma.CampaignEnrollmentOmit

@@ -53,6 +53,11 @@ export type Vote = Prisma.VoteModel
  */
 export type GameResult = Prisma.GameResultModel
 /**
+ * Model DiscountCode
+ * 
+ */
+export type DiscountCode = Prisma.DiscountCodeModel
+/**
  * Model Referral
  * 
  */

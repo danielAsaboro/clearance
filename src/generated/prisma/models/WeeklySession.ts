@@ -251,6 +251,7 @@ export type WeeklySessionWhereInput = {
   campaign?: Prisma.XOR<Prisma.CampaignNullableScalarRelationFilter, Prisma.CampaignWhereInput> | null
   matchups?: Prisma.MatchupListRelationFilter
   gameResults?: Prisma.GameResultListRelationFilter
+  discountCodes?: Prisma.DiscountCodeListRelationFilter
 }
 
 export type WeeklySessionOrderByWithRelationInput = {
@@ -266,6 +267,7 @@ export type WeeklySessionOrderByWithRelationInput = {
   campaign?: Prisma.CampaignOrderByWithRelationInput
   matchups?: Prisma.MatchupOrderByRelationAggregateInput
   gameResults?: Prisma.GameResultOrderByRelationAggregateInput
+  discountCodes?: Prisma.DiscountCodeOrderByRelationAggregateInput
 }
 
 export type WeeklySessionWhereUniqueInput = Prisma.AtLeast<{
@@ -284,6 +286,7 @@ export type WeeklySessionWhereUniqueInput = Prisma.AtLeast<{
   campaign?: Prisma.XOR<Prisma.CampaignNullableScalarRelationFilter, Prisma.CampaignWhereInput> | null
   matchups?: Prisma.MatchupListRelationFilter
   gameResults?: Prisma.GameResultListRelationFilter
+  discountCodes?: Prisma.DiscountCodeListRelationFilter
 }, "id" | "weekNumber">
 
 export type WeeklySessionOrderByWithAggregationInput = {
@@ -330,6 +333,7 @@ export type WeeklySessionCreateInput = {
   campaign?: Prisma.CampaignCreateNestedOneWithoutSessionsInput
   matchups?: Prisma.MatchupCreateNestedManyWithoutSessionInput
   gameResults?: Prisma.GameResultCreateNestedManyWithoutSessionInput
+  discountCodes?: Prisma.DiscountCodeCreateNestedManyWithoutSessionInput
 }
 
 export type WeeklySessionUncheckedCreateInput = {
@@ -344,6 +348,7 @@ export type WeeklySessionUncheckedCreateInput = {
   campaignId?: string | null
   matchups?: Prisma.MatchupUncheckedCreateNestedManyWithoutSessionInput
   gameResults?: Prisma.GameResultUncheckedCreateNestedManyWithoutSessionInput
+  discountCodes?: Prisma.DiscountCodeUncheckedCreateNestedManyWithoutSessionInput
 }
 
 export type WeeklySessionUpdateInput = {
@@ -358,6 +363,7 @@ export type WeeklySessionUpdateInput = {
   campaign?: Prisma.CampaignUpdateOneWithoutSessionsNestedInput
   matchups?: Prisma.MatchupUpdateManyWithoutSessionNestedInput
   gameResults?: Prisma.GameResultUpdateManyWithoutSessionNestedInput
+  discountCodes?: Prisma.DiscountCodeUpdateManyWithoutSessionNestedInput
 }
 
 export type WeeklySessionUncheckedUpdateInput = {
@@ -372,6 +378,7 @@ export type WeeklySessionUncheckedUpdateInput = {
   campaignId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   matchups?: Prisma.MatchupUncheckedUpdateManyWithoutSessionNestedInput
   gameResults?: Prisma.GameResultUncheckedUpdateManyWithoutSessionNestedInput
+  discountCodes?: Prisma.DiscountCodeUncheckedUpdateManyWithoutSessionNestedInput
 }
 
 export type WeeklySessionCreateManyInput = {
@@ -512,6 +519,20 @@ export type WeeklySessionUpdateOneRequiredWithoutGameResultsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.WeeklySessionUpdateToOneWithWhereWithoutGameResultsInput, Prisma.WeeklySessionUpdateWithoutGameResultsInput>, Prisma.WeeklySessionUncheckedUpdateWithoutGameResultsInput>
 }
 
+export type WeeklySessionCreateNestedOneWithoutDiscountCodesInput = {
+  create?: Prisma.XOR<Prisma.WeeklySessionCreateWithoutDiscountCodesInput, Prisma.WeeklySessionUncheckedCreateWithoutDiscountCodesInput>
+  connectOrCreate?: Prisma.WeeklySessionCreateOrConnectWithoutDiscountCodesInput
+  connect?: Prisma.WeeklySessionWhereUniqueInput
+}
+
+export type WeeklySessionUpdateOneRequiredWithoutDiscountCodesNestedInput = {
+  create?: Prisma.XOR<Prisma.WeeklySessionCreateWithoutDiscountCodesInput, Prisma.WeeklySessionUncheckedCreateWithoutDiscountCodesInput>
+  connectOrCreate?: Prisma.WeeklySessionCreateOrConnectWithoutDiscountCodesInput
+  upsert?: Prisma.WeeklySessionUpsertWithoutDiscountCodesInput
+  connect?: Prisma.WeeklySessionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.WeeklySessionUpdateToOneWithWhereWithoutDiscountCodesInput, Prisma.WeeklySessionUpdateWithoutDiscountCodesInput>, Prisma.WeeklySessionUncheckedUpdateWithoutDiscountCodesInput>
+}
+
 export type WeeklySessionCreateNestedManyWithoutCampaignInput = {
   create?: Prisma.XOR<Prisma.WeeklySessionCreateWithoutCampaignInput, Prisma.WeeklySessionUncheckedCreateWithoutCampaignInput> | Prisma.WeeklySessionCreateWithoutCampaignInput[] | Prisma.WeeklySessionUncheckedCreateWithoutCampaignInput[]
   connectOrCreate?: Prisma.WeeklySessionCreateOrConnectWithoutCampaignInput | Prisma.WeeklySessionCreateOrConnectWithoutCampaignInput[]
@@ -565,6 +586,7 @@ export type WeeklySessionCreateWithoutMatchupsInput = {
   vaultAddress?: string | null
   campaign?: Prisma.CampaignCreateNestedOneWithoutSessionsInput
   gameResults?: Prisma.GameResultCreateNestedManyWithoutSessionInput
+  discountCodes?: Prisma.DiscountCodeCreateNestedManyWithoutSessionInput
 }
 
 export type WeeklySessionUncheckedCreateWithoutMatchupsInput = {
@@ -578,6 +600,7 @@ export type WeeklySessionUncheckedCreateWithoutMatchupsInput = {
   vaultAddress?: string | null
   campaignId?: string | null
   gameResults?: Prisma.GameResultUncheckedCreateNestedManyWithoutSessionInput
+  discountCodes?: Prisma.DiscountCodeUncheckedCreateNestedManyWithoutSessionInput
 }
 
 export type WeeklySessionCreateOrConnectWithoutMatchupsInput = {
@@ -607,6 +630,7 @@ export type WeeklySessionUpdateWithoutMatchupsInput = {
   vaultAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   campaign?: Prisma.CampaignUpdateOneWithoutSessionsNestedInput
   gameResults?: Prisma.GameResultUpdateManyWithoutSessionNestedInput
+  discountCodes?: Prisma.DiscountCodeUpdateManyWithoutSessionNestedInput
 }
 
 export type WeeklySessionUncheckedUpdateWithoutMatchupsInput = {
@@ -620,6 +644,7 @@ export type WeeklySessionUncheckedUpdateWithoutMatchupsInput = {
   vaultAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   campaignId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gameResults?: Prisma.GameResultUncheckedUpdateManyWithoutSessionNestedInput
+  discountCodes?: Prisma.DiscountCodeUncheckedUpdateManyWithoutSessionNestedInput
 }
 
 export type WeeklySessionCreateWithoutGameResultsInput = {
@@ -633,6 +658,7 @@ export type WeeklySessionCreateWithoutGameResultsInput = {
   vaultAddress?: string | null
   campaign?: Prisma.CampaignCreateNestedOneWithoutSessionsInput
   matchups?: Prisma.MatchupCreateNestedManyWithoutSessionInput
+  discountCodes?: Prisma.DiscountCodeCreateNestedManyWithoutSessionInput
 }
 
 export type WeeklySessionUncheckedCreateWithoutGameResultsInput = {
@@ -646,6 +672,7 @@ export type WeeklySessionUncheckedCreateWithoutGameResultsInput = {
   vaultAddress?: string | null
   campaignId?: string | null
   matchups?: Prisma.MatchupUncheckedCreateNestedManyWithoutSessionInput
+  discountCodes?: Prisma.DiscountCodeUncheckedCreateNestedManyWithoutSessionInput
 }
 
 export type WeeklySessionCreateOrConnectWithoutGameResultsInput = {
@@ -675,6 +702,7 @@ export type WeeklySessionUpdateWithoutGameResultsInput = {
   vaultAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   campaign?: Prisma.CampaignUpdateOneWithoutSessionsNestedInput
   matchups?: Prisma.MatchupUpdateManyWithoutSessionNestedInput
+  discountCodes?: Prisma.DiscountCodeUpdateManyWithoutSessionNestedInput
 }
 
 export type WeeklySessionUncheckedUpdateWithoutGameResultsInput = {
@@ -688,6 +716,79 @@ export type WeeklySessionUncheckedUpdateWithoutGameResultsInput = {
   vaultAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   campaignId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   matchups?: Prisma.MatchupUncheckedUpdateManyWithoutSessionNestedInput
+  discountCodes?: Prisma.DiscountCodeUncheckedUpdateManyWithoutSessionNestedInput
+}
+
+export type WeeklySessionCreateWithoutDiscountCodesInput = {
+  id?: string
+  weekNumber: number
+  title: string
+  scheduledAt: Date | string
+  status?: $Enums.SessionStatus
+  lateJoinCutoff?: Date | string | null
+  collectionAddress?: string | null
+  vaultAddress?: string | null
+  campaign?: Prisma.CampaignCreateNestedOneWithoutSessionsInput
+  matchups?: Prisma.MatchupCreateNestedManyWithoutSessionInput
+  gameResults?: Prisma.GameResultCreateNestedManyWithoutSessionInput
+}
+
+export type WeeklySessionUncheckedCreateWithoutDiscountCodesInput = {
+  id?: string
+  weekNumber: number
+  title: string
+  scheduledAt: Date | string
+  status?: $Enums.SessionStatus
+  lateJoinCutoff?: Date | string | null
+  collectionAddress?: string | null
+  vaultAddress?: string | null
+  campaignId?: string | null
+  matchups?: Prisma.MatchupUncheckedCreateNestedManyWithoutSessionInput
+  gameResults?: Prisma.GameResultUncheckedCreateNestedManyWithoutSessionInput
+}
+
+export type WeeklySessionCreateOrConnectWithoutDiscountCodesInput = {
+  where: Prisma.WeeklySessionWhereUniqueInput
+  create: Prisma.XOR<Prisma.WeeklySessionCreateWithoutDiscountCodesInput, Prisma.WeeklySessionUncheckedCreateWithoutDiscountCodesInput>
+}
+
+export type WeeklySessionUpsertWithoutDiscountCodesInput = {
+  update: Prisma.XOR<Prisma.WeeklySessionUpdateWithoutDiscountCodesInput, Prisma.WeeklySessionUncheckedUpdateWithoutDiscountCodesInput>
+  create: Prisma.XOR<Prisma.WeeklySessionCreateWithoutDiscountCodesInput, Prisma.WeeklySessionUncheckedCreateWithoutDiscountCodesInput>
+  where?: Prisma.WeeklySessionWhereInput
+}
+
+export type WeeklySessionUpdateToOneWithWhereWithoutDiscountCodesInput = {
+  where?: Prisma.WeeklySessionWhereInput
+  data: Prisma.XOR<Prisma.WeeklySessionUpdateWithoutDiscountCodesInput, Prisma.WeeklySessionUncheckedUpdateWithoutDiscountCodesInput>
+}
+
+export type WeeklySessionUpdateWithoutDiscountCodesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  weekNumber?: Prisma.IntFieldUpdateOperationsInput | number
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  scheduledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
+  lateJoinCutoff?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vaultAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  campaign?: Prisma.CampaignUpdateOneWithoutSessionsNestedInput
+  matchups?: Prisma.MatchupUpdateManyWithoutSessionNestedInput
+  gameResults?: Prisma.GameResultUpdateManyWithoutSessionNestedInput
+}
+
+export type WeeklySessionUncheckedUpdateWithoutDiscountCodesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  weekNumber?: Prisma.IntFieldUpdateOperationsInput | number
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  scheduledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
+  lateJoinCutoff?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  collectionAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vaultAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  campaignId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  matchups?: Prisma.MatchupUncheckedUpdateManyWithoutSessionNestedInput
+  gameResults?: Prisma.GameResultUncheckedUpdateManyWithoutSessionNestedInput
 }
 
 export type WeeklySessionCreateWithoutCampaignInput = {
@@ -701,6 +802,7 @@ export type WeeklySessionCreateWithoutCampaignInput = {
   vaultAddress?: string | null
   matchups?: Prisma.MatchupCreateNestedManyWithoutSessionInput
   gameResults?: Prisma.GameResultCreateNestedManyWithoutSessionInput
+  discountCodes?: Prisma.DiscountCodeCreateNestedManyWithoutSessionInput
 }
 
 export type WeeklySessionUncheckedCreateWithoutCampaignInput = {
@@ -714,6 +816,7 @@ export type WeeklySessionUncheckedCreateWithoutCampaignInput = {
   vaultAddress?: string | null
   matchups?: Prisma.MatchupUncheckedCreateNestedManyWithoutSessionInput
   gameResults?: Prisma.GameResultUncheckedCreateNestedManyWithoutSessionInput
+  discountCodes?: Prisma.DiscountCodeUncheckedCreateNestedManyWithoutSessionInput
 }
 
 export type WeeklySessionCreateOrConnectWithoutCampaignInput = {
@@ -779,6 +882,7 @@ export type WeeklySessionUpdateWithoutCampaignInput = {
   vaultAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   matchups?: Prisma.MatchupUpdateManyWithoutSessionNestedInput
   gameResults?: Prisma.GameResultUpdateManyWithoutSessionNestedInput
+  discountCodes?: Prisma.DiscountCodeUpdateManyWithoutSessionNestedInput
 }
 
 export type WeeklySessionUncheckedUpdateWithoutCampaignInput = {
@@ -792,6 +896,7 @@ export type WeeklySessionUncheckedUpdateWithoutCampaignInput = {
   vaultAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   matchups?: Prisma.MatchupUncheckedUpdateManyWithoutSessionNestedInput
   gameResults?: Prisma.GameResultUncheckedUpdateManyWithoutSessionNestedInput
+  discountCodes?: Prisma.DiscountCodeUncheckedUpdateManyWithoutSessionNestedInput
 }
 
 export type WeeklySessionUncheckedUpdateManyWithoutCampaignInput = {
@@ -813,11 +918,13 @@ export type WeeklySessionUncheckedUpdateManyWithoutCampaignInput = {
 export type WeeklySessionCountOutputType = {
   matchups: number
   gameResults: number
+  discountCodes: number
 }
 
 export type WeeklySessionCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   matchups?: boolean | WeeklySessionCountOutputTypeCountMatchupsArgs
   gameResults?: boolean | WeeklySessionCountOutputTypeCountGameResultsArgs
+  discountCodes?: boolean | WeeklySessionCountOutputTypeCountDiscountCodesArgs
 }
 
 /**
@@ -844,6 +951,13 @@ export type WeeklySessionCountOutputTypeCountGameResultsArgs<ExtArgs extends run
   where?: Prisma.GameResultWhereInput
 }
 
+/**
+ * WeeklySessionCountOutputType without action
+ */
+export type WeeklySessionCountOutputTypeCountDiscountCodesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DiscountCodeWhereInput
+}
+
 
 export type WeeklySessionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -858,6 +972,7 @@ export type WeeklySessionSelect<ExtArgs extends runtime.Types.Extensions.Interna
   campaign?: boolean | Prisma.WeeklySession$campaignArgs<ExtArgs>
   matchups?: boolean | Prisma.WeeklySession$matchupsArgs<ExtArgs>
   gameResults?: boolean | Prisma.WeeklySession$gameResultsArgs<ExtArgs>
+  discountCodes?: boolean | Prisma.WeeklySession$discountCodesArgs<ExtArgs>
   _count?: boolean | Prisma.WeeklySessionCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["weeklySession"]>
 
@@ -904,6 +1019,7 @@ export type WeeklySessionInclude<ExtArgs extends runtime.Types.Extensions.Intern
   campaign?: boolean | Prisma.WeeklySession$campaignArgs<ExtArgs>
   matchups?: boolean | Prisma.WeeklySession$matchupsArgs<ExtArgs>
   gameResults?: boolean | Prisma.WeeklySession$gameResultsArgs<ExtArgs>
+  discountCodes?: boolean | Prisma.WeeklySession$discountCodesArgs<ExtArgs>
   _count?: boolean | Prisma.WeeklySessionCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type WeeklySessionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -919,6 +1035,7 @@ export type $WeeklySessionPayload<ExtArgs extends runtime.Types.Extensions.Inter
     campaign: Prisma.$CampaignPayload<ExtArgs> | null
     matchups: Prisma.$MatchupPayload<ExtArgs>[]
     gameResults: Prisma.$GameResultPayload<ExtArgs>[]
+    discountCodes: Prisma.$DiscountCodePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1327,6 +1444,7 @@ export interface Prisma__WeeklySessionClient<T, Null = never, ExtArgs extends ru
   campaign<T extends Prisma.WeeklySession$campaignArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WeeklySession$campaignArgs<ExtArgs>>): Prisma.Prisma__CampaignClient<runtime.Types.Result.GetResult<Prisma.$CampaignPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   matchups<T extends Prisma.WeeklySession$matchupsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WeeklySession$matchupsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MatchupPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   gameResults<T extends Prisma.WeeklySession$gameResultsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WeeklySession$gameResultsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GameResultPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  discountCodes<T extends Prisma.WeeklySession$discountCodesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WeeklySession$discountCodesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DiscountCodePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1825,6 +1943,30 @@ export type WeeklySession$gameResultsArgs<ExtArgs extends runtime.Types.Extensio
   take?: number
   skip?: number
   distinct?: Prisma.GameResultScalarFieldEnum | Prisma.GameResultScalarFieldEnum[]
+}
+
+/**
+ * WeeklySession.discountCodes
+ */
+export type WeeklySession$discountCodesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DiscountCode
+   */
+  select?: Prisma.DiscountCodeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DiscountCode
+   */
+  omit?: Prisma.DiscountCodeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DiscountCodeInclude<ExtArgs> | null
+  where?: Prisma.DiscountCodeWhereInput
+  orderBy?: Prisma.DiscountCodeOrderByWithRelationInput | Prisma.DiscountCodeOrderByWithRelationInput[]
+  cursor?: Prisma.DiscountCodeWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DiscountCodeScalarFieldEnum | Prisma.DiscountCodeScalarFieldEnum[]
 }
 
 /**

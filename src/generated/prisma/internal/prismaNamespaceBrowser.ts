@@ -58,6 +58,7 @@ export const ModelName = {
   Matchup: 'Matchup',
   Vote: 'Vote',
   GameResult: 'GameResult',
+  DiscountCode: 'DiscountCode',
   Referral: 'Referral',
   Campaign: 'Campaign',
   CampaignEnrollment: 'CampaignEnrollment'
@@ -87,6 +88,7 @@ export const UserScalarFieldEnum = {
   profilePhoto: 'profilePhoto',
   role: 'role',
   consentAccepted: 'consentAccepted',
+  isGuest: 'isGuest',
   privyId: 'privyId',
   walletAddress: 'walletAddress',
   referralCode: 'referralCode',
@@ -192,10 +194,24 @@ export const GameResultScalarFieldEnum = {
   lateJoin: 'lateJoin',
   usdcClaimed: 'usdcClaimed',
   claimTxHash: 'claimTxHash',
-  claimedAt: 'claimedAt'
+  claimedAt: 'claimedAt',
+  depositConfirmed: 'depositConfirmed',
+  depositTxHash: 'depositTxHash'
 } as const
 
 export type GameResultScalarFieldEnum = (typeof GameResultScalarFieldEnum)[keyof typeof GameResultScalarFieldEnum]
+
+
+export const DiscountCodeScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  userId: 'userId',
+  sessionId: 'sessionId',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type DiscountCodeScalarFieldEnum = (typeof DiscountCodeScalarFieldEnum)[keyof typeof DiscountCodeScalarFieldEnum]
 
 
 export const ReferralScalarFieldEnum = {

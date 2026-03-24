@@ -2,6 +2,7 @@ import { PrivyClient } from "@privy-io/server-auth";
 import { prisma } from "@/lib/db";
 import { nanoid } from "nanoid";
 import { NextRequest } from "next/server";
+import { verifyGuestToken } from "@/lib/guest-auth";
 
 const privy = new PrivyClient(
   process.env.NEXT_PUBLIC_PRIVY_APP_ID!,
@@ -22,6 +23,19 @@ function getLinkedSolanaWalletAddress(privyUser: Awaited<ReturnType<typeof privy
 
 export async function getAuthUser(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
+  const guestHeader = req.headers.get("x-guest-token");
+
+  // Try guest token first (from dedicated header or Bearer prefix)
+  const guestToken = guestHeader || (authHeader?.startsWith("Bearer guest_") ? authHeader.replace("Bearer ", "") : null);
+  if (guestToken) {
+    const guestUserId = verifyGuestToken(guestToken);
+    if (guestUserId) {
+      const guestUser = await prisma.user.findUnique({ where: { id: guestUserId } });
+      if (guestUser?.isGuest) return guestUser;
+    }
+    // If guest token is invalid, fall through to Privy
+  }
+
   if (!authHeader?.startsWith("Bearer ")) return null;
 
   const token = authHeader.replace("Bearer ", "");
