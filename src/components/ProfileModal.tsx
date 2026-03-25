@@ -50,7 +50,7 @@ export default function ProfileModal({ open, onClose }: ProfileModalProps) {
 
   if (!open) return null;
 
-  const tasteScoreMax = 70;
+  const tasteScoreMax = Number(process.env.NEXT_PUBLIC_NFT_THRESHOLD ?? 70);
   const tasteScorePct = stats
     ? Math.min(100, (stats.tasteScore / tasteScoreMax) * 100)
     : 0;

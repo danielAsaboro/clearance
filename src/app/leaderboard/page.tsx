@@ -53,13 +53,13 @@ function truncateWallet(name: string) {
 }
 
 function PlayerLeaderboard({ rankings }: { rankings: PlayerRanking[] }) {
-  const top3 = rankings.slice(0, 3);
-  const podium = top3.length >= 3 ? [top3[1], top3[0], top3[2]] : top3;
-  const rest = rankings.slice(3);
+  const showPodium = rankings.length >= 3;
+  const podium = showPodium ? [rankings[1], rankings[0], rankings[2]] : [];
+  const rest = showPodium ? rankings.slice(3) : rankings;
 
   return (
     <>
-      {podium.length >= 3 ? (
+      {showPodium ? (
         <div className="mb-6 mt-2 flex items-end justify-center gap-6 px-4">
           {podium.map((player, index) => {
             const style = PODIUM_STYLES[index];
@@ -131,13 +131,13 @@ function PlayerLeaderboard({ rankings }: { rankings: PlayerRanking[] }) {
 }
 
 function TribeLeaderboard({ tribes }: { tribes: TribeRanking[] }) {
-  const top3 = tribes.slice(0, 3);
-  const podium = top3.length >= 3 ? [top3[1], top3[0], top3[2]] : top3;
-  const rest = tribes.slice(3);
+  const showPodium = tribes.length >= 3;
+  const podium = showPodium ? [tribes[1], tribes[0], tribes[2]] : [];
+  const rest = showPodium ? tribes.slice(3) : tribes;
 
   return (
     <>
-      {podium.length >= 3 ? (
+      {showPodium && (
         <div className="mb-6 mt-2 flex items-end justify-center gap-6 px-4">
           {podium.map((tribe, index) => {
             const style = PODIUM_STYLES[index];
@@ -174,7 +174,7 @@ function TribeLeaderboard({ tribes }: { tribes: TribeRanking[] }) {
             );
           })}
         </div>
-      ) : null}
+      )}
 
       <div className="overflow-hidden rounded-[14px] border border-white/8 bg-[#121212]">
         <div className="grid grid-cols-[44px_minmax(0,1fr)_74px_74px] gap-2 border-b border-white/8 px-4 py-3 text-[11px] font-medium text-[#646464]">

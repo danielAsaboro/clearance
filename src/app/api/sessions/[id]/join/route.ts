@@ -30,7 +30,8 @@ export async function POST(
     return NextResponse.json({ error: "Session not found" }, { status: 404 });
   }
 
-  if (session.status !== "live" && session.status !== "scheduled") {
+  const isEnded = session.status === "ended";
+  if (session.status !== "live" && session.status !== "scheduled" && !isEnded) {
     return NextResponse.json({ error: "Session is not active" }, { status: 400 });
   }
 
@@ -40,12 +41,15 @@ export async function POST(
   });
 
   if (existing) {
-    // Clear old votes for this session
-    await prisma.vote.deleteMany({
-      where: { userId: user.id, matchup: { sessionId: id } },
+    // Already joined — return existing record without wiping votes
+    const joinedAtRound = existing.lateJoin ? getCurrentRound(session) : 1;
+    return NextResponse.json({
+      ...existing,
+      joinedAtRound,
+      alreadyJoined: true,
+      asyncReplay: isEnded,
+      ...(user.isGuest ? { isGuest: true, displayName: user.displayName } : { depositConfirmed: true }),
     });
-    // Delete old GameResult so a fresh one is created below
-    await prisma.gameResult.deleteMany({ where: { id: existing.id } });
   }
 
   const isLateJoin = session.status === "live" && canLateJoin(session);
@@ -69,7 +73,7 @@ export async function POST(
           where: { userId_sessionId: { userId: user.id, sessionId: id } },
         });
         if (!gameResult) throw err;
-        return NextResponse.json({ ...gameResult, joinedAtRound, alreadyJoined: true });
+        return NextResponse.json({ ...gameResult, joinedAtRound, alreadyJoined: true, asyncReplay: isEnded });
       }
       throw err;
     }
@@ -79,6 +83,7 @@ export async function POST(
       joinedAtRound,
       isGuest: true,
       displayName: user.displayName,
+      asyncReplay: isEnded,
     });
   }
 
@@ -105,7 +110,7 @@ export async function POST(
         where: { userId_sessionId: { userId: user.id, sessionId: id } },
       });
       if (!gameResult) throw err;
-      return NextResponse.json({ ...gameResult, joinedAtRound, alreadyJoined: true });
+      return NextResponse.json({ ...gameResult, joinedAtRound, alreadyJoined: true, asyncReplay: isEnded });
     }
     throw err;
   }
@@ -135,7 +140,7 @@ export async function POST(
   }
 
   return NextResponse.json(
-    { ...gameResult, joinedAtRound, depositConfirmed: true },
+    { ...gameResult, joinedAtRound, depositConfirmed: true, asyncReplay: isEnded },
     { status: 200 }
   );
 }

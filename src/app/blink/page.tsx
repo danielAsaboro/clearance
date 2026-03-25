@@ -95,7 +95,7 @@ function BlinkContent() {
     );
   };
 
-  const nftThreshold = 70;
+  const nftThreshold = Number(process.env.NEXT_PUBLIC_NFT_THRESHOLD ?? 70);
   const scorePct = tribeScore !== null ? Math.min(100, (tribeScore / nftThreshold) * 100) : 0;
   const backHref = sessionId ? `/arena/results?session=${sessionId}` : "/arena/results";
 

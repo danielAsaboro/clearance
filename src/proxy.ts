@@ -7,6 +7,7 @@ const publicPaths = [
   "/arena",
   "/api/auth",
   "/ref",
+  "/leaderboard",
 ];
 
 function isPublicPath(pathname: string) {

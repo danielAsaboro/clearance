@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { calculateMajorityWinners } from "@/lib/session-engine";
 
 export interface PlayerRanking {
   rank: number;
@@ -28,18 +29,50 @@ export interface TribeRanking {
 export async function GET(req: NextRequest) {
   const tab = req.nextUrl.searchParams.get("tab");
 
+  // Pre-compute majority winners for all matchups (shared by both tabs)
+  const allMatchups = await prisma.matchup.findMany({
+    select: {
+      id: true,
+      videoAId: true,
+      videoBId: true,
+      votes: { select: { decision: true } },
+    },
+  });
+
+  const winnerMap = calculateMajorityWinners(
+    allMatchups.map((m) => ({
+      id: m.id,
+      videoAId: m.videoAId,
+      videoBId: m.videoBId,
+      votes: m.votes.map((v) => ({ decision: v.decision as "video_a" | "video_b" })),
+    }))
+  );
+
   if (tab === "tribes") {
-    return getTribeRankings();
+    return getTribeRankings(winnerMap);
   }
 
-  return getPlayerRankings();
+  return getPlayerRankings(winnerMap);
 }
 
-async function getPlayerRankings() {
+function countCorrectVotes(
+  votes: { decision: string; matchup: { id: string; videoAId: string; videoBId: string } }[],
+  winnerMap: Map<string, string>
+) {
+  return votes.filter((v) => {
+    const winner = winnerMap.get(v.matchup.id);
+    if (!winner) return false;
+    return (
+      (v.decision === "video_a" && winner === v.matchup.videoAId) ||
+      (v.decision === "video_b" && winner === v.matchup.videoBId)
+    );
+  }).length;
+}
+
+async function getPlayerRankings(winnerMap: Map<string, string>) {
   const players = await prisma.user.findMany({
     where: {
       role: "player",
-      isGuest: false,
       gameResults: { some: {} },
     },
     select: {
@@ -48,9 +81,14 @@ async function getPlayerRankings() {
       profilePhoto: true,
       walletAddress: true,
       gameResults: {
+        select: { sessionId: true },
+      },
+      votes: {
         select: {
-          correctVotes: true,
-          totalVotes: true,
+          decision: true,
+          matchup: {
+            select: { id: true, videoAId: true, videoBId: true },
+          },
         },
       },
       referralReceived: {
@@ -69,14 +107,8 @@ async function getPlayerRankings() {
 
   const rankings: PlayerRanking[] = players
     .map((player) => {
-      const correctPredictions = player.gameResults.reduce(
-        (sum, r) => sum + r.correctVotes,
-        0
-      );
-      const totalVotes = player.gameResults.reduce(
-        (sum, r) => sum + r.totalVotes,
-        0
-      );
+      const correctPredictions = countCorrectVotes(player.votes, winnerMap);
+      const totalVotes = player.votes.length;
       const sessionsPlayed = player.gameResults.length;
       const winRate =
         totalVotes > 0
@@ -116,7 +148,7 @@ async function getPlayerRankings() {
   return NextResponse.json(rankings);
 }
 
-async function getTribeRankings() {
+async function getTribeRankings(winnerMap: Map<string, string>) {
   // Find all users who have referred at least one person (tribe leaders)
   const leaders = await prisma.user.findMany({
     where: {
@@ -126,16 +158,26 @@ async function getTribeRankings() {
       id: true,
       displayName: true,
       profilePhoto: true,
-      gameResults: {
-        select: { correctVotes: true },
+      votes: {
+        select: {
+          decision: true,
+          matchup: {
+            select: { id: true, videoAId: true, videoBId: true },
+          },
+        },
       },
       referralsMade: {
         select: {
           referredUser: {
             select: {
               id: true,
-              gameResults: {
-                select: { correctVotes: true },
+              votes: {
+                select: {
+                  decision: true,
+                  matchup: {
+                    select: { id: true, videoAId: true, videoBId: true },
+                  },
+                },
               },
             },
           },
@@ -146,17 +188,9 @@ async function getTribeRankings() {
 
   const tribes: TribeRanking[] = leaders
     .map((leader) => {
-      const leaderScore = leader.gameResults.reduce(
-        (sum, r) => sum + r.correctVotes,
-        0
-      );
+      const leaderScore = countCorrectVotes(leader.votes, winnerMap);
       const membersScore = leader.referralsMade.reduce(
-        (sum, ref) =>
-          sum +
-          ref.referredUser.gameResults.reduce(
-            (s, r) => s + r.correctVotes,
-            0
-          ),
+        (sum, ref) => sum + countCorrectVotes(ref.referredUser.votes, winnerMap),
         0
       );
 

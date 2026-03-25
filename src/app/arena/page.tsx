@@ -130,7 +130,7 @@ export default function Arena() {
                 { icon: <Gamepad2 className="h-3.5 w-3.5 text-[#d3b93b]" />, text: "7-round prediction session" },
                 { icon: <Coins className="h-3.5 w-3.5 text-[#d3b93b]" />, text: "Earn USDC for correct spots" },
                 { icon: <Star className="h-3.5 w-3.5 text-[#d3b93b]" />, text: "Build your Taste Score" },
-                { icon: <Gift className="h-3.5 w-3.5 text-[#d3b93b]" />, text: "NFT whitelist eligibility at 70 points" },
+                { icon: <Gift className="h-3.5 w-3.5 text-[#d3b93b]" />, text: `NFT whitelist eligibility at ${process.env.NEXT_PUBLIC_NFT_THRESHOLD ?? 70} points` },
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-3">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-[#27220f]">

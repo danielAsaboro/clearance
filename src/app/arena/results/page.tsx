@@ -7,7 +7,6 @@ import { Check, Copy, Home, LogIn, Share2, User } from "lucide-react";
 import Link from "next/link";
 import CircularProgress from "@/components/CircularProgress";
 import ProfileModal from "@/components/ProfileModal";
-import ShareQR from "@/components/ShareQR";
 
 const GUEST_TOKEN_KEY = "spotr_guest_token";
 const GUEST_NAME_KEY = "spotr_guest_name";
@@ -31,6 +30,8 @@ function ResultsContent() {
   const [loading, setLoading] = useState(true);
   const [showProfile, setShowProfile] = useState(false);
   const [codeCopied, setCodeCopied] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
+  const [referralCode, setReferralCode] = useState<string | null>(null);
   const [merging, setMerging] = useState(false);
   const [merged, setMerged] = useState(false);
   const [skippedSignup, setSkippedSignup] = useState(false);
@@ -81,6 +82,24 @@ function ResultsContent() {
   }, [authenticated, getAccessToken, merged, merging]);
 
   useEffect(() => {
+    if (!authenticated) return;
+    (async () => {
+      try {
+        const token = await getAccessToken();
+        const res = await fetch("/api/referrals", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setReferralCode(data.code ?? null);
+        }
+      } catch {
+        // ignore
+      }
+    })();
+  }, [authenticated, getAccessToken]);
+
+  useEffect(() => {
     if (!sessionId) {
       setLoading(false);
       return;
@@ -109,7 +128,7 @@ function ResultsContent() {
   }
 
   const tasteScore = results?.tasteScore ?? (results ? results.correctVotes : 0);
-  const nftThreshold = 70;
+  const nftThreshold = Number(process.env.NEXT_PUBLIC_NFT_THRESHOLD ?? 70);
   const scorePct = Math.min(100, (tasteScore / nftThreshold) * 100);
 
   return (
@@ -160,9 +179,35 @@ function ResultsContent() {
                 />
               </div>
               <p className="mt-3 text-center text-[12px] leading-4 text-black/60">
-                Share your Blink to recruit your tribe and boost this score together.
+                Share your referral link to recruit your tribe and boost this score together.
               </p>
             </div>
+
+            {results.discountCode && (
+              <div className="mt-4 w-full rounded-[16px] border border-[#2a2a2a] bg-[#161616] px-4 py-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#6b6b6b]">
+                  Your Discount Code
+                </p>
+                <div className="mt-2 flex items-center gap-3">
+                  <code className="flex-1 rounded-[10px] bg-[#232323] px-4 py-3 text-center text-[18px] font-semibold tracking-[0.12em] text-[#f5d63d]">
+                    {results.discountCode}
+                  </code>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(results.discountCode!);
+                      setCodeCopied(true);
+                      setTimeout(() => setCodeCopied(false), 2000);
+                    }}
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] bg-[#232323] text-white transition-colors hover:bg-[#2a2a2a]"
+                  >
+                    {codeCopied ? <Check className="h-4 w-4 text-[#45ca61]" /> : <Copy className="h-4 w-4" />}
+                  </button>
+                </div>
+                <p className="mt-2 text-center text-[12px] text-[#6b6b6b]">
+                  Use this code for exclusive rewards
+                </p>
+              </div>
+            )}
 
             {/* Guest signup CTA */}
             {isGuest && !merged && !skippedSignup && (
@@ -203,7 +248,7 @@ function ResultsContent() {
                 <div className="mt-1 h-3 w-3 rounded-[3px] bg-[#f5d63d]" />
                 <div className="min-w-0">
                   <p className="text-[14px] leading-5 text-[#d6d6d6]">
-                    Reach 70 collective points with your tribe to unlock{" "}
+                    Reach {nftThreshold} collective points with your tribe to unlock{" "}
                     <span className="font-semibold text-white">FREE NFT mint</span>
                   </p>
                   <p className="mt-2 text-[12px] font-semibold text-[#d0b33a]">
@@ -224,49 +269,39 @@ function ResultsContent() {
               </div>
             </div>
 
-            {results.discountCode && (
-              <div className="mt-4 w-full rounded-[16px] border border-[#2a2a2a] bg-[#161616] px-4 py-4">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#6b6b6b]">
-                  Your Discount Code
-                </p>
-                <div className="mt-2 flex items-center gap-3">
-                  <code className="flex-1 rounded-[10px] bg-[#232323] px-4 py-3 text-center text-[18px] font-semibold tracking-[0.12em] text-[#f5d63d]">
-                    {results.discountCode}
-                  </code>
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(results.discountCode!);
-                      setCodeCopied(true);
-                      setTimeout(() => setCodeCopied(false), 2000);
-                    }}
-                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] bg-[#232323] text-white transition-colors hover:bg-[#2a2a2a]"
-                  >
-                    {codeCopied ? <Check className="h-4 w-4 text-[#45ca61]" /> : <Copy className="h-4 w-4" />}
-                  </button>
-                </div>
-                <p className="mt-2 text-center text-[12px] text-[#6b6b6b]">
-                  Use this code for exclusive rewards
-                </p>
-              </div>
-            )}
-
-            {sessionId && (
-              <div className="mt-4 flex justify-center">
-                <ShareQR
-                  url={`${typeof window !== "undefined" ? window.location.origin : "https://spotr.tv"}/arena?session=${sessionId}`}
-                  label="Share Session"
-                  size={160}
-                />
-              </div>
-            )}
-
             <div className="mt-auto flex w-full flex-col gap-4 pt-8">
-              <Link href={`/blink?session=${sessionId}&score=${results.correctVotes}&total=${results.totalRounds}`} className="block w-full">
-                <button className="spotr-primary-button flex w-full items-center justify-center gap-2">
-                  <Share2 className="h-4 w-4" />
-                  Generate My Blink Link
+              {referralCode ? (
+                <button
+                  onClick={() => {
+                    const origin = typeof window !== "undefined" ? window.location.origin : "https://spotr.tv";
+                    const referralUrl = `${origin}/ref/${referralCode}${sessionId ? `?session=${sessionId}` : ""}`;
+                    navigator.clipboard.writeText(referralUrl);
+                    setLinkCopied(true);
+                    setTimeout(() => setLinkCopied(false), 2000);
+                  }}
+                  className="spotr-primary-button flex w-full items-center justify-center gap-2"
+                >
+                  {linkCopied ? (
+                    <>
+                      <Check className="h-4 w-4" />
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Share2 className="h-4 w-4" />
+                      Generate My Referral Link
+                    </>
+                  )}
                 </button>
-              </Link>
+              ) : (
+                <button
+                  onClick={() => login()}
+                  className="spotr-primary-button flex w-full items-center justify-center gap-2"
+                >
+                  <Share2 className="h-4 w-4" />
+                  Generate My Referral Link
+                </button>
+              )}
 
               <Link href="/" className="block w-full">
                 <button className="spotr-secondary-button flex w-full items-center justify-center gap-2">

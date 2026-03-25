@@ -8,7 +8,9 @@ const RESULTS_DURATION = 5; // seconds of results overlay between rounds
 // GET /api/sessions/sample/stream — SSE endpoint for sample session
 // Per-player timing: starts "now" when the client connects and runs through all rounds.
 export async function GET(req: NextRequest) {
-  if (!campaignConfig.sampleSessionEnabled) {
+  const isAsyncReplay = req.nextUrl.searchParams.get("async") === "true";
+
+  if (!isAsyncReplay && !campaignConfig.sampleSessionEnabled) {
     return new Response("Sample session is disabled", { status: 404 });
   }
 

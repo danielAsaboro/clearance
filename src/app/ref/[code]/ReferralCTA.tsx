@@ -1,20 +1,45 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { usePrivy } from "@privy-io/react-auth";
-import { Mail, Wallet, Zap, Trophy, Gift, ArrowRight } from "lucide-react";
+import { Wallet, Zap, Trophy, Gift, ArrowRight, PlayCircle } from "lucide-react";
 
-export default function ReferralCTA({ code }: { code: string }) {
+export default function ReferralCTA({ code, session }: { code: string; session?: string }) {
   const { login, authenticated } = usePrivy();
   const router = useRouter();
+  const [startLoading, setStartLoading] = useState(false);
 
-  // If user is already authenticated, redirect to arena
+  // If user is already authenticated, redirect to arena (with session if available)
   useEffect(() => {
     if (authenticated) {
+      router.push(session ? `/arena/game?session=${session}&replay=true` : "/arena");
+    }
+  }, [authenticated, router, session]);
+
+  const handleStartSession = useCallback(async () => {
+    setStartLoading(true);
+    try {
+      // If session prop is provided, go directly to game
+      if (session) {
+        router.push(`/arena/game?session=${session}&replay=true`);
+        return;
+      }
+      // Otherwise fetch current live session
+      const res = await fetch("/api/sessions");
+      if (res.ok) {
+        const data = await res.json();
+        const current = data.current || data.next || null;
+        if (current && current.status === "live") {
+          router.push(`/arena/game?session=${current.id}${current.isSample ? "&sample=true" : ""}`);
+          return;
+        }
+      }
+      router.push("/arena");
+    } catch {
       router.push("/arena");
     }
-  }, [authenticated, router]);
+  }, [session, router]);
 
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center bg-black px-5 py-8">
@@ -65,17 +90,23 @@ export default function ReferralCTA({ code }: { code: string }) {
 
         {/* CTA Buttons */}
         <button
-          onClick={() => login()}
+          onClick={handleStartSession}
+          disabled={startLoading}
           className="flex w-full items-center justify-center gap-2 rounded-[14px] bg-[#f5d63d] px-6 py-4 text-[16px] font-bold text-black transition-colors hover:bg-[#e6c832]"
         >
-          <Mail className="h-5 w-5" />
-          Sign Up with Email
-          <ArrowRight className="ml-1 h-4 w-4" />
+          <PlayCircle className="h-5 w-5" />
+          {startLoading ? "Loading..." : "Start Session"}
+          {!startLoading && <ArrowRight className="ml-1 h-4 w-4" />}
+        </button>
+
+        <button
+          onClick={() => login()}
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-[14px] border border-[#f5d63d] px-6 py-4 text-[16px] font-bold text-[#f5d63d] transition-colors hover:bg-[#f5d63d]/10"
+        >
+          Sign Up
         </button>
 
         <p className="mt-3 text-center text-[12px] leading-4 text-[#555]">
-          You can also connect your Solana wallet during sign-up.
-          <br />
           Your referral will be linked automatically.
         </p>
       </div>

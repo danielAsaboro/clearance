@@ -219,6 +219,7 @@ function GameContent() {
   const sessionId = searchParams.get("session");
   const { getAccessToken, authenticated } = usePrivy();
   const isSample = searchParams.get("sample") === "true";
+  const isReplay = searchParams.get("replay") === "true";
   const [phase, setPhase] = useState<GamePhase>("joining");
   const [matchups, setMatchups] = useState<Matchup[]>([]);
   const [roundState, setRoundState] = useState<RoundState | null>(null);
@@ -231,6 +232,7 @@ function GameContent() {
   const [interstitial, setInterstitial] = useState<(RoundResults & { completedRound: number }) | null>(null);
   const [displayedRound, setDisplayedRound] = useState(1);
   const [guestName, setGuestName] = useState<string | null>(null);
+  const [asyncReplay, setAsyncReplay] = useState(false);
 
   const prevStatusRef = useRef<string>("");
   const completedRoundRef = useRef(0);
@@ -311,6 +313,14 @@ function GameContent() {
             setGuestName(data.displayName);
           }
 
+          // Ended sessions: use per-player timing (async replay)
+          if (data.asyncReplay) {
+            setAsyncReplay(true);
+          }
+
+          // Record referral if cookie exists (fire-and-forget)
+          fetch("/api/referrals", { method: "POST", headers }).catch(() => {});
+
           // Go straight to playing — deposit handled server-side
           await fetchMatchups();
           setPhase("playing");
@@ -339,8 +349,8 @@ function GameContent() {
   useEffect(() => {
     if (phase !== "playing" || !sessionId) return;
 
-    const streamUrl = isSample
-      ? `/api/sessions/sample/stream?sessionId=${sessionId}`
+    const streamUrl = (isSample || isReplay || asyncReplay)
+      ? `/api/sessions/sample/stream?sessionId=${sessionId}&async=true`
       : `/api/sessions/${sessionId}/stream`;
 
     const es = new EventSource(streamUrl);
@@ -360,7 +370,7 @@ function GameContent() {
     };
 
     return () => es.close();
-  }, [isSample, phase, sessionId]);
+  }, [isSample, isReplay, asyncReplay, phase, sessionId]);
 
   const fetchRoundResults = useCallback(
     async (round: number) => {
