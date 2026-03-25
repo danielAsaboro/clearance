@@ -26,24 +26,31 @@ export async function GET(req: NextRequest) {
 
   const stream = new ReadableStream({
     start(controller) {
+      let closed = false;
+
       const sendEvent = (data: object) => {
+        if (closed) return;
         const payload = `data: ${JSON.stringify(data)}\n\n`;
         try {
           controller.enqueue(new TextEncoder().encode(payload));
         } catch {
           // client disconnected
+          closed = true;
         }
       };
 
       const tick = () => {
+        if (closed) { clearInterval(intervalId); return; }
+
         const elapsed = Math.max(0, Math.floor((Date.now() - startTime) / 1000));
         const slotDuration = roundDuration + RESULTS_DURATION;
         const totalDuration = totalMatchups * slotDuration;
 
         if (elapsed >= totalDuration) {
           sendEvent({ status: "ended", round: totalMatchups, secondsRemaining: 0, totalRounds: totalMatchups, roundDuration });
-          controller.close();
           clearInterval(intervalId);
+          closed = true;
+          controller.close();
           return;
         }
 

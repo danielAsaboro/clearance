@@ -13,6 +13,7 @@ interface PlayerRanking {
   totalVotes: number;
   sessionsPlayed: number;
   winRate: number;
+  tribeName: string | null;
 }
 
 interface TribeRanking {
@@ -98,9 +99,10 @@ function PlayerLeaderboard({ rankings }: { rankings: PlayerRanking[] }) {
       ) : null}
 
       <div className="overflow-hidden rounded-[14px] border border-white/8 bg-[#121212]">
-        <div className="grid grid-cols-[44px_minmax(0,1fr)_74px_74px_74px] gap-2 border-b border-white/8 px-4 py-3 text-[11px] font-medium text-[#646464]">
+        <div className="grid grid-cols-[36px_minmax(0,1fr)_minmax(0,1fr)_58px_58px_58px] gap-2 border-b border-white/8 px-4 py-3 text-[11px] font-medium text-[#646464]">
           <span>#</span>
           <span>Player</span>
+          <span>Tribe</span>
           <span className="text-right">Score</span>
           <span className="text-right">Acc%</span>
           <span className="text-right">Games</span>
@@ -109,10 +111,11 @@ function PlayerLeaderboard({ rankings }: { rankings: PlayerRanking[] }) {
         {rest.map((player) => (
           <div
             key={player.userId}
-            className="grid grid-cols-[44px_minmax(0,1fr)_74px_74px_74px] gap-2 border-b border-white/6 px-4 py-[14px] text-[14px] last:border-b-0"
+            className="grid grid-cols-[36px_minmax(0,1fr)_minmax(0,1fr)_58px_58px_58px] gap-2 border-b border-white/6 px-4 py-[14px] text-[14px] last:border-b-0"
           >
             <span className="text-[#8d8d8d]">{player.rank}</span>
             <span className="truncate text-[#e4e4e4]">{truncateWallet(player.displayName)}</span>
+            <span className="truncate text-[#6b6b6b] text-[12px]">{player.tribeName ?? "—"}</span>
             <span className="text-right font-semibold text-[#e4e4e4]">{player.correctPredictions}</span>
             <span className="text-right text-[#9b9b9b]">{player.winRate}%</span>
             <span className="text-right text-[#9b9b9b]">{player.sessionsPlayed}</span>

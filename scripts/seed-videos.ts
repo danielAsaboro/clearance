@@ -169,6 +169,7 @@ async function main() {
   if (staleSessions.length > 0) {
     const ids = staleSessions.map((s) => s.id);
     await prisma.vote.deleteMany({ where: { matchup: { sessionId: { in: ids } } } });
+    await prisma.discountCode.deleteMany({ where: { sessionId: { in: ids } } });
     await prisma.matchup.deleteMany({ where: { sessionId: { in: ids } } });
     await prisma.gameResult.deleteMany({ where: { sessionId: { in: ids } } });
   }

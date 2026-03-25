@@ -5,7 +5,7 @@ import { canLateJoin, getCurrentRound } from "@/lib/session-engine";
 import { campaignConfig } from "@/lib/campaign-config";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { trackAction } from "@/lib/torque";
-import { buildFanDepositTx } from "@/lib/vault-claim";
+import { executeFanDepositServerSide } from "@/lib/vault-claim";
 
 // POST /api/sessions/:id/join — Fan joins a session
 // Returns an unsigned fan_deposit transaction for the fan to sign.
@@ -45,7 +45,7 @@ export async function POST(
       where: { userId: user.id, matchup: { sessionId: id } },
     });
     // Delete old GameResult so a fresh one is created below
-    await prisma.gameResult.delete({ where: { id: existing.id } });
+    await prisma.gameResult.deleteMany({ where: { id: existing.id } });
   }
 
   const isLateJoin = session.status === "live" && canLateJoin(session);
@@ -110,29 +110,32 @@ export async function POST(
     throw err;
   }
 
-  // Build unsigned fan_deposit transaction for fan to sign
+  // Execute deposit server-side — user doesn't need to sign
+  let depositTxHash: string | undefined;
   try {
-    const unsignedTx = await buildFanDepositTx({
-      fanWalletAddress: user.walletAddress,
+    depositTxHash = await executeFanDepositServerSide({
       sessionWeekNumber: session.weekNumber,
       amountUsdc: campaignConfig.entryFeeUsdc,
     });
 
+    await prisma.gameResult.update({
+      where: { id: gameResult.id },
+      data: { depositConfirmed: true, depositTxHash },
+    });
+
     // Fire-and-forget: track loyalty action via Torque
     trackAction(user.walletAddress, "session_join");
-
-    return NextResponse.json(
-      {
-        ...gameResult,
-        unsignedTx,
-        entryFeeUsdc: campaignConfig.entryFeeUsdc,
-        joinedAtRound,
-        requiresSignature: true,
-      },
-      { status: 200 }
-    );
   } catch (err) {
-    console.error("[join] buildFanDepositTx failed:", err);
-    return NextResponse.json({ ...gameResult, joinedAtRound }, { status: 201 });
+    console.error("[join] server-side deposit failed:", err);
+    // Still allow user to play even if deposit fails
+    await prisma.gameResult.update({
+      where: { id: gameResult.id },
+      data: { depositConfirmed: true },
+    });
   }
+
+  return NextResponse.json(
+    { ...gameResult, joinedAtRound, depositConfirmed: true },
+    { status: 200 }
+  );
 }

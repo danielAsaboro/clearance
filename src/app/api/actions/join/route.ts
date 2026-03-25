@@ -105,6 +105,12 @@ export async function POST(req: NextRequest) {
     tx.feePayer = accountPubkey;
     tx.add(memoIx);
 
+    // Look up existing user by wallet
+    const walletAddr = accountPubkey.toBase58();
+    const user = await prisma.user.findFirst({
+      where: { walletAddress: walletAddr },
+    });
+
     // Record join in DB if user exists and session is active
     let skipJoin = false;
     if (sessionId) {
@@ -114,52 +120,57 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    if (sessionId && !skipJoin) {
-      const user = await prisma.user.findFirst({
-        where: { walletAddress: accountPubkey.toBase58() },
-      });
-      if (user) {
-        await prisma.gameResult
-          .create({
-            data: {
-              userId: user.id,
-              sessionId,
-              walletAddress: user.walletAddress,
-            },
-          })
-          .catch(() => {
-            // Already joined — ignore
-          });
+    if (sessionId && !skipJoin && user) {
+      await prisma.gameResult
+        .create({
+          data: {
+            userId: user.id,
+            sessionId,
+            walletAddress: user.walletAddress,
+          },
+        })
+        .catch((err) => {
+          console.log("[blink] gameResult already exists or failed:", err.code);
+        });
 
-        // Record referral attribution if a ref code was passed and user has no referral yet
-        if (refCode) {
-          const existingReferral = await prisma.referral.findUnique({
-            where: { referredUserId: user.id },
-          });
-          if (!existingReferral) {
-            const referrer = await prisma.user.findUnique({ where: { referralCode: refCode } });
-            if (referrer && referrer.id !== user.id) {
-              await prisma.referral
-                .create({
-                  data: { referrerId: referrer.id, referredUserId: user.id, code: refCode },
-                })
-                .catch(() => {
-                  // Race condition — ignore
-                });
-              await prisma.user
-                .update({ where: { id: user.id }, data: { referredBy: refCode } })
-                .catch(() => {});
-            }
+      // Record referral attribution if a ref code was passed and user has no referral yet
+      if (refCode) {
+        const existingReferral = await prisma.referral.findUnique({
+          where: { referredUserId: user.id },
+        });
+        if (!existingReferral) {
+          const referrer = await prisma.user.findUnique({ where: { referralCode: refCode } });
+          if (referrer && referrer.id !== user.id) {
+            await prisma.referral
+              .create({
+                data: { referrerId: referrer.id, referredUserId: user.id, code: refCode },
+              })
+              .catch((err) => {
+                console.error("[blink] referral creation failed:", err.message);
+              });
+            await prisma.user
+              .update({ where: { id: user.id }, data: { referredBy: refCode } })
+              .catch((err) => {
+                console.error("[blink] user referredBy update failed:", err.message);
+              });
           }
         }
       }
     }
 
+    // Tailor message: existing users go play, new users sign up via referral page
+    const origin = new URL(req.url).origin;
+    const message = user
+      ? "You're in! Head to Spotr TV to start voting when the session goes live."
+      : refCode
+        ? `You're in! Sign up at ${origin}/ref/${refCode} to save your progress and start playing.`
+        : `You're in! Sign up at ${origin} to start playing.`;
+
     const response = await createPostResponse({
       fields: {
         type: "transaction",
         transaction: tx,
-        message: "You're in! Head to Spotr TV to start voting when the session goes live.",
+        message,
       },
     });
 

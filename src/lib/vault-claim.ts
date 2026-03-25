@@ -81,6 +81,21 @@ export async function buildFanDepositTx({
 }
 
 /**
+ * Execute a fan deposit server-side using the admin keypair.
+ * The admin deposits on behalf of the fan so the user doesn't need to sign.
+ * Returns the transaction signature.
+ */
+export async function executeFanDepositServerSide({
+  sessionWeekNumber,
+  amountUsdc,
+}: {
+  sessionWeekNumber: number;
+  amountUsdc: number;
+}): Promise<string> {
+  return adminDepositToVault(sessionWeekNumber, amountUsdc);
+}
+
+/**
  * Build a partially-signed `claim_with_nft` transaction.
  * Returns a base64-serialized transaction that the user must co-sign.
  */

@@ -13,21 +13,14 @@ const localTailwindCssEntry = path.join(
 
 const nextConfig: NextConfig = {
   turbopack: {
-    root: projectRoot,
     resolveAlias: {
       tailwindcss: localTailwindCssEntry,
     },
   },
-  webpack(config) {
-    config.resolve ??= {};
-    config.resolve.alias ??= {};
-    config.resolve.alias.tailwindcss = localTailwindCssEntry;
-    return config;
-  },
   async headers() {
     return [
       {
-        // CORS headers for mobile app API access
+        // CORS headers for API access
         source: "/api/:path*",
         headers: [
           { key: "Access-Control-Allow-Origin", value: "*" },

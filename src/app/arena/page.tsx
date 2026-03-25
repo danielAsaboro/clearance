@@ -147,7 +147,7 @@ export default function Arena() {
             className="spotr-primary-button mt-2 flex w-full items-center justify-center gap-2"
           >
             <Shield className="h-4 w-4" />
-            Deposit ${ENTRY_FEE} USDC to Play
+            Ready to Play
           </Link>
 
           <p className="spotr-screen-footer pt-1 text-center">

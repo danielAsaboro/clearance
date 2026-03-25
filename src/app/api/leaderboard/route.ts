@@ -11,6 +11,7 @@ export interface PlayerRanking {
   sessionsPlayed: number;
   winRate: number;
   walletAddress: string | null;
+  tribeName: string | null;
 }
 
 export interface TribeRanking {
@@ -52,6 +53,17 @@ async function getPlayerRankings() {
           totalVotes: true,
         },
       },
+      referralReceived: {
+        select: {
+          referrer: {
+            select: { displayName: true },
+          },
+        },
+      },
+      referralsMade: {
+        select: { id: true },
+        take: 1,
+      },
     },
   });
 
@@ -71,6 +83,15 @@ async function getPlayerRankings() {
           ? Math.round((correctPredictions / totalVotes) * 100)
           : 0;
 
+      // Determine tribe affiliation
+      const referrerName = player.referralReceived?.referrer?.displayName;
+      const isLeader = player.referralsMade.length > 0;
+      const tribeName = referrerName
+        ? `${referrerName}'s Tribe`
+        : isLeader
+          ? `${player.displayName ?? "Anonymous"}'s Tribe`
+          : null;
+
       return {
         rank: 0,
         userId: player.id,
@@ -81,6 +102,7 @@ async function getPlayerRankings() {
         sessionsPlayed,
         winRate,
         walletAddress: player.walletAddress ?? null,
+        tribeName,
       };
     })
     .sort(
