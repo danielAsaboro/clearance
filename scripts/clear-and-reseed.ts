@@ -70,6 +70,8 @@ async function clearDB() {
   console.log(`  Matchup: ${matchups.count} deleted`);
   const gameResults = await prisma.gameResult.deleteMany();
   console.log(`  GameResult: ${gameResults.count} deleted`);
+  const discountCodes = await prisma.discountCode.deleteMany();
+  console.log(`  DiscountCode: ${discountCodes.count} deleted`);
   const sessions = await prisma.weeklySession.deleteMany();
   console.log(`  WeeklySession: ${sessions.count} deleted`);
   const videos = await prisma.video.deleteMany();
