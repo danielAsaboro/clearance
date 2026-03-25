@@ -3,7 +3,16 @@
 import { useState, useEffect, useCallback } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import Link from "next/link";
-import { Plus, Radio, Calendar, Box, CheckCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
+import {
+  Plus,
+  Radio,
+  Calendar,
+  Box,
+  CheckCircle,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
 interface Session {
   id: string;
@@ -17,7 +26,10 @@ interface Session {
 
 export default function AdminSessions() {
   const { getAccessToken } = usePrivy();
+  const router = useRouter();
   const [sessions, setSessions] = useState<Session[]>([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [showCreate, setShowCreate] = useState(false);
   const [finalizing, setFinalizing] = useState<string | null>(null);
   const [form, setForm] = useState({
@@ -26,17 +38,25 @@ export default function AdminSessions() {
     scheduledAt: "",
   });
 
-  const fetchSessions = useCallback(async () => {
-    const token = await getAccessToken();
-    const res = await fetch("/api/admin/stats?type=sessions", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (res.ok) setSessions(await res.json());
-  }, [getAccessToken]);
+  const fetchSessions = useCallback(
+    async (p: number = page) => {
+      const token = await getAccessToken();
+      const res = await fetch(
+        `/api/admin/stats?type=sessions&page=${p}&limit=10`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (res.ok) {
+        const data = await res.json();
+        setSessions(data.sessions);
+        setTotalPages(data.totalPages);
+      }
+    },
+    [getAccessToken, page]
+  );
 
   useEffect(() => {
-    fetchSessions();
-  }, [fetchSessions]);
+    fetchSessions(page);
+  }, [page, fetchSessions]);
 
   const handleCreate = async () => {
     const token = await getAccessToken();
@@ -54,10 +74,15 @@ export default function AdminSessions() {
     });
     setShowCreate(false);
     setForm({ weekNumber: "", title: "", scheduledAt: "" });
-    fetchSessions();
+    setPage(1);
+    fetchSessions(1);
   };
 
-  const handleCreateCollection = async (weekNumber: number) => {
+  const handleCreateCollection = async (
+    e: React.MouseEvent,
+    weekNumber: number
+  ) => {
+    e.stopPropagation();
     const token = await getAccessToken();
     const res = await fetch("/api/nft/collection", {
       method: "POST",
@@ -74,7 +99,12 @@ export default function AdminSessions() {
     fetchSessions();
   };
 
-  const handleStatusChange = async (id: string, status: string) => {
+  const handleStatusChange = async (
+    e: React.MouseEvent,
+    id: string,
+    status: string
+  ) => {
+    e.stopPropagation();
     const token = await getAccessToken();
     await fetch(`/api/sessions/${id}`, {
       method: "PATCH",
@@ -87,7 +117,8 @@ export default function AdminSessions() {
     fetchSessions();
   };
 
-  const handleFinalize = async (id: string) => {
+  const handleFinalize = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
     setFinalizing(id);
     try {
       const token = await getAccessToken();
@@ -97,7 +128,9 @@ export default function AdminSessions() {
       });
       if (res.ok) {
         const data = await res.json();
-        alert(`Finalized: ${data.matchupsFinalized} matchups, ${data.resultsUpdated} results updated`);
+        alert(
+          `Finalized: ${data.matchupsFinalized} matchups, ${data.resultsUpdated} results updated`
+        );
       } else {
         const data = await res.json();
         alert(data.error || "Failed to finalize");
@@ -138,7 +171,9 @@ export default function AdminSessions() {
           <input
             type="datetime-local"
             value={form.scheduledAt}
-            onChange={(e) => setForm({ ...form, scheduledAt: e.target.value })}
+            onChange={(e) =>
+              setForm({ ...form, scheduledAt: e.target.value })
+            }
             className="w-full bg-[#111] text-white text-sm rounded-lg px-3 py-2 outline-none focus:ring-1 focus:ring-[#F5E642]"
           />
           <button
@@ -154,7 +189,8 @@ export default function AdminSessions() {
         {sessions.map((session) => (
           <div
             key={session.id}
-            className="bg-[#1A1A1A] rounded-xl p-4 border border-[#2A2A2A]"
+            onClick={() => router.push(`/admin/sessions/${session.id}`)}
+            className="bg-[#1A1A1A] rounded-xl p-4 border border-[#2A2A2A] cursor-pointer hover:border-[#F5E642]/30 transition-colors"
           >
             <div className="flex items-start justify-between mb-2">
               <div>
@@ -185,13 +221,19 @@ export default function AdminSessions() {
             </div>
 
             <div className="flex items-center gap-2 text-xs text-[#888] mb-3">
-              <span>{session._count.matchups}/{process.env.NEXT_PUBLIC_ROUNDS_PER_SESSION} matchups</span>
+              <span>
+                {session._count.matchups}/
+                {process.env.NEXT_PUBLIC_ROUNDS_PER_SESSION} matchups
+              </span>
               <span>|</span>
               <span>{session._count.gameResults} participants</span>
               {session.collectionAddress && (
                 <>
                   <span>|</span>
-                  <span className="text-[#F5E642]" title={session.collectionAddress}>
+                  <span
+                    className="text-[#F5E642]"
+                    title={session.collectionAddress}
+                  >
                     NFT Collection
                   </span>
                 </>
@@ -203,20 +245,25 @@ export default function AdminSessions() {
                 <>
                   {!session.collectionAddress && (
                     <button
-                      onClick={() => handleCreateCollection(session.weekNumber)}
+                      onClick={(e) =>
+                        handleCreateCollection(e, session.weekNumber)
+                      }
                       className="flex-1 py-2 rounded-lg bg-purple-500/10 text-purple-400 text-xs font-medium flex items-center justify-center gap-1"
                     >
                       <Box className="w-3 h-3" /> Create Collection
                     </button>
                   )}
                   <button
-                    onClick={() => handleStatusChange(session.id, "live")}
+                    onClick={(e) =>
+                      handleStatusChange(e, session.id, "live")
+                    }
                     className="flex-1 py-2 rounded-lg bg-red-500/10 text-red-400 text-xs font-medium flex items-center justify-center gap-1"
                   >
                     <Radio className="w-3 h-3" /> Go Live
                   </button>
                   <Link
                     href={`/admin/sessions/${session.id}/matchups`}
+                    onClick={(e) => e.stopPropagation()}
                     className="flex-1 py-2 rounded-lg bg-[#2A2A2A] text-[#888] text-xs font-medium flex items-center justify-center"
                   >
                     Build Matchups
@@ -225,7 +272,9 @@ export default function AdminSessions() {
               )}
               {session.status === "live" && (
                 <button
-                  onClick={() => handleStatusChange(session.id, "ended")}
+                  onClick={(e) =>
+                    handleStatusChange(e, session.id, "ended")
+                  }
                   className="flex-1 py-2 rounded-lg bg-[#F5E642]/10 text-[#F5E642] text-xs font-medium"
                 >
                   End Session
@@ -233,12 +282,14 @@ export default function AdminSessions() {
               )}
               {session.status === "ended" && (
                 <button
-                  onClick={() => handleFinalize(session.id)}
+                  onClick={(e) => handleFinalize(e, session.id)}
                   disabled={finalizing === session.id}
                   className="flex-1 py-2 rounded-lg bg-green-500/10 text-green-400 text-xs font-medium flex items-center justify-center gap-1 disabled:opacity-50"
                 >
                   <CheckCircle className="w-3 h-3" />
-                  {finalizing === session.id ? "Finalizing..." : "Finalize Results"}
+                  {finalizing === session.id
+                    ? "Finalizing..."
+                    : "Finalize Results"}
                 </button>
               )}
             </div>
@@ -251,6 +302,29 @@ export default function AdminSessions() {
           </p>
         )}
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between mt-4">
+          <button
+            disabled={page <= 1}
+            onClick={() => setPage((p) => p - 1)}
+            className="flex items-center gap-1 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg px-3 py-1.5 text-xs text-white disabled:opacity-30 hover:border-[#F5E642]/30 transition-colors"
+          >
+            <ChevronLeft className="w-3.5 h-3.5" /> Previous
+          </button>
+          <span className="text-[#888] text-xs">
+            Page {page} of {totalPages}
+          </span>
+          <button
+            disabled={page >= totalPages}
+            onClick={() => setPage((p) => p + 1)}
+            className="flex items-center gap-1 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg px-3 py-1.5 text-xs text-white disabled:opacity-30 hover:border-[#F5E642]/30 transition-colors"
+          >
+            Next <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

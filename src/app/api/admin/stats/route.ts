@@ -10,15 +10,30 @@ export async function GET(req: NextRequest) {
 
   const type = req.nextUrl.searchParams.get("type");
 
-  // Return sessions list
+  // Return sessions list (paginated)
   if (type === "sessions") {
-    const sessions = await prisma.weeklySession.findMany({
-      include: {
-        _count: { select: { matchups: true, gameResults: true } },
-      },
-      orderBy: { weekNumber: "desc" },
+    const page = Math.max(1, parseInt(req.nextUrl.searchParams.get("page") ?? "1"));
+    const limit = Math.max(1, Math.min(100, parseInt(req.nextUrl.searchParams.get("limit") ?? "10")));
+
+    const [sessions, total] = await Promise.all([
+      prisma.weeklySession.findMany({
+        include: {
+          _count: { select: { matchups: true, gameResults: true } },
+        },
+        orderBy: { weekNumber: "desc" },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      prisma.weeklySession.count(),
+    ]);
+
+    return NextResponse.json({
+      sessions,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
     });
-    return NextResponse.json(sessions);
   }
 
   // Return results for most recent ended session
