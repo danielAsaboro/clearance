@@ -31,10 +31,6 @@ const serverSchema = z.object({
   // Campaign
   PLAYER_POOL_PERCENT: z.string().transform(Number),
 
-  // Integrations
-  DRIP_API_KEY: z.string(),
-  DRIP_API_URL: z.string(),
-  TORQUE_API_KEY: z.string(),
   // Optional flags
   SAMPLE_SESSION_ENABLED: z
     .string()

@@ -3,7 +3,6 @@ import { prisma } from "@/lib/db";
 import { getAuthUser } from "@/lib/auth-helpers";
 import { submitVoteSchema } from "@/lib/validators";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { trackAction } from "@/lib/torque";
 
 // POST /api/votes — Submit a vote on a matchup
 export async function POST(req: NextRequest) {
@@ -64,11 +63,6 @@ export async function POST(req: NextRequest) {
       deviceType,
     },
   });
-
-  // Fire-and-forget: track loyalty action via Torque
-  if (user.walletAddress) {
-    trackAction(user.walletAddress, "session_vote");
-  }
 
   // No real-time correctness — winner determined after session ends
   return NextResponse.json(vote, { status: 201 });

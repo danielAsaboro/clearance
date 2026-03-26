@@ -4,7 +4,6 @@ import { getAuthUser } from "@/lib/auth-helpers";
 import { canLateJoin, getCurrentRound } from "@/lib/session-engine";
 import { campaignConfig } from "@/lib/campaign-config";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { trackAction } from "@/lib/torque";
 import { executeFanDepositServerSide } from "@/lib/vault-claim";
 
 // POST /api/sessions/:id/join — Fan joins a session
@@ -127,9 +126,6 @@ export async function POST(
       where: { id: gameResult.id },
       data: { depositConfirmed: true, depositTxHash },
     });
-
-    // Fire-and-forget: track loyalty action via Torque
-    trackAction(user.walletAddress, "session_join");
   } catch (err) {
     console.error("[join] server-side deposit failed:", err);
     // Still allow user to play even if deposit fails

@@ -11,7 +11,6 @@ import { ArrowLeft, Eye, Gift, Link2, ExternalLink, Loader2 } from "lucide-react
 import Link from "next/link";
 import BlindBoxCard from "@/components/BlindBoxCard";
 import ConnectWallet from "@/components/ConnectWallet";
-import LoyaltyBadges from "@/components/LoyaltyBadges";
 import { useCluster, getPrivySolanaChain } from "@/components/cluster/cluster-data-access";
 import { clientEnv } from "@/lib/env";
 
@@ -299,9 +298,6 @@ export default function RewardsPage() {
         <ConnectWallet />
       </div>
 
-      {/* Loyalty Progress — Torque */}
-      <LoyaltyBadges />
-
       {loading ? (
         <div className="flex items-center justify-center py-20">
           <div className="w-8 h-8 border-2 border-[#F5E642] border-t-transparent rounded-full animate-spin" />
@@ -447,28 +443,6 @@ export default function RewardsPage() {
             </div>
           )}
 
-          {/* DRiP Collectibles Section */}
-          <div className="mt-8 bg-[#1A1A1A] rounded-2xl p-5 border border-[#2A2A2A]">
-            <div className="flex items-center gap-2 mb-3">
-              <Gift className="w-4 h-4 text-purple-400" />
-              <h3 className="text-white font-bold text-sm">DRiP Collectibles</h3>
-              <span className="ml-auto text-xs text-[#888] bg-[#2A2A2A] px-2 py-0.5 rounded-full">
-                Powered by DRiP
-              </span>
-            </div>
-            <p className="text-[#888] text-sm mb-3">
-              Participation collectibles are distributed as compressed NFTs after each session via DRiP.
-            </p>
-            <a
-              href="https://drip.haus"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 text-purple-400 text-sm hover:text-purple-300 transition-colors"
-            >
-              <ExternalLink className="w-3.5 h-3.5" />
-              View DRiP Channel
-            </a>
-          </div>
         </>
       )}
     </div>

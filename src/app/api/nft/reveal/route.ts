@@ -4,7 +4,6 @@ import { getAuthUser } from "@/lib/auth-helpers";
 import { getUmi, getMintAuthority } from "@/lib/solana";
 import { revealBlindBox } from "@/lib/nft";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { trackAction } from "@/lib/torque";
 import { fetchRaffleRecordOnChain } from "@/lib/vault-claim";
 
 // POST /api/nft/reveal — Reveal a Blind Box NFT
@@ -85,11 +84,6 @@ export async function POST(req: NextRequest) {
       where: { id: gameResultId },
       data: { nftRevealed: true, rewardAmount },
     });
-
-    // Fire-and-forget: track loyalty action via Torque
-    if (user.walletAddress) {
-      trackAction(user.walletAddress, "nft_reveal");
-    }
 
     return NextResponse.json({
       revealed: true,

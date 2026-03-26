@@ -29,11 +29,6 @@ process.env.RESEND_FROM_EMAIL = "Test <test@test.com>";
 // Campaign
 process.env.PLAYER_POOL_PERCENT = "0.84";
 
-// Integrations
-process.env.DRIP_API_KEY = "test-drip-key";
-process.env.DRIP_API_URL = "https://api.drip.re/v1";
-process.env.TORQUE_API_KEY = "test-torque-key";
-
 // NEXT_PUBLIC_*
 process.env.NEXT_PUBLIC_SOLANA_RPC_URL = "https://api.devnet.solana.com";
 process.env.NEXT_PUBLIC_APP_URL = "http://localhost:3000";

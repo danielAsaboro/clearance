@@ -63,7 +63,7 @@ import {
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
-const CLUSTER = process.env.CLUSTER
+const CLUSTER = process.env.CLUSTER!
 if (!CLUSTER) throw new Error('Missing env: CLUSTER')
 const IS_DEVNET  = CLUSTER === 'devnet'
 

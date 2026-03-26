@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { usePrivy } from "@privy-io/react-auth";
-import { Trophy, Star, Award, Package, Send } from "lucide-react";
+import { Trophy, Star, Award, Package } from "lucide-react";
 import { clientEnv } from "@/lib/env";
 
 interface ResultEntry {
@@ -34,8 +34,6 @@ export default function AdminResults() {
   const [data, setData] = useState<ResultSummary | null>(null);
   const [minting, setMinting] = useState(false);
   const [mintProgress, setMintProgress] = useState({ done: 0, total: 0, errors: 0 });
-  const [distributing, setDistributing] = useState(false);
-  const [dripStatus, setDripStatus] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -86,35 +84,6 @@ export default function AdminResults() {
 
     setData({ ...data });
     setMinting(false);
-  };
-
-  const handleDripDistribute = async () => {
-    if (!data?.sessionId) return;
-    setDistributing(true);
-    setDripStatus(null);
-
-    try {
-      const token = await getAccessToken();
-      const res = await fetch("/api/admin/drip/distribute", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ sessionId: data.sessionId }),
-      });
-
-      const result = await res.json();
-      setDripStatus(
-        res.ok
-          ? `Distributed to ${result.totalParticipants} participants (${result.status})`
-          : `Failed: ${result.error}`
-      );
-    } catch {
-      setDripStatus("Network error");
-    } finally {
-      setDistributing(false);
-    }
   };
 
   if (!data) {
@@ -178,26 +147,11 @@ export default function AdminResults() {
               ? `Mint NFTs (${unmintedCount} eligible)`
               : "All NFTs Minted"}
         </button>
-
-        <button
-          onClick={handleDripDistribute}
-          disabled={distributing}
-          className="flex-1 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl py-3 text-sm font-bold text-white flex items-center justify-center gap-2 disabled:opacity-40"
-        >
-          <Send className="w-4 h-4" />
-          {distributing ? "Sending..." : "DRiP Participation"}
-        </button>
       </div>
 
       {mintProgress.errors > 0 && (
         <p className="text-red-400 text-xs mb-3">
           {mintProgress.errors} mint(s) failed. Check console for details.
-        </p>
-      )}
-
-      {dripStatus && (
-        <p className={`text-xs mb-3 ${dripStatus.startsWith("Failed") ? "text-red-400" : "text-green-400"}`}>
-          {dripStatus}
         </p>
       )}
 
