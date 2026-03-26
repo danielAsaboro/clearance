@@ -146,21 +146,21 @@ export default function AdminResults() {
           <p className="text-white font-bold text-lg">
             {data.tierDistribution.participation}
           </p>
-          <p className="text-[#888] text-[10px]">Participation</p>
+          <p className="text-[#888] text-[10px]">Rookie</p>
         </div>
         <div className="bg-[#1A1A1A] rounded-xl p-3 text-center border border-[#F5E642]/20">
           <Star className="w-5 h-5 text-[#F5E642] mx-auto mb-1" />
           <p className="text-white font-bold text-lg">
             {data.tierDistribution.base}
           </p>
-          <p className="text-[#888] text-[10px]">Base (${clientEnv.BASE_REWARD_USDC})</p>
+          <p className="text-[#888] text-[10px]">Rising</p>
         </div>
         <div className="bg-[#1A1A1A] rounded-xl p-3 text-center border border-yellow-400/20">
           <Trophy className="w-5 h-5 text-yellow-400 mx-auto mb-1" />
           <p className="text-white font-bold text-lg">
             {data.tierDistribution.gold}
           </p>
-          <p className="text-[#888] text-[10px]">Gold (${clientEnv.ENTRY_FEE_USDC})</p>
+          <p className="text-[#888] text-[10px]">Elite</p>
         </div>
       </div>
 
@@ -230,7 +230,7 @@ export default function AdminResults() {
                       : "text-[#888]"
                 }`}
               >
-                {r.tier}
+                {r.tier === "gold" ? "Elite" : r.tier === "base" ? "Rising" : "Rookie"}
               </p>
               {r.rewardAmount > 0 && (
                 <p className="text-[#F5E642] text-xs">

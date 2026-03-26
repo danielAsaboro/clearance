@@ -29,7 +29,7 @@ const serverSchema = z.object({
   RESEND_FROM_EMAIL: z.string(),
 
   // Campaign
-  GOLD_REWARD_USDC: z.string().transform(Number),
+  PLAYER_POOL_PERCENT: z.string().transform(Number),
 
   // Integrations
   DRIP_API_KEY: z.string(),
@@ -52,7 +52,6 @@ const serverSchema = z.object({
   NEXT_PUBLIC_ROUNDS_PER_SESSION: z.string().transform(Number),
   NEXT_PUBLIC_VOTING_ROUND_DURATION_IN_SECONDS: z.string().transform(Number),
   NEXT_PUBLIC_ENTRY_FEE_USDC: z.string().transform(Number),
-  NEXT_PUBLIC_BASE_REWARD_USDC: z.string().transform(Number),
   NEXT_PUBLIC_TRIBE_TASTE_SCORE: z.string().transform(Number),
   NEXT_PUBLIC_SOLANA_NETWORK: z.string(),
   NEXT_PUBLIC_SOLANA_CLUSTER: z.string(),
@@ -97,7 +96,6 @@ export const clientEnv = {
     process.env.NEXT_PUBLIC_VOTING_ROUND_DURATION_IN_SECONDS!
   ),
   ENTRY_FEE_USDC: Number(process.env.NEXT_PUBLIC_ENTRY_FEE_USDC!),
-  BASE_REWARD_USDC: Number(process.env.NEXT_PUBLIC_BASE_REWARD_USDC!),
   TRIBE_TASTE_SCORE: Number(process.env.NEXT_PUBLIC_TRIBE_TASTE_SCORE!),
   SOLANA_NETWORK: process.env.NEXT_PUBLIC_SOLANA_NETWORK!,
   SOLANA_CLUSTER: process.env.NEXT_PUBLIC_SOLANA_CLUSTER!,

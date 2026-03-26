@@ -30,7 +30,7 @@ import { prisma } from "../src/lib/db";
 import { getStorageAssetPath } from "../src/lib/storage-url";
 
 const s3 = new S3Client({
-  region: process.env.S3_REGION ?? "auto",
+  region: process.env.S3_REGION!,
   endpoint: process.env.S3_ENDPOINT,
   credentials: {
     accessKeyId: process.env.S3_ACCESS_KEY_ID!,

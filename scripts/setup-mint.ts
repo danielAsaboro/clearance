@@ -28,8 +28,8 @@ import {
   mintTo,
 } from '@solana/spl-token'
 
-const RPC_URL =
-  process.env.NEXT_PUBLIC_SOLANA_RPC_URL ?? 'https://api.devnet.solana.com'
+const RPC_URL = process.env.NEXT_PUBLIC_SOLANA_RPC_URL
+if (!RPC_URL) throw new Error('Missing env: NEXT_PUBLIC_SOLANA_RPC_URL')
 
 const INITIAL_SUPPLY = 1_000_000 // 1 M tokens (6 decimals → 1_000_000_000_000 raw)
 const DECIMALS = 6

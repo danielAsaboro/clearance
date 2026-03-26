@@ -89,7 +89,7 @@ export default function BlindBoxCard({
           <Gift className={`w-16 h-16 ${colors.text} mb-4`} />
           <p className="text-white font-bold text-lg mb-1">Blind Box</p>
           <p className={`${colors.text} text-sm font-medium mb-6`}>
-            {tier === "gold" ? "Gold Tier" : "Base Tier"}
+            {tier === "gold" ? "Elite Tier" : "Rising Tier"}
           </p>
 
           {/* Internal reveal button hidden — rewards page controls reveal flow via raffle */}
@@ -107,7 +107,7 @@ export default function BlindBoxCard({
           </p>
           <p className="text-[#888] text-sm">USDC Reward</p>
           <p className={`${colors.text} text-xs mt-2 uppercase tracking-wider mb-4`}>
-            {tier === "gold" ? "Gold Tier" : "Base Tier"}
+            {tier === "gold" ? "Elite Tier" : "Rising Tier"}
           </p>
 
           {rewardAmount > 0 && (

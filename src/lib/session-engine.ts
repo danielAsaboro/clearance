@@ -69,6 +69,20 @@ export function calculateTier(
 }
 
 /**
+ * Pool-based reward: (userTasteScore / totalTasteScores) * playerPoolPercent * totalDeposits.
+ * Returns 0 if totalTasteScores is 0 (no one scored anything).
+ */
+export function calculatePoolReward(
+  userTasteScore: number,
+  totalTasteScores: number,
+  totalDeposits: number,
+  playerPoolPercent: number
+): number {
+  if (totalTasteScores <= 0) return 0;
+  return (userTasteScore / totalTasteScores) * playerPoolPercent * totalDeposits;
+}
+
+/**
  * Calculate majority winners for all matchups in a session.
  * Counts video_a vs video_b votes per matchup.
  * video_a wins ties.

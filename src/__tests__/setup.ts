@@ -27,7 +27,7 @@ process.env.RESEND_API_KEY = "test-resend-key";
 process.env.RESEND_FROM_EMAIL = "Test <test@test.com>";
 
 // Campaign
-process.env.GOLD_REWARD_USDC = "5.00";
+process.env.PLAYER_POOL_PERCENT = "0.84";
 
 // Integrations
 process.env.DRIP_API_KEY = "test-drip-key";
@@ -41,7 +41,6 @@ process.env.NEXT_PUBLIC_PRIVY_APP_ID = "test-app-id";
 process.env.NEXT_PUBLIC_ROUNDS_PER_SESSION = "5";
 process.env.NEXT_PUBLIC_VOTING_ROUND_DURATION_IN_SECONDS = "30";
 process.env.NEXT_PUBLIC_ENTRY_FEE_USDC = "1.00";
-process.env.NEXT_PUBLIC_BASE_REWARD_USDC = "1.75";
 process.env.NEXT_PUBLIC_TRIBE_TASTE_SCORE = "70";
 process.env.NEXT_PUBLIC_SOLANA_NETWORK = "devnet";
 process.env.NEXT_PUBLIC_SOLANA_CLUSTER = "devnet";

@@ -15,7 +15,6 @@
     "db:push": "npx prisma db push --schema prisma/schema.prisma",
     "db:reset": "npx prisma db push --force-reset --schema prisma/schema.prisma",
     "setup-mint": "npx tsx --env-file=.env.local scripts/setup-mint.ts",
-    "setup-demo": "npx tsx --env-file=.env.local scripts/setup-demo.ts",
     "smoke:devnet": "CLUSTER=devnet npx tsx --env-file=.env.local scripts/devnet-raffle-smoke.ts",
     "smoke:localnet": "CLUSTER=localnet npx tsx --env-file=.env.local scripts/devnet-raffle-smoke.ts",
     "format": "prettier --write .",

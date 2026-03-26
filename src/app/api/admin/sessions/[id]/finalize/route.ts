@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAuthUser } from "@/lib/auth-helpers";
-import { calculateMajorityWinners, calculateTier } from "@/lib/session-engine";
+import { calculateMajorityWinners, calculateTier, calculatePoolReward } from "@/lib/session-engine";
 import { campaignConfig } from "@/lib/campaign-config";
 import { updateVideoStatsForSession } from "@/lib/video-stats";
 
@@ -73,8 +73,10 @@ export async function POST(
 
   const totalMatchups = session.matchups.length;
 
+  // First pass: calculate correctVotes for every player
+  const playerScores: { resultId: string; totalVotes: number; correctVotes: number; tier: "participation" | "base" | "gold" }[] = [];
+
   for (const result of gameResults) {
-    // Count correct votes for this player
     const votes = await prisma.vote.findMany({
       where: {
         userId: result.userId,
@@ -93,14 +95,24 @@ export async function POST(
     }).length;
 
     const { tier } = calculateTier(correctVotes, totalMatchups);
+    playerScores.push({ resultId: result.id, totalVotes: votes.length, correctVotes, tier });
+  }
 
+  // Pool-based rewards: (userScore / totalScores) * 84% of total deposits
+  const depositCount = gameResults.filter((r) => r.depositConfirmed).length;
+  const totalDeposits = depositCount * campaignConfig.entryFeeUsdc;
+  const totalTasteScores = playerScores.reduce((sum, p) => sum + p.correctVotes, 0);
+
+  // Second pass: persist scores and pool-based reward amounts
+  for (const player of playerScores) {
+    const rewardAmount = calculatePoolReward(player.correctVotes, totalTasteScores, totalDeposits, campaignConfig.playerPoolPercent);
     await prisma.gameResult.update({
-      where: { id: result.id },
+      where: { id: player.resultId },
       data: {
-        totalVotes: votes.length,
-        correctVotes,
-        tier,
-        rewardAmount: tier === "gold" ? campaignConfig.goldRewardUsdc : tier === "base" ? campaignConfig.baseRewardUsdc : 0,
+        totalVotes: player.totalVotes,
+        correctVotes: player.correctVotes,
+        tier: player.tier,
+        rewardAmount: Math.round(rewardAmount * 100) / 100,
       },
     });
   }

@@ -63,13 +63,19 @@ import {
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
-const CLUSTER    = process.env.CLUSTER ?? 'devnet'
+const CLUSTER = process.env.CLUSTER
+if (!CLUSTER) throw new Error('Missing env: CLUSTER')
 const IS_DEVNET  = CLUSTER === 'devnet'
-const RPC_URL    = IS_DEVNET
-  ? (process.env.DEVNET_RPC_URL ?? process.env.NEXT_PUBLIC_SOLANA_RPC_URL ?? 'https://api.devnet.solana.com')
-  : (process.env.LOCALNET_RPC_URL ?? 'http://localhost:8899')
 
-const NUM_FANS       = parseInt(process.env.NUM_FANS ?? '10', 10)
+const RPC_URL_RAW = IS_DEVNET
+  ? (process.env.DEVNET_RPC_URL ?? process.env.NEXT_PUBLIC_SOLANA_RPC_URL)
+  : process.env.LOCALNET_RPC_URL
+if (!RPC_URL_RAW) throw new Error(`Missing env: ${IS_DEVNET ? 'DEVNET_RPC_URL or NEXT_PUBLIC_SOLANA_RPC_URL' : 'LOCALNET_RPC_URL'}`)
+const RPC_URL = RPC_URL_RAW
+
+const NUM_FANS_RAW = process.env.NUM_FANS
+if (!NUM_FANS_RAW) throw new Error('Missing env: NUM_FANS')
+const NUM_FANS = parseInt(NUM_FANS_RAW, 10)
 const SESSION_ID     = Math.floor(Date.now() / 1000)
 const VAULT_DEPOSIT  = NUM_FANS * 20        // generous pool
 const FAN_MINT       = 10                   // tokens given to each fan

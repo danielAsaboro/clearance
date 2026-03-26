@@ -160,7 +160,7 @@ function generatePlayersCSV(players: PlayerData[], sessionTitle: string) {
       p.totalVotes,
       p.correctVotes,
       p.accuracy,
-      p.tier ?? "—",
+      p.tier === "gold" ? "Elite" : p.tier === "base" ? "Rising" : p.tier === "participation" ? "Rookie" : "—",
       p.rewardAmount.toFixed(2),
       p.nftMinted ? "Yes" : "No",
       p.nftRevealed ? "Yes" : "No",
@@ -422,21 +422,21 @@ export default function SessionDetail({
               Tier Distribution
             </h3>
             <TierBar
-              label="Gold"
+              label="Elite"
               count={overview.tierDistribution.gold}
               total={overview.totalParticipants}
               color="bg-yellow-400"
               textColor="text-yellow-400"
             />
             <TierBar
-              label="Base"
+              label="Rising"
               count={overview.tierDistribution.base}
               total={overview.totalParticipants}
               color="bg-blue-400"
               textColor="text-blue-400"
             />
             <TierBar
-              label="Participation"
+              label="Rookie"
               count={overview.tierDistribution.participation}
               total={overview.totalParticipants}
               color="bg-[#555]"
@@ -597,7 +597,7 @@ export default function SessionDetail({
                               : "text-[#888] bg-[#888]/10"
                         }`}
                       >
-                        {p.tier ?? "—"}
+                        {p.tier === "gold" ? "Elite" : p.tier === "base" ? "Rising" : p.tier === "participation" ? "Rookie" : "—"}
                       </span>
                     </TableCell>
                     <TableCell className="text-[#F5E642] text-xs">

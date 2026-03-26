@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { nanoid } from "nanoid";
 import { prisma } from "@/lib/db";
 import { getAuthUser } from "@/lib/auth-helpers";
-import { calculateTier, calculateMajorityWinners } from "@/lib/session-engine";
+import { calculateTier, calculateMajorityWinners, calculatePoolReward } from "@/lib/session-engine";
 import { campaignConfig } from "@/lib/campaign-config";
 
 // GET /api/sessions/:id/results — Get user's results for a session
@@ -89,13 +89,28 @@ export async function GET(
 
     const { tier } = calculateTier(correctVotes, matchups.length);
 
+    // Pool-based reward: (userTasteScore / totalTasteScores) * 84% of total deposits
+    const [depositCount, allScores] = await Promise.all([
+      prisma.gameResult.count({
+        where: { sessionId: id, depositConfirmed: true },
+      }),
+      prisma.gameResult.aggregate({
+        where: { sessionId: id },
+        _sum: { correctVotes: true },
+      }),
+    ]);
+
+    const totalDeposits = depositCount * campaignConfig.entryFeeUsdc;
+    const totalTasteScores = allScores._sum.correctVotes ?? 0;
+    const rewardAmount = calculatePoolReward(correctVotes, totalTasteScores, totalDeposits, campaignConfig.playerPoolPercent);
+
     gameResult = await prisma.gameResult.update({
       where: { id: gameResult.id },
       data: {
         totalVotes: userVotes.length,
         correctVotes,
         tier,
-        rewardAmount: tier === "gold" ? campaignConfig.goldRewardUsdc : tier === "base" ? campaignConfig.baseRewardUsdc : 0,
+        rewardAmount: Math.round(rewardAmount * 100) / 100,
       },
     });
   }

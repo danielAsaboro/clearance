@@ -9,7 +9,7 @@ const eventSchema = z.object({
   events: z
     .array(
       z.object({
-        type: z.enum(["video_impression", "page_view"]),
+        type: z.enum(["video_impression", "page_view", "vote_cast"]),
         videoId: z.string().optional(),
         sessionId: z.string().optional(),
         matchupId: z.string().optional(),

@@ -5,8 +5,6 @@ export const CAMPAIGN = {
   matchupsPerSession: 28,
   votingRoundDurationSeconds: 30,
   entryFeeUsdc: 10,
-  goldRewardUsdc: 3.5,
-  baseRewardUsdc: 1.75,
 } as const;
 
 // Tier thresholds
@@ -25,9 +23,9 @@ export const COLORS = {
   white: "#FFFFFF",
   red: "#EF4444",
   green: "#22C55E",
-  tierGold: "#F5E642",
-  tierBase: "#C0C0C0",
-  tierParticipation: "#CD7F32",
+  tierElite: "#F5E642",
+  tierRising: "#C0C0C0",
+  tierRookie: "#CD7F32",
 } as const;
 
 // Categories for onboarding

@@ -84,18 +84,18 @@ function TierBadge({ tier }: { tier: string | null }) {
   if (tier === "gold")
     return (
       <span className="rounded-full bg-[#F5E642]/10 px-2 py-0.5 text-[10px] font-bold text-[#F5E642]">
-        GOLD
+        ELITE
       </span>
     );
   if (tier === "base")
     return (
       <span className="rounded-full bg-[#888]/10 px-2 py-0.5 text-[10px] font-bold text-[#ccc]">
-        BASE
+        RISING
       </span>
     );
   return (
     <span className="rounded-full bg-[#333]/30 px-2 py-0.5 text-[10px] text-[#888]">
-      PARTICIPATION
+      ROOKIE
     </span>
   );
 }

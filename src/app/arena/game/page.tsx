@@ -3,10 +3,11 @@
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { usePrivy } from "@privy-io/react-auth";
-import { AlertCircle, User } from "lucide-react";
+import { AlertCircle, Check, Share2, User } from "lucide-react";
 import Link from "next/link";
 import MatchupPicker from "@/components/MatchupPicker";
 import ProgressBar from "@/components/ProgressBar";
+import CircularProgress from "@/components/CircularProgress";
 import { clientEnv } from "@/lib/env";
 
 interface MatchupVideo {
@@ -41,7 +42,13 @@ interface RoundResults {
   correctCount: number;
 }
 
-type GamePhase = "joining" | "playing" | "insufficient";
+interface AlreadyPlayedData {
+  correctVotes: number;
+  totalRounds: number;
+  tasteScore: number;
+}
+
+type GamePhase = "joining" | "playing" | "insufficient" | "already-played";
 
 const ENTRY_FEE = clientEnv.ENTRY_FEE_USDC;
 
@@ -75,6 +82,101 @@ function InsufficientBalanceScreen() {
         <Link href="/arena" className="text-[14px] text-[#666]">
           Back to Arena
         </Link>
+      </div>
+    </div>
+  );
+}
+
+function AlreadyPlayedScreen({
+  sessionId,
+  data,
+  referralCode,
+}: {
+  sessionId: string;
+  data: AlreadyPlayedData;
+  referralCode: string | null;
+}) {
+  const [linkCopied, setLinkCopied] = useState(false);
+  const { login, authenticated } = usePrivy();
+
+  const nftThreshold = clientEnv.TRIBE_TASTE_SCORE;
+  const scorePct = Math.min(100, (data.tasteScore / nftThreshold) * 100);
+
+  return (
+    <div className="spotr-page flex flex-1 flex-col">
+      <div className="spotr-mobile-shell flex min-h-dvh flex-col items-center px-5 pb-8 pt-10">
+        <p className="mb-2 text-[13px] font-semibold uppercase tracking-[0.08em] text-[#d4b83a]">
+          Already Played
+        </p>
+        <p className="mb-8 text-center text-[14px] leading-5 text-[#8b8b8b]">
+          You&apos;ve already played this session. Here&apos;s how you did:
+        </p>
+
+        <CircularProgress
+          value={data.correctVotes}
+          max={data.totalRounds}
+          size={130}
+          label="Correct Predictions"
+        />
+
+        <div className="mt-8 w-full rounded-[18px] bg-[#f5d63d] px-5 py-5 text-black">
+          <p className="text-center text-[11px] font-semibold uppercase tracking-[0.08em] text-black/55">
+            Your Taste Score
+          </p>
+          <p className="mt-2 text-center text-[72px] font-semibold leading-none tracking-[-0.08em]">
+            {data.tasteScore}
+          </p>
+          <p className="mt-3 text-[13px] text-black/68">
+            {data.tasteScore} / {nftThreshold} to NFT Whitelist
+          </p>
+          <div className="mt-2 h-[7px] overflow-hidden rounded-full bg-[#c3ac31]/42">
+            <div className="h-full rounded-full bg-[#c1ab38]" style={{ width: `${scorePct}%` }} />
+          </div>
+          <p className="mt-3 text-center text-[12px] leading-4 text-black/60">
+            Invite others to play and boost your tribe score together.
+          </p>
+        </div>
+
+        <div className="mt-auto flex w-full flex-col gap-4 pt-8">
+          {referralCode ? (
+            <button
+              onClick={() => {
+                const origin = typeof window !== "undefined" ? window.location.origin : "https://spotr.tv";
+                const referralUrl = `${origin}/ref/${referralCode}?session=${sessionId}`;
+                navigator.clipboard.writeText(referralUrl);
+                setLinkCopied(true);
+                setTimeout(() => setLinkCopied(false), 2000);
+              }}
+              className="spotr-primary-button flex w-full items-center justify-center gap-2"
+            >
+              {linkCopied ? (
+                <>
+                  <Check className="h-4 w-4" />
+                  Copied!
+                </>
+              ) : (
+                <>
+                  <Share2 className="h-4 w-4" />
+                  Invite Friends to Play
+                </>
+              )}
+            </button>
+          ) : (
+            <button
+              onClick={() => login()}
+              className="spotr-primary-button flex w-full items-center justify-center gap-2"
+            >
+              <Share2 className="h-4 w-4" />
+              Sign In to Get Referral Link
+            </button>
+          )}
+
+          <Link href="/arena" className="block w-full">
+            <button className="spotr-secondary-button flex w-full items-center justify-center gap-2">
+              Back to Arena
+            </button>
+          </Link>
+        </div>
       </div>
     </div>
   );
@@ -234,6 +336,8 @@ function GameContent() {
   const [displayedRound, setDisplayedRound] = useState(1);
   const [guestName, setGuestName] = useState<string | null>(null);
   const [asyncReplay, setAsyncReplay] = useState(false);
+  const [alreadyPlayedData, setAlreadyPlayedData] = useState<AlreadyPlayedData | null>(null);
+  const [referralCode, setReferralCode] = useState<string | null>(null);
 
   const prevStatusRef = useRef<string>("");
   const completedRoundRef = useRef(0);
@@ -309,6 +413,34 @@ function GameContent() {
 
         if (res.ok || res.status === 201) {
           const data = await res.json();
+
+          // If user already played this session, show their score instead
+          if (data.alreadyJoined) {
+            // Fetch their results and referral code in parallel
+            const [resultsRes, referralRes] = await Promise.all([
+              fetch(`/api/sessions/${sessionId}/results`, { headers }),
+              authenticated
+                ? fetch("/api/referrals", { headers })
+                : Promise.resolve(null),
+            ]);
+
+            if (resultsRes.ok) {
+              const resultsData = await resultsRes.json();
+              setAlreadyPlayedData({
+                correctVotes: resultsData.correctVotes ?? 0,
+                totalRounds: resultsData.totalRounds ?? resultsData.totalVotes ?? 0,
+                tasteScore: resultsData.tasteScore ?? resultsData.correctVotes ?? 0,
+              });
+            }
+
+            if (referralRes?.ok) {
+              const refData = await referralRes.json();
+              setReferralCode(refData.code ?? null);
+            }
+
+            setPhase("already-played");
+            return;
+          }
 
           // Guest users: set display name
           if (data.isGuest && data.displayName) {
@@ -406,6 +538,27 @@ function GameContent() {
       completedRoundRef.current = round;
       setDisplayedRound(round);
 
+      // Track final vote choice for this round (after round closes, so switching is settled)
+      const completedMatchup = matchups[round - 1];
+      if (voted && completedMatchup && sessionId) {
+        const chosenVideoId = voted === "video_a" ? completedMatchup.videoA.id : completedMatchup.videoB.id;
+        fetch("/api/analytics/events", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            events: [
+              {
+                type: "vote_cast",
+                videoId: chosenVideoId,
+                sessionId,
+                matchupId: completedMatchup.id,
+                metadata: { decision: voted, round },
+              },
+            ],
+          }),
+        }).catch(() => {});
+      }
+
       fetchRoundResults(round).then((result) => {
         if (!result) return;
         setCorrectCount(result.correctCount);
@@ -457,6 +610,7 @@ function GameContent() {
           timeToVoteMs,
         }),
       });
+
     } catch {
       // silent failure for live voting
     }
@@ -484,6 +638,16 @@ function GameContent() {
 
   if (phase === "insufficient") {
     return <InsufficientBalanceScreen />;
+  }
+
+  if (phase === "already-played" && alreadyPlayedData && sessionId) {
+    return (
+      <AlreadyPlayedScreen
+        sessionId={sessionId}
+        data={alreadyPlayedData}
+        referralCode={referralCode}
+      />
+    );
   }
 
   if (phase === "joining" || loading) {
