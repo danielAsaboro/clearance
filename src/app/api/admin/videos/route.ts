@@ -24,6 +24,8 @@ export async function GET(req: NextRequest) {
   const tag = req.nextUrl.searchParams.get("tag")?.trim().toLowerCase() ?? "";
   const status = req.nextUrl.searchParams.get("status")?.trim() ?? "";
   const readyOnly = req.nextUrl.searchParams.get("readyOnly") === "true";
+  const page = Math.max(1, parseInt(req.nextUrl.searchParams.get("page") ?? "1"));
+  const limit = Math.min(Math.max(1, parseInt(req.nextUrl.searchParams.get("limit") ?? "20")), 100);
 
   const where: Prisma.VideoWhereInput = {};
 
@@ -49,20 +51,25 @@ export async function GET(req: NextRequest) {
     ];
   }
 
-  const videos = await prisma.video.findMany({
-    where,
-    orderBy: { createdAt: "desc" },
-    include: {
-      category: true,
-      uploadedBy: { select: { displayName: true } },
-      _count: {
-        select: {
-          matchupsAsA: true,
-          matchupsAsB: true,
+  const [videos, total] = await Promise.all([
+    prisma.video.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip: (page - 1) * limit,
+      take: limit,
+      include: {
+        category: true,
+        uploadedBy: { select: { displayName: true } },
+        _count: {
+          select: {
+            matchupsAsA: true,
+            matchupsAsB: true,
+          },
         },
       },
-    },
-  });
+    }),
+    prisma.video.count({ where }),
+  ]);
 
   const normalized = videos.map((video) => ({
     ...resolveVideoAssetUrls(video, req.nextUrl.origin),
@@ -85,7 +92,12 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  return NextResponse.json(normalized);
+  return NextResponse.json({
+    videos: normalized,
+    total,
+    page,
+    totalPages: Math.ceil(total / limit),
+  });
 }
 
 export async function POST(req: NextRequest) {

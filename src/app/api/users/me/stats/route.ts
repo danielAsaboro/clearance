@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAuthUser } from "@/lib/auth-helpers";
+import { campaignConfig } from "@/lib/campaign-config";
 
 // GET /api/users/me/stats — Personal performance stats
 export async function GET(req: NextRequest) {
@@ -12,7 +13,14 @@ export async function GET(req: NextRequest) {
   const results = await prisma.gameResult.findMany({
     where: { userId: user.id },
     include: {
-      session: { select: { title: true, weekNumber: true, scheduledAt: true } },
+      session: {
+        select: {
+          title: true,
+          weekNumber: true,
+          scheduledAt: true,
+          _count: { select: { matchups: true } },
+        },
+      },
     },
     orderBy: { session: { scheduledAt: "desc" } },
   });
@@ -38,10 +46,19 @@ export async function GET(req: NextRequest) {
 
   const totalVotes = results.reduce((s, r) => s + r.totalVotes, 0);
   const correctVotes = results.reduce((s, r) => s + r.correctVotes, 0);
-  const totalEarnings = results.reduce((s, r) => s + r.rewardAmount, 0);
+
+  // Earnings formula: (entryFee / totalRounds) * correctVotes per session
+  const entryFee = campaignConfig.entryFeeUsdc;
+  function sessionEarnings(r: { correctVotes: number; session: { _count: { matchups: number } } }) {
+    const rounds = r.session._count.matchups;
+    if (rounds === 0) return 0;
+    return (entryFee / rounds) * r.correctVotes;
+  }
+
+  const totalEarnings = results.reduce((s, r) => s + sessionEarnings(r), 0);
   const totalClaimed = results
     .filter((r) => r.usdcClaimed)
-    .reduce((s, r) => s + r.rewardAmount, 0);
+    .reduce((s, r) => s + sessionEarnings(r), 0);
   const nftsMinted = results.filter((r) => r.nftMinted).length;
 
   // Tier distribution
@@ -69,7 +86,7 @@ export async function GET(req: NextRequest) {
 
   // Recent trend (last 10 sessions)
   const recentTrend = results.slice(0, 10).map((r) => {
-    const matchupsForAccuracy = r.totalVotes || 1;
+    const rounds = r.session._count.matchups || 1;
     return {
       sessionId: r.sessionId,
       sessionTitle: r.session.title,
@@ -77,9 +94,9 @@ export async function GET(req: NextRequest) {
       scheduledAt: r.session.scheduledAt,
       correctVotes: r.correctVotes,
       totalVotes: r.totalVotes,
-      accuracy: Math.round((r.correctVotes / matchupsForAccuracy) * 1000) / 10,
+      accuracy: Math.round((r.correctVotes / rounds) * 1000) / 10,
       tier: r.tier,
-      earnings: r.rewardAmount,
+      earnings: Math.round(sessionEarnings(r) * 100) / 100,
       nftMinted: r.nftMinted,
       usdcClaimed: r.usdcClaimed,
     };

@@ -1,103 +1,100 @@
-"use client";
+'use client'
 
-import { Suspense, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { Check, Copy, Send } from "lucide-react";
-import { usePrivy } from "@privy-io/react-auth";
-import PageHeader from "@/components/PageHeader";
-import ShareQR from "@/components/ShareQR";
-import SpotrIcon from "@/components/SpotrIcon";
+import { Suspense, useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { Check, Copy, Send } from 'lucide-react'
+import { usePrivy } from '@privy-io/react-auth'
+import PageHeader from '@/components/PageHeader'
+import ShareQR from '@/components/ShareQR'
+import SpotrIcon from '@/components/SpotrIcon'
 
 function BlinkContent() {
-  const searchParams = useSearchParams();
-  const sessionId = searchParams.get("session");
-  const score = searchParams.get("score");
-  const total = searchParams.get("total");
+  const searchParams = useSearchParams()
+  const sessionId = searchParams.get('session')
+  const score = searchParams.get('score')
+  const total = searchParams.get('total')
 
-  const { getAccessToken, authenticated } = usePrivy();
-  const [blinkCode, setBlinkCode] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
-  const [tribeScore, setTribeScore] = useState<number | null>(null);
+  const { getAccessToken, authenticated } = usePrivy()
+  const [blinkCode, setBlinkCode] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
+  const [tribeScore, setTribeScore] = useState<number | null>(null)
 
   useEffect(() => {
-    if (!authenticated) return;
+    if (!authenticated) return
 
-    (async () => {
+    ;(async () => {
       try {
-        const token = await getAccessToken();
-        const res = await fetch("/api/referrals", {
+        const token = await getAccessToken()
+        const res = await fetch('/api/referrals', {
           headers: { Authorization: `Bearer ${token}` },
-        });
+        })
 
         if (res.ok) {
-          const data = await res.json();
-          setBlinkCode(data.code ?? null);
-          setTribeScore(data.tribeScore ?? 0);
+          const data = await res.json()
+          setBlinkCode(data.code ?? null)
+          setTribeScore(data.tribeScore ?? 0)
         }
       } catch {
         // ignore
       }
-    })();
-  }, [authenticated, getAccessToken]);
+    })()
+  }, [authenticated, getAccessToken])
 
-  const origin = typeof window !== "undefined" ? window.location.origin : "https://spotr.tv";
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://spotr.tv'
 
   const actionUrl = blinkCode
     ? `${origin}/api/actions/join${sessionId ? `?session=${sessionId}&ref=${blinkCode}` : `?ref=${blinkCode}`}`
-    : "";
+    : ''
 
-  const fullUrl = blinkCode
-    ? `https://dial.to/?action=solana-action:${encodeURIComponent(actionUrl)}`
-    : "";
+  const fullUrl = blinkCode ? `https://dial.to/?action=solana-action:${encodeURIComponent(actionUrl)}` : ''
 
   const blinkDisplay = blinkCode
     ? `dial.to/?action=solana-action:${encodeURIComponent(actionUrl).slice(0, 18)}...`
-    : "dial.to/...";
+    : 'dial.to/...'
 
   const truncateUrl = (url: string) => {
-    const start = 22;
-    const end = 7;
-    if (url.length <= start + end + 3) return url;
-    return `${url.slice(0, start)}...${url.slice(-end)}`;
-  };
+    const start = 22
+    const end = 7
+    if (url.length <= start + end + 3) return url
+    return `${url.slice(0, start)}...${url.slice(-end)}`
+  }
 
   const handleCopy = async () => {
-    if (!fullUrl) return;
+    if (!fullUrl) return
     try {
-      await navigator.clipboard.writeText(fullUrl);
+      await navigator.clipboard.writeText(fullUrl)
     } catch {
-      const ta = document.createElement("textarea");
-      ta.value = fullUrl;
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand("copy");
-      document.body.removeChild(ta);
+      const ta = document.createElement('textarea')
+      ta.value = fullUrl
+      document.body.appendChild(ta)
+      ta.select()
+      document.execCommand('copy')
+      document.body.removeChild(ta)
     }
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   const handleShareX = () => {
     const scoreText =
-      score && total ? `I scored ${score}/${total} on @SpotrTV. Play through my link 👇` : `I'm building my Taste Tribe on @SpotrTV. Join through my link and let's unlock NFT rewards together.`;
-    const text = `${scoreText}\n\n${fullUrl}`;
-    window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(text)}`, "_blank");
-  };
+      score && total
+        ? `I scored ${score}/${total} on @SpotrTV. Play through my link 👇`
+        : `I'm building my Taste Tribe on @SpotrTV. Join through my link and let's unlock NFT rewards together.`
+    const text = `${scoreText}\n\n${fullUrl}`
+    window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank')
+  }
 
   const handleShareTelegram = () => {
     const text =
       score && total
         ? `I scored ${score}/${total} on Spotr TV! Join via my Blink link:`
-        : `Join my Taste Tribe on Spotr TV!`;
-    window.open(
-      `https://t.me/share/url?url=${encodeURIComponent(fullUrl)}&text=${encodeURIComponent(text)}`,
-      "_blank",
-    );
-  };
+        : `Join my Taste Tribe on Spotr TV!`
+    window.open(`https://t.me/share/url?url=${encodeURIComponent(fullUrl)}&text=${encodeURIComponent(text)}`, '_blank')
+  }
 
-  const nftThreshold = Number(process.env.NEXT_PUBLIC_NFT_THRESHOLD ?? 70);
-  const scorePct = tribeScore !== null ? Math.min(100, (tribeScore / nftThreshold) * 100) : 0;
-  const backHref = sessionId ? `/arena/results?session=${sessionId}` : "/arena/results";
+  const nftThreshold = Number(process.env.TRIBE_TASTE_SCORE ?? 70)
+  const scorePct = tribeScore !== null ? Math.min(100, (tribeScore / nftThreshold) * 100) : 0
+  const backHref = sessionId ? `/arena/results?session=${sessionId}` : '/arena/results'
 
   return (
     <div className="spotr-page flex flex-1 flex-col">
@@ -143,7 +140,14 @@ function BlinkContent() {
             onClick={handleShareX}
             className="flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-[14px] border border-[#2f2f2f] bg-[#101010] px-3 text-[14px] font-semibold text-white"
           >
-            <svg width="14" height="14" viewBox="0 0 1200 1227" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 1200 1227"
+              fill="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
               <path d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L842.672 1226.37H1200L714.163 519.284ZM569.165 687.828L521.697 619.934L144.011 79.6944H306.615L611.412 515.685L658.88 583.579L1055.08 1150.3H892.476L569.165 687.828Z" />
             </svg>
             Share on X
@@ -162,7 +166,7 @@ function BlinkContent() {
             className="flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-[14px] border border-[#d0b33a] px-3 text-[14px] font-semibold text-[#d0b33a]"
           >
             <Copy className="h-4 w-4" />
-            {copied ? "Copied!" : "Copy Link"}
+            {copied ? 'Copied!' : 'Copy Link'}
           </button>
         </div>
 
@@ -179,7 +183,9 @@ function BlinkContent() {
               {tribeScore === null ? (
                 <span className="italic text-[#6d6d6d]">computing scores...</span>
               ) : (
-                <><span className="font-semibold text-[#bdbdbd]">{tribeScore}</span> / {nftThreshold} points</>
+                <>
+                  <span className="font-semibold text-[#bdbdbd]">{tribeScore}</span> / {nftThreshold} points
+                </>
               )}
             </p>
             <div className="mt-3 h-[7px] overflow-hidden rounded-full bg-[#303030]">
@@ -195,7 +201,7 @@ function BlinkContent() {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 export default function BlinkPage() {
@@ -209,5 +215,5 @@ export default function BlinkPage() {
     >
       <BlinkContent />
     </Suspense>
-  );
+  )
 }

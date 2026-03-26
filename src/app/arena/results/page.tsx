@@ -1,135 +1,135 @@
-"use client";
+'use client'
 
-import { Suspense, useCallback, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { usePrivy } from "@privy-io/react-auth";
-import { Check, Copy, Home, LogIn, Share2, User } from "lucide-react";
-import Link from "next/link";
-import CircularProgress from "@/components/CircularProgress";
-import ProfileModal from "@/components/ProfileModal";
+import { Suspense, useCallback, useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { usePrivy } from '@privy-io/react-auth'
+import { Check, Copy, Home, LogIn, Share2, User } from 'lucide-react'
+import Link from 'next/link'
+import CircularProgress from '@/components/CircularProgress'
+import ProfileModal from '@/components/ProfileModal'
 
-const GUEST_TOKEN_KEY = "spotr_guest_token";
-const GUEST_NAME_KEY = "spotr_guest_name";
+const GUEST_TOKEN_KEY = 'spotr_guest_token'
+const GUEST_NAME_KEY = 'spotr_guest_name'
 
 interface GameResults {
-  correctVotes: number;
-  totalVotes: number;
-  totalRounds: number;
-  tier: "participation" | "base" | "gold";
-  rewardAmount: number;
-  nftMinted: boolean;
-  tasteScore?: number;
-  discountCode?: string;
+  correctVotes: number
+  totalVotes: number
+  totalRounds: number
+  tier: 'participation' | 'base' | 'gold'
+  rewardAmount: number
+  nftMinted: boolean
+  tasteScore?: number
+  discountCode?: string
 }
 
 function ResultsContent() {
-  const searchParams = useSearchParams();
-  const sessionId = searchParams.get("session");
-  const { getAccessToken, authenticated, login } = usePrivy();
-  const [results, setResults] = useState<GameResults | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [showProfile, setShowProfile] = useState(false);
-  const [codeCopied, setCodeCopied] = useState(false);
-  const [linkCopied, setLinkCopied] = useState(false);
-  const [referralCode, setReferralCode] = useState<string | null>(null);
-  const [merging, setMerging] = useState(false);
-  const [merged, setMerged] = useState(false);
-  const [skippedSignup, setSkippedSignup] = useState(false);
+  const searchParams = useSearchParams()
+  const sessionId = searchParams.get('session')
+  const { getAccessToken, authenticated, login } = usePrivy()
+  const [results, setResults] = useState<GameResults | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [showProfile, setShowProfile] = useState(false)
+  const [codeCopied, setCodeCopied] = useState(false)
+  const [linkCopied, setLinkCopied] = useState(false)
+  const [referralCode, setReferralCode] = useState<string | null>(null)
+  const [merging, setMerging] = useState(false)
+  const [merged, setMerged] = useState(false)
+  const [skippedSignup, setSkippedSignup] = useState(false)
 
-  const isGuest = !authenticated && typeof window !== "undefined" && !!localStorage.getItem(GUEST_TOKEN_KEY);
+  const isGuest = !authenticated && typeof window !== 'undefined' && !!localStorage.getItem(GUEST_TOKEN_KEY)
 
   const getAuthHeaders = useCallback(async (): Promise<Record<string, string>> => {
     if (authenticated) {
-      const token = await getAccessToken();
-      return token ? { Authorization: `Bearer ${token}` } : {};
+      const token = await getAccessToken()
+      return token ? { Authorization: `Bearer ${token}` } : {}
     }
-    const guestToken = typeof window !== "undefined" ? localStorage.getItem(GUEST_TOKEN_KEY) : null;
+    const guestToken = typeof window !== 'undefined' ? localStorage.getItem(GUEST_TOKEN_KEY) : null
     if (guestToken) {
-      return { "X-Guest-Token": guestToken };
+      return { 'X-Guest-Token': guestToken }
     }
-    return {};
-  }, [authenticated, getAccessToken]);
+    return {}
+  }, [authenticated, getAccessToken])
 
   // After Privy login succeeds, merge guest data
   useEffect(() => {
-    if (!authenticated || merged || merging) return;
+    if (!authenticated || merged || merging) return
 
-    const guestToken = typeof window !== "undefined" ? localStorage.getItem(GUEST_TOKEN_KEY) : null;
-    if (!guestToken) return;
+    const guestToken = typeof window !== 'undefined' ? localStorage.getItem(GUEST_TOKEN_KEY) : null
+    if (!guestToken) return
 
-    setMerging(true);
-    (async () => {
+    setMerging(true)
+    ;(async () => {
       try {
-        const token = await getAccessToken();
-        await fetch("/api/auth/guest/merge", {
-          method: "POST",
+        const token = await getAccessToken()
+        await fetch('/api/auth/guest/merge', {
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ guestToken }),
-        });
+        })
 
-        localStorage.removeItem(GUEST_TOKEN_KEY);
-        localStorage.removeItem(GUEST_NAME_KEY);
-        setMerged(true);
+        localStorage.removeItem(GUEST_TOKEN_KEY)
+        localStorage.removeItem(GUEST_NAME_KEY)
+        setMerged(true)
       } catch (err) {
-        console.error("[results] merge failed:", err);
+        console.error('[results] merge failed:', err)
       } finally {
-        setMerging(false);
+        setMerging(false)
       }
-    })();
-  }, [authenticated, getAccessToken, merged, merging]);
+    })()
+  }, [authenticated, getAccessToken, merged, merging])
 
   useEffect(() => {
-    if (!authenticated) return;
-    (async () => {
+    if (!authenticated) return
+    ;(async () => {
       try {
-        const token = await getAccessToken();
-        const res = await fetch("/api/referrals", {
+        const token = await getAccessToken()
+        const res = await fetch('/api/referrals', {
           headers: { Authorization: `Bearer ${token}` },
-        });
+        })
         if (res.ok) {
-          const data = await res.json();
-          setReferralCode(data.code ?? null);
+          const data = await res.json()
+          setReferralCode(data.code ?? null)
         }
       } catch {
         // ignore
       }
-    })();
-  }, [authenticated, getAccessToken]);
+    })()
+  }, [authenticated, getAccessToken])
 
   useEffect(() => {
     if (!sessionId) {
-      setLoading(false);
-      return;
+      setLoading(false)
+      return
     }
 
     const fetchResults = async () => {
-      const headers = await getAuthHeaders();
-      const res = await fetch(`/api/sessions/${sessionId}/results`, { headers });
+      const headers = await getAuthHeaders()
+      const res = await fetch(`/api/sessions/${sessionId}/results`, { headers })
 
       if (res.ok) {
-        setResults(await res.json());
+        setResults(await res.json())
       }
 
-      setLoading(false);
-    };
+      setLoading(false)
+    }
 
-    fetchResults();
-  }, [sessionId, getAuthHeaders]);
+    fetchResults()
+  }, [sessionId, getAuthHeaders])
 
   if (loading) {
     return (
       <div className="flex flex-1 items-center justify-center bg-black">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#f5d63d] border-t-transparent" />
       </div>
-    );
+    )
   }
 
-  const tasteScore = results?.tasteScore ?? (results ? results.correctVotes : 0);
-  const nftThreshold = Number(process.env.NEXT_PUBLIC_NFT_THRESHOLD ?? 70);
-  const scorePct = Math.min(100, (tasteScore / nftThreshold) * 100);
+  const tasteScore = results?.tasteScore ?? (results ? results.correctVotes : 0)
+  const nftThreshold = Number(process.env.TRIBE_TASTE_SCORE ?? 70)
+  const scorePct = Math.min(100, (tasteScore / nftThreshold) * 100)
 
   return (
     <div className="spotr-page flex flex-1 flex-col">
@@ -166,17 +166,12 @@ function ResultsContent() {
               <p className="text-center text-[11px] font-semibold uppercase tracking-[0.08em] text-black/55">
                 Your Taste Score
               </p>
-              <p className="mt-2 text-center text-[72px] font-semibold leading-none tracking-[-0.08em]">
-                {tasteScore}
-              </p>
+              <p className="mt-2 text-center text-[72px] font-semibold leading-none tracking-[-0.08em]">{tasteScore}</p>
               <p className="mt-3 text-[13px] text-black/68">
                 {tasteScore} / {nftThreshold} to NFT Whitelist
               </p>
               <div className="mt-2 h-[7px] overflow-hidden rounded-full bg-[#c3ac31]/42">
-                <div
-                  className="h-full rounded-full bg-[#c1ab38]"
-                  style={{ width: `${scorePct}%` }}
-                />
+                <div className="h-full rounded-full bg-[#c1ab38]" style={{ width: `${scorePct}%` }} />
               </div>
               <p className="mt-3 text-center text-[12px] leading-4 text-black/60">
                 Share your referral link to recruit your tribe and boost this score together.
@@ -194,18 +189,16 @@ function ResultsContent() {
                   </code>
                   <button
                     onClick={() => {
-                      navigator.clipboard.writeText(results.discountCode!);
-                      setCodeCopied(true);
-                      setTimeout(() => setCodeCopied(false), 2000);
+                      navigator.clipboard.writeText(results.discountCode!)
+                      setCodeCopied(true)
+                      setTimeout(() => setCodeCopied(false), 2000)
                     }}
                     className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] bg-[#232323] text-white transition-colors hover:bg-[#2a2a2a]"
                   >
                     {codeCopied ? <Check className="h-4 w-4 text-[#45ca61]" /> : <Copy className="h-4 w-4" />}
                   </button>
                 </div>
-                <p className="mt-2 text-center text-[12px] text-[#6b6b6b]">
-                  Use this code for exclusive rewards
-                </p>
+                <p className="mt-2 text-center text-[12px] text-[#6b6b6b]">Use this code for exclusive rewards</p>
               </div>
             )}
 
@@ -248,17 +241,15 @@ function ResultsContent() {
                 <div className="mt-1 h-3 w-3 rounded-[3px] bg-[#f5d63d]" />
                 <div className="min-w-0">
                   <p className="text-[14px] leading-5 text-[#d6d6d6]">
-                    Reach {nftThreshold} collective points with your tribe to unlock{" "}
+                    Reach {nftThreshold} collective points with your tribe to unlock{' '}
                     <span className="font-semibold text-white">FREE NFT mint</span>
                   </p>
-                  <p className="mt-2 text-[12px] font-semibold text-[#d0b33a]">
-                    Taste NFT Drop — May 14, 2026
-                  </p>
+                  <p className="mt-2 text-[12px] font-semibold text-[#d0b33a]">Taste NFT Drop — May 14, 2026</p>
                 </div>
               </div>
 
               <div className="mt-4 grid grid-cols-4 gap-2">
-                {["Common", "Uncommon", "Rare", "Legendary"].map((tier) => (
+                {['Common', 'Uncommon', 'Rare', 'Legendary'].map((tier) => (
                   <div
                     key={tier}
                     className="rounded-[10px] bg-[#232323] px-2 py-2 text-center text-[11px] text-[#6b6b6b]"
@@ -273,11 +264,11 @@ function ResultsContent() {
               {referralCode ? (
                 <button
                   onClick={() => {
-                    const origin = typeof window !== "undefined" ? window.location.origin : "https://spotr.tv";
-                    const referralUrl = `${origin}/ref/${referralCode}${sessionId ? `?session=${sessionId}` : ""}`;
-                    navigator.clipboard.writeText(referralUrl);
-                    setLinkCopied(true);
-                    setTimeout(() => setLinkCopied(false), 2000);
+                    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://spotr.tv'
+                    const referralUrl = `${origin}/ref/${referralCode}${sessionId ? `?session=${sessionId}` : ''}`
+                    navigator.clipboard.writeText(referralUrl)
+                    setLinkCopied(true)
+                    setTimeout(() => setLinkCopied(false), 2000)
                   }}
                   className="spotr-primary-button flex w-full items-center justify-center gap-2"
                 >
@@ -320,7 +311,7 @@ function ResultsContent() {
 
       <ProfileModal open={showProfile} onClose={() => setShowProfile(false)} />
     </div>
-  );
+  )
 }
 
 export default function ResultsPage() {
@@ -334,5 +325,5 @@ export default function ResultsPage() {
     >
       <ResultsContent />
     </Suspense>
-  );
+  )
 }

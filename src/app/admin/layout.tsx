@@ -5,6 +5,7 @@ import { usePrivy } from "@privy-io/react-auth";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  BarChart3,
   LayoutDashboard,
   Radio,
   Trophy,
@@ -37,6 +38,7 @@ const navItems = [
   { href: "/admin/videos", label: "Videos", icon: Film },
   { href: "/admin/sessions", label: "Sessions", icon: Radio },
   { href: "/admin/results", label: "Results", icon: Trophy },
+  { href: "/admin/videos/analytics", label: "Analytics", icon: BarChart3 },
 ];
 
 export default function AdminLayout({
@@ -222,7 +224,9 @@ export default function AdminLayout({
           const isActive =
             item.href === "/admin"
               ? pathname === "/admin"
-              : pathname.startsWith(item.href);
+              : item.href === "/admin/videos"
+                ? pathname.startsWith("/admin/videos") && !pathname.startsWith("/admin/videos/analytics")
+                : pathname.startsWith(item.href);
           const Icon = item.icon;
           return (
             <Link

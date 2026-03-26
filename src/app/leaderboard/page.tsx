@@ -122,10 +122,6 @@ function PlayerLeaderboard({ rankings }: { rankings: PlayerRanking[] }) {
           </div>
         ))}
       </div>
-
-      <p className="mt-5 text-center text-[12px] text-[#646464]">
-        Top Taste Tribe at 7,000 collective points unlocks group NFT eligibility
-      </p>
     </>
   );
 }

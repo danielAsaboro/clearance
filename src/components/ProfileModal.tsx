@@ -1,59 +1,55 @@
-"use client";
+'use client'
 
-import { X, LogOut, User, Zap, Trophy, Crosshair } from "lucide-react";
-import { usePrivy } from "@privy-io/react-auth";
-import { useWallets } from "@privy-io/react-auth/solana";
-import { useEffect, useState } from "react";
+import { X, LogOut, User, Zap, Trophy, Crosshair } from 'lucide-react'
+import { usePrivy } from '@privy-io/react-auth'
+import { useWallets } from '@privy-io/react-auth/solana'
+import { useEffect, useState } from 'react'
 
 interface ProfileModalProps {
-  open: boolean;
-  onClose: () => void;
+  open: boolean
+  onClose: () => void
 }
 
 interface ProfileStats {
-  sessionsPlayed: number;
-  correctPredictions: number;
-  tasteScore: number;
+  sessionsPlayed: number
+  correctPredictions: number
+  tasteScore: number
 }
 
 export default function ProfileModal({ open, onClose }: ProfileModalProps) {
-  const { user, logout, getAccessToken } = usePrivy();
-  const { wallets } = useWallets();
-  const [stats, setStats] = useState<ProfileStats | null>(null);
+  const { user, logout, getAccessToken } = usePrivy()
+  const { wallets } = useWallets()
+  const [stats, setStats] = useState<ProfileStats | null>(null)
 
-  const walletAddress = wallets[0]?.address ?? user?.wallet?.address;
-  const shortAddress = walletAddress
-    ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
-    : "Not connected";
+  const walletAddress = wallets[0]?.address ?? user?.wallet?.address
+  const shortAddress = walletAddress ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : 'Not connected'
 
   useEffect(() => {
-    if (!open) return;
-    (async () => {
+    if (!open) return
+    ;(async () => {
       try {
-        const token = await getAccessToken();
-        const res = await fetch("/api/social/profile", {
+        const token = await getAccessToken()
+        const res = await fetch('/api/social/profile', {
           headers: { Authorization: `Bearer ${token}` },
-        });
+        })
         if (res.ok) {
-          const data = await res.json();
+          const data = await res.json()
           setStats({
             sessionsPlayed: data.sessionsPlayed ?? 0,
             correctPredictions: data.correctPredictions ?? 0,
             tasteScore: data.tasteScore ?? 0,
-          });
+          })
         }
       } catch {
         // ignore
       }
-    })();
-  }, [open, getAccessToken]);
+    })()
+  }, [open, getAccessToken])
 
-  if (!open) return null;
+  if (!open) return null
 
-  const tasteScoreMax = Number(process.env.NEXT_PUBLIC_NFT_THRESHOLD ?? 70);
-  const tasteScorePct = stats
-    ? Math.min(100, (stats.tasteScore / tasteScoreMax) * 100)
-    : 0;
+  const tasteScoreMax = Number(process.env.TRIBE_TASTE_SCORE ?? 70)
+  const tasteScorePct = stats ? Math.min(100, (stats.tasteScore / tasteScoreMax) * 100) : 0
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center">
@@ -83,14 +79,14 @@ export default function ProfileModal({ open, onClose }: ProfileModalProps) {
             <Zap className="mb-2 h-4 w-4 text-[#f5d63d]" />
             <p className="text-[11px] text-[#8d8d8d]">Sessions</p>
             <p className="mt-1 text-[42px] font-semibold tracking-[-0.06em] text-white leading-none">
-              {stats?.sessionsPlayed ?? "1"}
+              {stats?.sessionsPlayed ?? '1'}
             </p>
           </div>
           <div className="spotr-panel-soft px-4 py-4">
             <Trophy className="mb-2 h-4 w-4 text-[#f5d63d]" />
             <p className="text-[11px] text-[#8d8d8d]">Correct</p>
             <p className="mt-1 text-[42px] font-semibold tracking-[-0.06em] text-white leading-none">
-              {stats?.correctPredictions ?? "0"}
+              {stats?.correctPredictions ?? '0'}
             </p>
           </div>
         </div>
@@ -107,17 +103,14 @@ export default function ProfileModal({ open, onClose }: ProfileModalProps) {
             <span className="pb-2 text-[13px] text-[#b59d2d]">/ {tasteScoreMax} to NFT</span>
           </div>
           <div className="spotr-progress-track h-[7px] bg-[#6b5d18]/40">
-            <div
-              className="h-full rounded-full bg-[#d1b83c] transition-all"
-              style={{ width: `${tasteScorePct}%` }}
-            />
+            <div className="h-full rounded-full bg-[#d1b83c] transition-all" style={{ width: `${tasteScorePct}%` }} />
           </div>
         </div>
 
         <button
           onClick={() => {
-            logout();
-            onClose();
+            logout()
+            onClose()
           }}
           className="mb-3 flex min-h-[50px] w-full items-center justify-center gap-2 rounded-[14px] border border-[#da5249] text-[15px] font-semibold text-[#da5249] transition-colors hover:bg-[#da5249]/10"
         >
@@ -132,5 +125,5 @@ export default function ProfileModal({ open, onClose }: ProfileModalProps) {
         </button>
       </div>
     </div>
-  );
+  )
 }

@@ -4,6 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import {
   BarChart3,
+  ChevronLeft,
+  ChevronRight,
   Loader2,
   Pencil,
   RefreshCw,
@@ -155,7 +157,11 @@ export default function AdminVideos() {
     tags: "",
   });
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const PAGE_SIZE = 10;
 
   const getToken = useCallback(async () => {
     if (!ready || !authenticated) {
@@ -170,19 +176,22 @@ export default function AdminVideos() {
     return token;
   }, [authenticated, getAccessToken, ready]);
 
-  const fetchVideos = useCallback(async () => {
+  const fetchVideos = useCallback(async (targetPage?: number) => {
     setLoading(true);
     setError(null);
+
+    const fetchPage = targetPage ?? page;
 
     try {
       const token = await getToken();
       const params = new URLSearchParams();
       if (search) params.set("search", search);
       if (statusFilter !== "all") params.set("status", statusFilter);
+      params.set("page", String(fetchPage));
+      params.set("limit", String(PAGE_SIZE));
 
-      const query = params.toString();
       const res = await fetchWithTimeout(
-        query ? `/api/admin/videos?${query}` : "/api/admin/videos",
+        `/api/admin/videos?${params.toString()}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -192,8 +201,12 @@ export default function AdminVideos() {
         throw new Error(await readErrorMessage(res));
       }
 
-      const freshVideos: Video[] = await res.json();
+      const data = await res.json();
+      const freshVideos: Video[] = data.videos;
       setVideos(freshVideos);
+      setPage(data.page);
+      setTotalPages(data.totalPages);
+      setTotal(data.total);
 
       // Reconcile upload queue items with fresh server state
       setUploadQueue((current) => {
@@ -231,7 +244,7 @@ export default function AdminVideos() {
     } finally {
       setLoading(false);
     }
-  }, [getToken, search, statusFilter]);
+  }, [getToken, search, statusFilter, page]);
 
   useEffect(() => {
     if (!ready) return;
@@ -701,13 +714,13 @@ export default function AdminVideos() {
               type="text"
               placeholder="Search by title or tag"
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              onChange={(event) => { setSearch(event.target.value); setPage(1); }}
               className="w-full rounded-2xl border border-[#242424] bg-black px-11 py-3 text-sm text-white outline-none focus:border-[#F5E642]/60"
             />
           </div>
           <select
             value={statusFilter}
-            onChange={(event) => setStatusFilter(event.target.value)}
+            onChange={(event) => { setStatusFilter(event.target.value); setPage(1); }}
             className="rounded-2xl border border-[#242424] bg-black px-4 py-3 text-sm text-white outline-none focus:border-[#F5E642]/60"
           >
             <option value="all">All statuses</option>
@@ -894,6 +907,34 @@ export default function AdminVideos() {
               </article>
             );
           })}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {!loading && !error && videos.length > 0 && totalPages > 0 && (
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-[#888]">
+            Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, total)} of {total} videos
+          </p>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => { setPage((p) => Math.max(1, p - 1)); }}
+              disabled={page <= 1}
+              className="rounded-lg border border-[#2A2A2A] p-2 text-[#888] hover:text-white disabled:opacity-30"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <span className="text-xs text-[#888]">
+              Page {page} of {totalPages}
+            </span>
+            <button
+              onClick={() => { setPage((p) => Math.min(totalPages, p + 1)); }}
+              disabled={page >= totalPages}
+              className="rounded-lg border border-[#2A2A2A] p-2 text-[#888] hover:text-white disabled:opacity-30"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       )}
     </div>
