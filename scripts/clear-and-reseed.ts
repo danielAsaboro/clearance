@@ -64,6 +64,10 @@ function parseCaption(filename: string): string {
 
 async function clearDB() {
   console.log("Clearing DB (FK-safe order)…");
+  const videoStats = await prisma.videoStats.deleteMany();
+  console.log(`  VideoStats: ${videoStats.count} deleted`);
+  const analyticsEvents = await prisma.analyticsEvent.deleteMany();
+  console.log(`  AnalyticsEvent: ${analyticsEvents.count} deleted`);
   const votes = await prisma.vote.deleteMany();
   console.log(`  Vote: ${votes.count} deleted`);
   const matchups = await prisma.matchup.deleteMany();

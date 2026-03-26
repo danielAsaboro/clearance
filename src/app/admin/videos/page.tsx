@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import {
+  BarChart3,
   Loader2,
   Pencil,
   RefreshCw,
@@ -11,6 +12,7 @@ import {
   Upload,
   Video as VideoIcon,
 } from "lucide-react";
+import Link from "next/link";
 import { splitTagsInput } from "@/lib/video-admin";
 
 interface VideoCategory {
@@ -561,6 +563,14 @@ export default function AdminVideos() {
             Upload 1 to 10 videos at a time. Categorization can happen later from the library.
           </p>
         </div>
+        <div className="flex items-center gap-2">
+        <Link
+          href="/admin/videos/analytics"
+          className="rounded-xl border border-[#2A2A2A] px-4 py-2.5 text-xs font-bold text-[#D5D5D5] flex items-center gap-2 hover:border-[#F5E642]/40"
+        >
+          <BarChart3 className="h-4 w-4" />
+          Analytics
+        </Link>
         <button
           onClick={() => fileInputRef.current?.click()}
           disabled={batchUploading}
@@ -578,6 +588,7 @@ export default function AdminVideos() {
             </>
           )}
         </button>
+        </div>
       </div>
 
       <input
@@ -738,7 +749,7 @@ export default function AdminVideos() {
                 className="overflow-hidden rounded-3xl border border-[#242424] bg-[#111]"
               >
                 <div className="grid gap-0 md:grid-cols-[220px_1fr]">
-                  <div className="aspect-video bg-black">
+                  <Link href={`/admin/videos/${video.id}/analytics`} className="aspect-video bg-black block">
                     {video.thumbnailUrl ? (
                       <img
                         src={video.thumbnailUrl}
@@ -750,14 +761,16 @@ export default function AdminVideos() {
                         <VideoIcon className="h-8 w-8 text-[#333]" />
                       </div>
                     )}
-                  </div>
+                  </Link>
 
                   <div className="p-4">
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <h3 className="text-base font-semibold text-white">
-                          {video.title ?? "Untitled"}
-                        </h3>
+                        <Link href={`/admin/videos/${video.id}/analytics`} className="hover:text-[#F5E642]">
+                          <h3 className="text-base font-semibold text-white hover:text-[#F5E642]">
+                            {video.title ?? "Untitled"}
+                          </h3>
+                        </Link>
                         <p className="mt-1 text-xs text-[#7D7D7D]">
                           {formatDuration(video.duration)} • {formatBytes(video.sourceBytes)}
                         </p>
@@ -844,6 +857,13 @@ export default function AdminVideos() {
                       </div>
                     ) : (
                       <div className="mt-4 flex flex-wrap gap-2">
+                        <Link
+                          href={`/admin/videos/${video.id}/analytics`}
+                          className="rounded-xl border border-[#2A2A2A] px-3 py-2 text-xs text-[#D5D5D5] flex items-center gap-2 hover:border-[#F5E642]/40"
+                        >
+                          <BarChart3 className="h-3.5 w-3.5" />
+                          Stats
+                        </Link>
                         <button
                           onClick={() => startEdit(video)}
                           className="rounded-xl border border-[#2A2A2A] px-3 py-2 text-xs text-[#D5D5D5] flex items-center gap-2"

@@ -61,7 +61,9 @@ export const ModelName = {
   DiscountCode: 'DiscountCode',
   Referral: 'Referral',
   Campaign: 'Campaign',
-  CampaignEnrollment: 'CampaignEnrollment'
+  CampaignEnrollment: 'CampaignEnrollment',
+  VideoStats: 'VideoStats',
+  AnalyticsEvent: 'AnalyticsEvent'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -172,7 +174,9 @@ export const VoteScalarFieldEnum = {
   userId: 'userId',
   matchupId: 'matchupId',
   decision: 'decision',
-  submittedAt: 'submittedAt'
+  submittedAt: 'submittedAt',
+  timeToVoteMs: 'timeToVoteMs',
+  deviceType: 'deviceType'
 } as const
 
 export type VoteScalarFieldEnum = (typeof VoteScalarFieldEnum)[keyof typeof VoteScalarFieldEnum]
@@ -253,6 +257,38 @@ export const CampaignEnrollmentScalarFieldEnum = {
 } as const
 
 export type CampaignEnrollmentScalarFieldEnum = (typeof CampaignEnrollmentScalarFieldEnum)[keyof typeof CampaignEnrollmentScalarFieldEnum]
+
+
+export const VideoStatsScalarFieldEnum = {
+  id: 'id',
+  videoId: 'videoId',
+  timesUsed: 'timesUsed',
+  timesWon: 'timesWon',
+  timesLost: 'timesLost',
+  totalVotesFor: 'totalVotesFor',
+  totalVotesAgainst: 'totalVotesAgainst',
+  winRate: 'winRate',
+  avgVoteShare: 'avgVoteShare',
+  sessionsAppeared: 'sessionsAppeared',
+  lastUsedAt: 'lastUsedAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type VideoStatsScalarFieldEnum = (typeof VideoStatsScalarFieldEnum)[keyof typeof VideoStatsScalarFieldEnum]
+
+
+export const AnalyticsEventScalarFieldEnum = {
+  id: 'id',
+  type: 'type',
+  userId: 'userId',
+  sessionId: 'sessionId',
+  videoId: 'videoId',
+  matchupId: 'matchupId',
+  metadata: 'metadata',
+  createdAt: 'createdAt'
+} as const
+
+export type AnalyticsEventScalarFieldEnum = (typeof AnalyticsEventScalarFieldEnum)[keyof typeof AnalyticsEventScalarFieldEnum]
 
 
 export const SortOrder = {

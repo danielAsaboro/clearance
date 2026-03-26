@@ -21,6 +21,7 @@ export const createSessionSchema = z.object({
 export const submitVoteSchema = z.object({
   matchupId: z.string(),
   decision: z.enum(["video_a", "video_b"]),
+  timeToVoteMs: z.number().int().min(0).max(120000).optional(),
 });
 
 export const claimUsdcSchema = z.object({

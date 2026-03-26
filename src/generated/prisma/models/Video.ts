@@ -357,6 +357,7 @@ export type VideoWhereInput = {
   matchupsAsA?: Prisma.MatchupListRelationFilter
   matchupsAsB?: Prisma.MatchupListRelationFilter
   wonMatchups?: Prisma.MatchupListRelationFilter
+  stats?: Prisma.XOR<Prisma.VideoStatsNullableScalarRelationFilter, Prisma.VideoStatsWhereInput> | null
 }
 
 export type VideoOrderByWithRelationInput = {
@@ -386,6 +387,7 @@ export type VideoOrderByWithRelationInput = {
   matchupsAsA?: Prisma.MatchupOrderByRelationAggregateInput
   matchupsAsB?: Prisma.MatchupOrderByRelationAggregateInput
   wonMatchups?: Prisma.MatchupOrderByRelationAggregateInput
+  stats?: Prisma.VideoStatsOrderByWithRelationInput
 }
 
 export type VideoWhereUniqueInput = Prisma.AtLeast<{
@@ -418,6 +420,7 @@ export type VideoWhereUniqueInput = Prisma.AtLeast<{
   matchupsAsA?: Prisma.MatchupListRelationFilter
   matchupsAsB?: Prisma.MatchupListRelationFilter
   wonMatchups?: Prisma.MatchupListRelationFilter
+  stats?: Prisma.XOR<Prisma.VideoStatsNullableScalarRelationFilter, Prisma.VideoStatsWhereInput> | null
 }, "id" | "sourceKey">
 
 export type VideoOrderByWithAggregationInput = {
@@ -501,6 +504,7 @@ export type VideoCreateInput = {
   matchupsAsA?: Prisma.MatchupCreateNestedManyWithoutVideoAInput
   matchupsAsB?: Prisma.MatchupCreateNestedManyWithoutVideoBInput
   wonMatchups?: Prisma.MatchupCreateNestedManyWithoutWinningVideoInput
+  stats?: Prisma.VideoStatsCreateNestedOneWithoutVideoInput
 }
 
 export type VideoUncheckedCreateInput = {
@@ -528,6 +532,7 @@ export type VideoUncheckedCreateInput = {
   matchupsAsA?: Prisma.MatchupUncheckedCreateNestedManyWithoutVideoAInput
   matchupsAsB?: Prisma.MatchupUncheckedCreateNestedManyWithoutVideoBInput
   wonMatchups?: Prisma.MatchupUncheckedCreateNestedManyWithoutWinningVideoInput
+  stats?: Prisma.VideoStatsUncheckedCreateNestedOneWithoutVideoInput
 }
 
 export type VideoUpdateInput = {
@@ -555,6 +560,7 @@ export type VideoUpdateInput = {
   matchupsAsA?: Prisma.MatchupUpdateManyWithoutVideoANestedInput
   matchupsAsB?: Prisma.MatchupUpdateManyWithoutVideoBNestedInput
   wonMatchups?: Prisma.MatchupUpdateManyWithoutWinningVideoNestedInput
+  stats?: Prisma.VideoStatsUpdateOneWithoutVideoNestedInput
 }
 
 export type VideoUncheckedUpdateInput = {
@@ -582,6 +588,7 @@ export type VideoUncheckedUpdateInput = {
   matchupsAsA?: Prisma.MatchupUncheckedUpdateManyWithoutVideoANestedInput
   matchupsAsB?: Prisma.MatchupUncheckedUpdateManyWithoutVideoBNestedInput
   wonMatchups?: Prisma.MatchupUncheckedUpdateManyWithoutWinningVideoNestedInput
+  stats?: Prisma.VideoStatsUncheckedUpdateOneWithoutVideoNestedInput
 }
 
 export type VideoCreateManyInput = {
@@ -915,6 +922,20 @@ export type VideoUpdateOneWithoutWonMatchupsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.VideoUpdateToOneWithWhereWithoutWonMatchupsInput, Prisma.VideoUpdateWithoutWonMatchupsInput>, Prisma.VideoUncheckedUpdateWithoutWonMatchupsInput>
 }
 
+export type VideoCreateNestedOneWithoutStatsInput = {
+  create?: Prisma.XOR<Prisma.VideoCreateWithoutStatsInput, Prisma.VideoUncheckedCreateWithoutStatsInput>
+  connectOrCreate?: Prisma.VideoCreateOrConnectWithoutStatsInput
+  connect?: Prisma.VideoWhereUniqueInput
+}
+
+export type VideoUpdateOneRequiredWithoutStatsNestedInput = {
+  create?: Prisma.XOR<Prisma.VideoCreateWithoutStatsInput, Prisma.VideoUncheckedCreateWithoutStatsInput>
+  connectOrCreate?: Prisma.VideoCreateOrConnectWithoutStatsInput
+  upsert?: Prisma.VideoUpsertWithoutStatsInput
+  connect?: Prisma.VideoWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.VideoUpdateToOneWithWhereWithoutStatsInput, Prisma.VideoUpdateWithoutStatsInput>, Prisma.VideoUncheckedUpdateWithoutStatsInput>
+}
+
 export type VideoCreateWithoutUploadedByInput = {
   id?: string
   title?: string | null
@@ -939,6 +960,7 @@ export type VideoCreateWithoutUploadedByInput = {
   matchupsAsA?: Prisma.MatchupCreateNestedManyWithoutVideoAInput
   matchupsAsB?: Prisma.MatchupCreateNestedManyWithoutVideoBInput
   wonMatchups?: Prisma.MatchupCreateNestedManyWithoutWinningVideoInput
+  stats?: Prisma.VideoStatsCreateNestedOneWithoutVideoInput
 }
 
 export type VideoUncheckedCreateWithoutUploadedByInput = {
@@ -965,6 +987,7 @@ export type VideoUncheckedCreateWithoutUploadedByInput = {
   matchupsAsA?: Prisma.MatchupUncheckedCreateNestedManyWithoutVideoAInput
   matchupsAsB?: Prisma.MatchupUncheckedCreateNestedManyWithoutVideoBInput
   wonMatchups?: Prisma.MatchupUncheckedCreateNestedManyWithoutWinningVideoInput
+  stats?: Prisma.VideoStatsUncheckedCreateNestedOneWithoutVideoInput
 }
 
 export type VideoCreateOrConnectWithoutUploadedByInput = {
@@ -1044,6 +1067,7 @@ export type VideoCreateWithoutCategoryInput = {
   matchupsAsA?: Prisma.MatchupCreateNestedManyWithoutVideoAInput
   matchupsAsB?: Prisma.MatchupCreateNestedManyWithoutVideoBInput
   wonMatchups?: Prisma.MatchupCreateNestedManyWithoutWinningVideoInput
+  stats?: Prisma.VideoStatsCreateNestedOneWithoutVideoInput
 }
 
 export type VideoUncheckedCreateWithoutCategoryInput = {
@@ -1070,6 +1094,7 @@ export type VideoUncheckedCreateWithoutCategoryInput = {
   matchupsAsA?: Prisma.MatchupUncheckedCreateNestedManyWithoutVideoAInput
   matchupsAsB?: Prisma.MatchupUncheckedCreateNestedManyWithoutVideoBInput
   wonMatchups?: Prisma.MatchupUncheckedCreateNestedManyWithoutWinningVideoInput
+  stats?: Prisma.VideoStatsUncheckedCreateNestedOneWithoutVideoInput
 }
 
 export type VideoCreateOrConnectWithoutCategoryInput = {
@@ -1122,6 +1147,7 @@ export type VideoCreateWithoutMatchupsAsAInput = {
   uploadedBy: Prisma.UserCreateNestedOneWithoutUploadedVideosInput
   matchupsAsB?: Prisma.MatchupCreateNestedManyWithoutVideoBInput
   wonMatchups?: Prisma.MatchupCreateNestedManyWithoutWinningVideoInput
+  stats?: Prisma.VideoStatsCreateNestedOneWithoutVideoInput
 }
 
 export type VideoUncheckedCreateWithoutMatchupsAsAInput = {
@@ -1148,6 +1174,7 @@ export type VideoUncheckedCreateWithoutMatchupsAsAInput = {
   updatedAt?: Date | string
   matchupsAsB?: Prisma.MatchupUncheckedCreateNestedManyWithoutVideoBInput
   wonMatchups?: Prisma.MatchupUncheckedCreateNestedManyWithoutWinningVideoInput
+  stats?: Prisma.VideoStatsUncheckedCreateNestedOneWithoutVideoInput
 }
 
 export type VideoCreateOrConnectWithoutMatchupsAsAInput = {
@@ -1179,6 +1206,7 @@ export type VideoCreateWithoutMatchupsAsBInput = {
   uploadedBy: Prisma.UserCreateNestedOneWithoutUploadedVideosInput
   matchupsAsA?: Prisma.MatchupCreateNestedManyWithoutVideoAInput
   wonMatchups?: Prisma.MatchupCreateNestedManyWithoutWinningVideoInput
+  stats?: Prisma.VideoStatsCreateNestedOneWithoutVideoInput
 }
 
 export type VideoUncheckedCreateWithoutMatchupsAsBInput = {
@@ -1205,6 +1233,7 @@ export type VideoUncheckedCreateWithoutMatchupsAsBInput = {
   updatedAt?: Date | string
   matchupsAsA?: Prisma.MatchupUncheckedCreateNestedManyWithoutVideoAInput
   wonMatchups?: Prisma.MatchupUncheckedCreateNestedManyWithoutWinningVideoInput
+  stats?: Prisma.VideoStatsUncheckedCreateNestedOneWithoutVideoInput
 }
 
 export type VideoCreateOrConnectWithoutMatchupsAsBInput = {
@@ -1236,6 +1265,7 @@ export type VideoCreateWithoutWonMatchupsInput = {
   uploadedBy: Prisma.UserCreateNestedOneWithoutUploadedVideosInput
   matchupsAsA?: Prisma.MatchupCreateNestedManyWithoutVideoAInput
   matchupsAsB?: Prisma.MatchupCreateNestedManyWithoutVideoBInput
+  stats?: Prisma.VideoStatsCreateNestedOneWithoutVideoInput
 }
 
 export type VideoUncheckedCreateWithoutWonMatchupsInput = {
@@ -1262,6 +1292,7 @@ export type VideoUncheckedCreateWithoutWonMatchupsInput = {
   updatedAt?: Date | string
   matchupsAsA?: Prisma.MatchupUncheckedCreateNestedManyWithoutVideoAInput
   matchupsAsB?: Prisma.MatchupUncheckedCreateNestedManyWithoutVideoBInput
+  stats?: Prisma.VideoStatsUncheckedCreateNestedOneWithoutVideoInput
 }
 
 export type VideoCreateOrConnectWithoutWonMatchupsInput = {
@@ -1304,6 +1335,7 @@ export type VideoUpdateWithoutMatchupsAsAInput = {
   uploadedBy?: Prisma.UserUpdateOneRequiredWithoutUploadedVideosNestedInput
   matchupsAsB?: Prisma.MatchupUpdateManyWithoutVideoBNestedInput
   wonMatchups?: Prisma.MatchupUpdateManyWithoutWinningVideoNestedInput
+  stats?: Prisma.VideoStatsUpdateOneWithoutVideoNestedInput
 }
 
 export type VideoUncheckedUpdateWithoutMatchupsAsAInput = {
@@ -1330,6 +1362,7 @@ export type VideoUncheckedUpdateWithoutMatchupsAsAInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   matchupsAsB?: Prisma.MatchupUncheckedUpdateManyWithoutVideoBNestedInput
   wonMatchups?: Prisma.MatchupUncheckedUpdateManyWithoutWinningVideoNestedInput
+  stats?: Prisma.VideoStatsUncheckedUpdateOneWithoutVideoNestedInput
 }
 
 export type VideoUpsertWithoutMatchupsAsBInput = {
@@ -1367,6 +1400,7 @@ export type VideoUpdateWithoutMatchupsAsBInput = {
   uploadedBy?: Prisma.UserUpdateOneRequiredWithoutUploadedVideosNestedInput
   matchupsAsA?: Prisma.MatchupUpdateManyWithoutVideoANestedInput
   wonMatchups?: Prisma.MatchupUpdateManyWithoutWinningVideoNestedInput
+  stats?: Prisma.VideoStatsUpdateOneWithoutVideoNestedInput
 }
 
 export type VideoUncheckedUpdateWithoutMatchupsAsBInput = {
@@ -1393,6 +1427,7 @@ export type VideoUncheckedUpdateWithoutMatchupsAsBInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   matchupsAsA?: Prisma.MatchupUncheckedUpdateManyWithoutVideoANestedInput
   wonMatchups?: Prisma.MatchupUncheckedUpdateManyWithoutWinningVideoNestedInput
+  stats?: Prisma.VideoStatsUncheckedUpdateOneWithoutVideoNestedInput
 }
 
 export type VideoUpsertWithoutWonMatchupsInput = {
@@ -1430,6 +1465,7 @@ export type VideoUpdateWithoutWonMatchupsInput = {
   uploadedBy?: Prisma.UserUpdateOneRequiredWithoutUploadedVideosNestedInput
   matchupsAsA?: Prisma.MatchupUpdateManyWithoutVideoANestedInput
   matchupsAsB?: Prisma.MatchupUpdateManyWithoutVideoBNestedInput
+  stats?: Prisma.VideoStatsUpdateOneWithoutVideoNestedInput
 }
 
 export type VideoUncheckedUpdateWithoutWonMatchupsInput = {
@@ -1456,6 +1492,131 @@ export type VideoUncheckedUpdateWithoutWonMatchupsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   matchupsAsA?: Prisma.MatchupUncheckedUpdateManyWithoutVideoANestedInput
   matchupsAsB?: Prisma.MatchupUncheckedUpdateManyWithoutVideoBNestedInput
+  stats?: Prisma.VideoStatsUncheckedUpdateOneWithoutVideoNestedInput
+}
+
+export type VideoCreateWithoutStatsInput = {
+  id?: string
+  title?: string | null
+  url: string
+  thumbnailUrl?: string | null
+  duration?: number | null
+  status?: $Enums.VideoStatus
+  tags?: Prisma.VideoCreatetagsInput | string[]
+  searchText?: string | null
+  originalFilename?: string | null
+  sourceContentType?: string | null
+  sourceBytes?: number | null
+  sourceKey?: string | null
+  playbackKey?: string | null
+  thumbnailKey?: string | null
+  width?: number | null
+  height?: number | null
+  processingError?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  category?: Prisma.VideoCategoryCreateNestedOneWithoutVideosInput
+  uploadedBy: Prisma.UserCreateNestedOneWithoutUploadedVideosInput
+  matchupsAsA?: Prisma.MatchupCreateNestedManyWithoutVideoAInput
+  matchupsAsB?: Prisma.MatchupCreateNestedManyWithoutVideoBInput
+  wonMatchups?: Prisma.MatchupCreateNestedManyWithoutWinningVideoInput
+}
+
+export type VideoUncheckedCreateWithoutStatsInput = {
+  id?: string
+  title?: string | null
+  url: string
+  thumbnailUrl?: string | null
+  duration?: number | null
+  status?: $Enums.VideoStatus
+  tags?: Prisma.VideoCreatetagsInput | string[]
+  searchText?: string | null
+  originalFilename?: string | null
+  sourceContentType?: string | null
+  sourceBytes?: number | null
+  sourceKey?: string | null
+  playbackKey?: string | null
+  thumbnailKey?: string | null
+  width?: number | null
+  height?: number | null
+  processingError?: string | null
+  categoryId?: string | null
+  uploadedById: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  matchupsAsA?: Prisma.MatchupUncheckedCreateNestedManyWithoutVideoAInput
+  matchupsAsB?: Prisma.MatchupUncheckedCreateNestedManyWithoutVideoBInput
+  wonMatchups?: Prisma.MatchupUncheckedCreateNestedManyWithoutWinningVideoInput
+}
+
+export type VideoCreateOrConnectWithoutStatsInput = {
+  where: Prisma.VideoWhereUniqueInput
+  create: Prisma.XOR<Prisma.VideoCreateWithoutStatsInput, Prisma.VideoUncheckedCreateWithoutStatsInput>
+}
+
+export type VideoUpsertWithoutStatsInput = {
+  update: Prisma.XOR<Prisma.VideoUpdateWithoutStatsInput, Prisma.VideoUncheckedUpdateWithoutStatsInput>
+  create: Prisma.XOR<Prisma.VideoCreateWithoutStatsInput, Prisma.VideoUncheckedCreateWithoutStatsInput>
+  where?: Prisma.VideoWhereInput
+}
+
+export type VideoUpdateToOneWithWhereWithoutStatsInput = {
+  where?: Prisma.VideoWhereInput
+  data: Prisma.XOR<Prisma.VideoUpdateWithoutStatsInput, Prisma.VideoUncheckedUpdateWithoutStatsInput>
+}
+
+export type VideoUpdateWithoutStatsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.StringFieldUpdateOperationsInput | string
+  thumbnailUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  duration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  status?: Prisma.EnumVideoStatusFieldUpdateOperationsInput | $Enums.VideoStatus
+  tags?: Prisma.VideoUpdatetagsInput | string[]
+  searchText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  sourceKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  playbackKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  thumbnailKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  width?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  height?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  processingError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  category?: Prisma.VideoCategoryUpdateOneWithoutVideosNestedInput
+  uploadedBy?: Prisma.UserUpdateOneRequiredWithoutUploadedVideosNestedInput
+  matchupsAsA?: Prisma.MatchupUpdateManyWithoutVideoANestedInput
+  matchupsAsB?: Prisma.MatchupUpdateManyWithoutVideoBNestedInput
+  wonMatchups?: Prisma.MatchupUpdateManyWithoutWinningVideoNestedInput
+}
+
+export type VideoUncheckedUpdateWithoutStatsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.StringFieldUpdateOperationsInput | string
+  thumbnailUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  duration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  status?: Prisma.EnumVideoStatusFieldUpdateOperationsInput | $Enums.VideoStatus
+  tags?: Prisma.VideoUpdatetagsInput | string[]
+  searchText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceBytes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  sourceKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  playbackKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  thumbnailKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  width?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  height?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  processingError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uploadedById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  matchupsAsA?: Prisma.MatchupUncheckedUpdateManyWithoutVideoANestedInput
+  matchupsAsB?: Prisma.MatchupUncheckedUpdateManyWithoutVideoBNestedInput
+  wonMatchups?: Prisma.MatchupUncheckedUpdateManyWithoutWinningVideoNestedInput
 }
 
 export type VideoCreateManyUploadedByInput = {
@@ -1505,6 +1666,7 @@ export type VideoUpdateWithoutUploadedByInput = {
   matchupsAsA?: Prisma.MatchupUpdateManyWithoutVideoANestedInput
   matchupsAsB?: Prisma.MatchupUpdateManyWithoutVideoBNestedInput
   wonMatchups?: Prisma.MatchupUpdateManyWithoutWinningVideoNestedInput
+  stats?: Prisma.VideoStatsUpdateOneWithoutVideoNestedInput
 }
 
 export type VideoUncheckedUpdateWithoutUploadedByInput = {
@@ -1531,6 +1693,7 @@ export type VideoUncheckedUpdateWithoutUploadedByInput = {
   matchupsAsA?: Prisma.MatchupUncheckedUpdateManyWithoutVideoANestedInput
   matchupsAsB?: Prisma.MatchupUncheckedUpdateManyWithoutVideoBNestedInput
   wonMatchups?: Prisma.MatchupUncheckedUpdateManyWithoutWinningVideoNestedInput
+  stats?: Prisma.VideoStatsUncheckedUpdateOneWithoutVideoNestedInput
 }
 
 export type VideoUncheckedUpdateManyWithoutUploadedByInput = {
@@ -1603,6 +1766,7 @@ export type VideoUpdateWithoutCategoryInput = {
   matchupsAsA?: Prisma.MatchupUpdateManyWithoutVideoANestedInput
   matchupsAsB?: Prisma.MatchupUpdateManyWithoutVideoBNestedInput
   wonMatchups?: Prisma.MatchupUpdateManyWithoutWinningVideoNestedInput
+  stats?: Prisma.VideoStatsUpdateOneWithoutVideoNestedInput
 }
 
 export type VideoUncheckedUpdateWithoutCategoryInput = {
@@ -1629,6 +1793,7 @@ export type VideoUncheckedUpdateWithoutCategoryInput = {
   matchupsAsA?: Prisma.MatchupUncheckedUpdateManyWithoutVideoANestedInput
   matchupsAsB?: Prisma.MatchupUncheckedUpdateManyWithoutVideoBNestedInput
   wonMatchups?: Prisma.MatchupUncheckedUpdateManyWithoutWinningVideoNestedInput
+  stats?: Prisma.VideoStatsUncheckedUpdateOneWithoutVideoNestedInput
 }
 
 export type VideoUncheckedUpdateManyWithoutCategoryInput = {
@@ -1730,6 +1895,7 @@ export type VideoSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   matchupsAsA?: boolean | Prisma.Video$matchupsAsAArgs<ExtArgs>
   matchupsAsB?: boolean | Prisma.Video$matchupsAsBArgs<ExtArgs>
   wonMatchups?: boolean | Prisma.Video$wonMatchupsArgs<ExtArgs>
+  stats?: boolean | Prisma.Video$statsArgs<ExtArgs>
   _count?: boolean | Prisma.VideoCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["video"]>
 
@@ -1816,6 +1982,7 @@ export type VideoInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   matchupsAsA?: boolean | Prisma.Video$matchupsAsAArgs<ExtArgs>
   matchupsAsB?: boolean | Prisma.Video$matchupsAsBArgs<ExtArgs>
   wonMatchups?: boolean | Prisma.Video$wonMatchupsArgs<ExtArgs>
+  stats?: boolean | Prisma.Video$statsArgs<ExtArgs>
   _count?: boolean | Prisma.VideoCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type VideoIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1835,6 +2002,7 @@ export type $VideoPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     matchupsAsA: Prisma.$MatchupPayload<ExtArgs>[]
     matchupsAsB: Prisma.$MatchupPayload<ExtArgs>[]
     wonMatchups: Prisma.$MatchupPayload<ExtArgs>[]
+    stats: Prisma.$VideoStatsPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2257,6 +2425,7 @@ export interface Prisma__VideoClient<T, Null = never, ExtArgs extends runtime.Ty
   matchupsAsA<T extends Prisma.Video$matchupsAsAArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Video$matchupsAsAArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MatchupPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   matchupsAsB<T extends Prisma.Video$matchupsAsBArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Video$matchupsAsBArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MatchupPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   wonMatchups<T extends Prisma.Video$wonMatchupsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Video$wonMatchupsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MatchupPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  stats<T extends Prisma.Video$statsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Video$statsArgs<ExtArgs>>): Prisma.Prisma__VideoStatsClient<runtime.Types.Result.GetResult<Prisma.$VideoStatsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2791,6 +2960,25 @@ export type Video$wonMatchupsArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.MatchupScalarFieldEnum | Prisma.MatchupScalarFieldEnum[]
+}
+
+/**
+ * Video.stats
+ */
+export type Video$statsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the VideoStats
+   */
+  select?: Prisma.VideoStatsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the VideoStats
+   */
+  omit?: Prisma.VideoStatsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.VideoStatsInclude<ExtArgs> | null
+  where?: Prisma.VideoStatsWhereInput
 }
 
 /**

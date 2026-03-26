@@ -61,12 +61,12 @@ export default function Home() {
           >
             <HomeIcon className="h-4 w-4" />
           </Link>
-          <button
-            onClick={() => setShowProfile(true)}
+          <Link
+            href="/profile"
             className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#161616] text-white transition-colors hover:bg-[#1d1d1d]"
           >
             <User className="h-4 w-4" />
-          </button>
+          </Link>
         </div>
         <div className="flex flex-1 flex-col items-center pt-6 text-center">
           <SpotrIcon size={96} className="mb-6" />

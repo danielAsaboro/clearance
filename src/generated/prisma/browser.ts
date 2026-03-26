@@ -72,3 +72,13 @@ export type Campaign = Prisma.CampaignModel
  * 
  */
 export type CampaignEnrollment = Prisma.CampaignEnrollmentModel
+/**
+ * Model VideoStats
+ * 
+ */
+export type VideoStats = Prisma.VideoStatsModel
+/**
+ * Model AnalyticsEvent
+ * 
+ */
+export type AnalyticsEvent = Prisma.AnalyticsEventModel

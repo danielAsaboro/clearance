@@ -394,7 +394,9 @@ export const ModelName = {
   DiscountCode: 'DiscountCode',
   Referral: 'Referral',
   Campaign: 'Campaign',
-  CampaignEnrollment: 'CampaignEnrollment'
+  CampaignEnrollment: 'CampaignEnrollment',
+  VideoStats: 'VideoStats',
+  AnalyticsEvent: 'AnalyticsEvent'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -410,7 +412,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "video" | "videoCategory" | "weeklySession" | "matchup" | "vote" | "gameResult" | "discountCode" | "referral" | "campaign" | "campaignEnrollment"
+    modelProps: "user" | "video" | "videoCategory" | "weeklySession" | "matchup" | "vote" | "gameResult" | "discountCode" | "referral" | "campaign" | "campaignEnrollment" | "videoStats" | "analyticsEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1228,6 +1230,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    VideoStats: {
+      payload: Prisma.$VideoStatsPayload<ExtArgs>
+      fields: Prisma.VideoStatsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.VideoStatsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VideoStatsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.VideoStatsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VideoStatsPayload>
+        }
+        findFirst: {
+          args: Prisma.VideoStatsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VideoStatsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.VideoStatsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VideoStatsPayload>
+        }
+        findMany: {
+          args: Prisma.VideoStatsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VideoStatsPayload>[]
+        }
+        create: {
+          args: Prisma.VideoStatsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VideoStatsPayload>
+        }
+        createMany: {
+          args: Prisma.VideoStatsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.VideoStatsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VideoStatsPayload>[]
+        }
+        delete: {
+          args: Prisma.VideoStatsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VideoStatsPayload>
+        }
+        update: {
+          args: Prisma.VideoStatsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VideoStatsPayload>
+        }
+        deleteMany: {
+          args: Prisma.VideoStatsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.VideoStatsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.VideoStatsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VideoStatsPayload>[]
+        }
+        upsert: {
+          args: Prisma.VideoStatsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VideoStatsPayload>
+        }
+        aggregate: {
+          args: Prisma.VideoStatsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateVideoStats>
+        }
+        groupBy: {
+          args: Prisma.VideoStatsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.VideoStatsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.VideoStatsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.VideoStatsCountAggregateOutputType> | number
+        }
+      }
+    }
+    AnalyticsEvent: {
+      payload: Prisma.$AnalyticsEventPayload<ExtArgs>
+      fields: Prisma.AnalyticsEventFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AnalyticsEventFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsEventPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AnalyticsEventFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsEventPayload>
+        }
+        findFirst: {
+          args: Prisma.AnalyticsEventFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsEventPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AnalyticsEventFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsEventPayload>
+        }
+        findMany: {
+          args: Prisma.AnalyticsEventFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsEventPayload>[]
+        }
+        create: {
+          args: Prisma.AnalyticsEventCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsEventPayload>
+        }
+        createMany: {
+          args: Prisma.AnalyticsEventCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AnalyticsEventCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsEventPayload>[]
+        }
+        delete: {
+          args: Prisma.AnalyticsEventDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsEventPayload>
+        }
+        update: {
+          args: Prisma.AnalyticsEventUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsEventPayload>
+        }
+        deleteMany: {
+          args: Prisma.AnalyticsEventDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AnalyticsEventUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AnalyticsEventUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsEventPayload>[]
+        }
+        upsert: {
+          args: Prisma.AnalyticsEventUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsEventPayload>
+        }
+        aggregate: {
+          args: Prisma.AnalyticsEventAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAnalyticsEvent>
+        }
+        groupBy: {
+          args: Prisma.AnalyticsEventGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AnalyticsEventGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AnalyticsEventCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AnalyticsEventCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1359,7 +1509,9 @@ export const VoteScalarFieldEnum = {
   userId: 'userId',
   matchupId: 'matchupId',
   decision: 'decision',
-  submittedAt: 'submittedAt'
+  submittedAt: 'submittedAt',
+  timeToVoteMs: 'timeToVoteMs',
+  deviceType: 'deviceType'
 } as const
 
 export type VoteScalarFieldEnum = (typeof VoteScalarFieldEnum)[keyof typeof VoteScalarFieldEnum]
@@ -1440,6 +1592,38 @@ export const CampaignEnrollmentScalarFieldEnum = {
 } as const
 
 export type CampaignEnrollmentScalarFieldEnum = (typeof CampaignEnrollmentScalarFieldEnum)[keyof typeof CampaignEnrollmentScalarFieldEnum]
+
+
+export const VideoStatsScalarFieldEnum = {
+  id: 'id',
+  videoId: 'videoId',
+  timesUsed: 'timesUsed',
+  timesWon: 'timesWon',
+  timesLost: 'timesLost',
+  totalVotesFor: 'totalVotesFor',
+  totalVotesAgainst: 'totalVotesAgainst',
+  winRate: 'winRate',
+  avgVoteShare: 'avgVoteShare',
+  sessionsAppeared: 'sessionsAppeared',
+  lastUsedAt: 'lastUsedAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type VideoStatsScalarFieldEnum = (typeof VideoStatsScalarFieldEnum)[keyof typeof VideoStatsScalarFieldEnum]
+
+
+export const AnalyticsEventScalarFieldEnum = {
+  id: 'id',
+  type: 'type',
+  userId: 'userId',
+  sessionId: 'sessionId',
+  videoId: 'videoId',
+  matchupId: 'matchupId',
+  metadata: 'metadata',
+  createdAt: 'createdAt'
+} as const
+
+export type AnalyticsEventScalarFieldEnum = (typeof AnalyticsEventScalarFieldEnum)[keyof typeof AnalyticsEventScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1755,6 +1939,8 @@ export type GlobalOmitConfig = {
   referral?: Prisma.ReferralOmit
   campaign?: Prisma.CampaignOmit
   campaignEnrollment?: Prisma.CampaignEnrollmentOmit
+  videoStats?: Prisma.VideoStatsOmit
+  analyticsEvent?: Prisma.AnalyticsEventOmit
 }
 
 /* Types for Logging */

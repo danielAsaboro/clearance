@@ -20,8 +20,18 @@ export type VoteModel = runtime.Types.Result.DefaultSelection<Prisma.$VotePayloa
 
 export type AggregateVote = {
   _count: VoteCountAggregateOutputType | null
+  _avg: VoteAvgAggregateOutputType | null
+  _sum: VoteSumAggregateOutputType | null
   _min: VoteMinAggregateOutputType | null
   _max: VoteMaxAggregateOutputType | null
+}
+
+export type VoteAvgAggregateOutputType = {
+  timeToVoteMs: number | null
+}
+
+export type VoteSumAggregateOutputType = {
+  timeToVoteMs: number | null
 }
 
 export type VoteMinAggregateOutputType = {
@@ -30,6 +40,8 @@ export type VoteMinAggregateOutputType = {
   matchupId: string | null
   decision: $Enums.VoteDecision | null
   submittedAt: Date | null
+  timeToVoteMs: number | null
+  deviceType: string | null
 }
 
 export type VoteMaxAggregateOutputType = {
@@ -38,6 +50,8 @@ export type VoteMaxAggregateOutputType = {
   matchupId: string | null
   decision: $Enums.VoteDecision | null
   submittedAt: Date | null
+  timeToVoteMs: number | null
+  deviceType: string | null
 }
 
 export type VoteCountAggregateOutputType = {
@@ -46,9 +60,19 @@ export type VoteCountAggregateOutputType = {
   matchupId: number
   decision: number
   submittedAt: number
+  timeToVoteMs: number
+  deviceType: number
   _all: number
 }
 
+
+export type VoteAvgAggregateInputType = {
+  timeToVoteMs?: true
+}
+
+export type VoteSumAggregateInputType = {
+  timeToVoteMs?: true
+}
 
 export type VoteMinAggregateInputType = {
   id?: true
@@ -56,6 +80,8 @@ export type VoteMinAggregateInputType = {
   matchupId?: true
   decision?: true
   submittedAt?: true
+  timeToVoteMs?: true
+  deviceType?: true
 }
 
 export type VoteMaxAggregateInputType = {
@@ -64,6 +90,8 @@ export type VoteMaxAggregateInputType = {
   matchupId?: true
   decision?: true
   submittedAt?: true
+  timeToVoteMs?: true
+  deviceType?: true
 }
 
 export type VoteCountAggregateInputType = {
@@ -72,6 +100,8 @@ export type VoteCountAggregateInputType = {
   matchupId?: true
   decision?: true
   submittedAt?: true
+  timeToVoteMs?: true
+  deviceType?: true
   _all?: true
 }
 
@@ -113,6 +143,18 @@ export type VoteAggregateArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: VoteAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: VoteSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: VoteMinAggregateInputType
@@ -143,6 +185,8 @@ export type VoteGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
   take?: number
   skip?: number
   _count?: VoteCountAggregateInputType | true
+  _avg?: VoteAvgAggregateInputType
+  _sum?: VoteSumAggregateInputType
   _min?: VoteMinAggregateInputType
   _max?: VoteMaxAggregateInputType
 }
@@ -153,7 +197,11 @@ export type VoteGroupByOutputType = {
   matchupId: string
   decision: $Enums.VoteDecision
   submittedAt: Date
+  timeToVoteMs: number | null
+  deviceType: string | null
   _count: VoteCountAggregateOutputType | null
+  _avg: VoteAvgAggregateOutputType | null
+  _sum: VoteSumAggregateOutputType | null
   _min: VoteMinAggregateOutputType | null
   _max: VoteMaxAggregateOutputType | null
 }
@@ -182,6 +230,8 @@ export type VoteWhereInput = {
   matchupId?: Prisma.StringFilter<"Vote"> | string
   decision?: Prisma.EnumVoteDecisionFilter<"Vote"> | $Enums.VoteDecision
   submittedAt?: Prisma.DateTimeFilter<"Vote"> | Date | string
+  timeToVoteMs?: Prisma.IntNullableFilter<"Vote"> | number | null
+  deviceType?: Prisma.StringNullableFilter<"Vote"> | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   matchup?: Prisma.XOR<Prisma.MatchupScalarRelationFilter, Prisma.MatchupWhereInput>
 }
@@ -192,6 +242,8 @@ export type VoteOrderByWithRelationInput = {
   matchupId?: Prisma.SortOrder
   decision?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
+  timeToVoteMs?: Prisma.SortOrderInput | Prisma.SortOrder
+  deviceType?: Prisma.SortOrderInput | Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   matchup?: Prisma.MatchupOrderByWithRelationInput
 }
@@ -206,6 +258,8 @@ export type VoteWhereUniqueInput = Prisma.AtLeast<{
   matchupId?: Prisma.StringFilter<"Vote"> | string
   decision?: Prisma.EnumVoteDecisionFilter<"Vote"> | $Enums.VoteDecision
   submittedAt?: Prisma.DateTimeFilter<"Vote"> | Date | string
+  timeToVoteMs?: Prisma.IntNullableFilter<"Vote"> | number | null
+  deviceType?: Prisma.StringNullableFilter<"Vote"> | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   matchup?: Prisma.XOR<Prisma.MatchupScalarRelationFilter, Prisma.MatchupWhereInput>
 }, "id" | "userId_matchupId">
@@ -216,9 +270,13 @@ export type VoteOrderByWithAggregationInput = {
   matchupId?: Prisma.SortOrder
   decision?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
+  timeToVoteMs?: Prisma.SortOrderInput | Prisma.SortOrder
+  deviceType?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.VoteCountOrderByAggregateInput
+  _avg?: Prisma.VoteAvgOrderByAggregateInput
   _max?: Prisma.VoteMaxOrderByAggregateInput
   _min?: Prisma.VoteMinOrderByAggregateInput
+  _sum?: Prisma.VoteSumOrderByAggregateInput
 }
 
 export type VoteScalarWhereWithAggregatesInput = {
@@ -230,12 +288,16 @@ export type VoteScalarWhereWithAggregatesInput = {
   matchupId?: Prisma.StringWithAggregatesFilter<"Vote"> | string
   decision?: Prisma.EnumVoteDecisionWithAggregatesFilter<"Vote"> | $Enums.VoteDecision
   submittedAt?: Prisma.DateTimeWithAggregatesFilter<"Vote"> | Date | string
+  timeToVoteMs?: Prisma.IntNullableWithAggregatesFilter<"Vote"> | number | null
+  deviceType?: Prisma.StringNullableWithAggregatesFilter<"Vote"> | string | null
 }
 
 export type VoteCreateInput = {
   id?: string
   decision: $Enums.VoteDecision
   submittedAt?: Date | string
+  timeToVoteMs?: number | null
+  deviceType?: string | null
   user: Prisma.UserCreateNestedOneWithoutVotesInput
   matchup: Prisma.MatchupCreateNestedOneWithoutVotesInput
 }
@@ -246,12 +308,16 @@ export type VoteUncheckedCreateInput = {
   matchupId: string
   decision: $Enums.VoteDecision
   submittedAt?: Date | string
+  timeToVoteMs?: number | null
+  deviceType?: string | null
 }
 
 export type VoteUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   decision?: Prisma.EnumVoteDecisionFieldUpdateOperationsInput | $Enums.VoteDecision
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  timeToVoteMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deviceType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutVotesNestedInput
   matchup?: Prisma.MatchupUpdateOneRequiredWithoutVotesNestedInput
 }
@@ -262,6 +328,8 @@ export type VoteUncheckedUpdateInput = {
   matchupId?: Prisma.StringFieldUpdateOperationsInput | string
   decision?: Prisma.EnumVoteDecisionFieldUpdateOperationsInput | $Enums.VoteDecision
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  timeToVoteMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deviceType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type VoteCreateManyInput = {
@@ -270,12 +338,16 @@ export type VoteCreateManyInput = {
   matchupId: string
   decision: $Enums.VoteDecision
   submittedAt?: Date | string
+  timeToVoteMs?: number | null
+  deviceType?: string | null
 }
 
 export type VoteUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   decision?: Prisma.EnumVoteDecisionFieldUpdateOperationsInput | $Enums.VoteDecision
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  timeToVoteMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deviceType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type VoteUncheckedUpdateManyInput = {
@@ -284,6 +356,8 @@ export type VoteUncheckedUpdateManyInput = {
   matchupId?: Prisma.StringFieldUpdateOperationsInput | string
   decision?: Prisma.EnumVoteDecisionFieldUpdateOperationsInput | $Enums.VoteDecision
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  timeToVoteMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deviceType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type VoteListRelationFilter = {
@@ -307,6 +381,12 @@ export type VoteCountOrderByAggregateInput = {
   matchupId?: Prisma.SortOrder
   decision?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
+  timeToVoteMs?: Prisma.SortOrder
+  deviceType?: Prisma.SortOrder
+}
+
+export type VoteAvgOrderByAggregateInput = {
+  timeToVoteMs?: Prisma.SortOrder
 }
 
 export type VoteMaxOrderByAggregateInput = {
@@ -315,6 +395,8 @@ export type VoteMaxOrderByAggregateInput = {
   matchupId?: Prisma.SortOrder
   decision?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
+  timeToVoteMs?: Prisma.SortOrder
+  deviceType?: Prisma.SortOrder
 }
 
 export type VoteMinOrderByAggregateInput = {
@@ -323,6 +405,12 @@ export type VoteMinOrderByAggregateInput = {
   matchupId?: Prisma.SortOrder
   decision?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
+  timeToVoteMs?: Prisma.SortOrder
+  deviceType?: Prisma.SortOrder
+}
+
+export type VoteSumOrderByAggregateInput = {
+  timeToVoteMs?: Prisma.SortOrder
 }
 
 export type VoteCreateNestedManyWithoutUserInput = {
@@ -417,6 +505,8 @@ export type VoteCreateWithoutUserInput = {
   id?: string
   decision: $Enums.VoteDecision
   submittedAt?: Date | string
+  timeToVoteMs?: number | null
+  deviceType?: string | null
   matchup: Prisma.MatchupCreateNestedOneWithoutVotesInput
 }
 
@@ -425,6 +515,8 @@ export type VoteUncheckedCreateWithoutUserInput = {
   matchupId: string
   decision: $Enums.VoteDecision
   submittedAt?: Date | string
+  timeToVoteMs?: number | null
+  deviceType?: string | null
 }
 
 export type VoteCreateOrConnectWithoutUserInput = {
@@ -462,12 +554,16 @@ export type VoteScalarWhereInput = {
   matchupId?: Prisma.StringFilter<"Vote"> | string
   decision?: Prisma.EnumVoteDecisionFilter<"Vote"> | $Enums.VoteDecision
   submittedAt?: Prisma.DateTimeFilter<"Vote"> | Date | string
+  timeToVoteMs?: Prisma.IntNullableFilter<"Vote"> | number | null
+  deviceType?: Prisma.StringNullableFilter<"Vote"> | string | null
 }
 
 export type VoteCreateWithoutMatchupInput = {
   id?: string
   decision: $Enums.VoteDecision
   submittedAt?: Date | string
+  timeToVoteMs?: number | null
+  deviceType?: string | null
   user: Prisma.UserCreateNestedOneWithoutVotesInput
 }
 
@@ -476,6 +572,8 @@ export type VoteUncheckedCreateWithoutMatchupInput = {
   userId: string
   decision: $Enums.VoteDecision
   submittedAt?: Date | string
+  timeToVoteMs?: number | null
+  deviceType?: string | null
 }
 
 export type VoteCreateOrConnectWithoutMatchupInput = {
@@ -509,12 +607,16 @@ export type VoteCreateManyUserInput = {
   matchupId: string
   decision: $Enums.VoteDecision
   submittedAt?: Date | string
+  timeToVoteMs?: number | null
+  deviceType?: string | null
 }
 
 export type VoteUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   decision?: Prisma.EnumVoteDecisionFieldUpdateOperationsInput | $Enums.VoteDecision
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  timeToVoteMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deviceType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   matchup?: Prisma.MatchupUpdateOneRequiredWithoutVotesNestedInput
 }
 
@@ -523,6 +625,8 @@ export type VoteUncheckedUpdateWithoutUserInput = {
   matchupId?: Prisma.StringFieldUpdateOperationsInput | string
   decision?: Prisma.EnumVoteDecisionFieldUpdateOperationsInput | $Enums.VoteDecision
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  timeToVoteMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deviceType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type VoteUncheckedUpdateManyWithoutUserInput = {
@@ -530,6 +634,8 @@ export type VoteUncheckedUpdateManyWithoutUserInput = {
   matchupId?: Prisma.StringFieldUpdateOperationsInput | string
   decision?: Prisma.EnumVoteDecisionFieldUpdateOperationsInput | $Enums.VoteDecision
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  timeToVoteMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deviceType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type VoteCreateManyMatchupInput = {
@@ -537,12 +643,16 @@ export type VoteCreateManyMatchupInput = {
   userId: string
   decision: $Enums.VoteDecision
   submittedAt?: Date | string
+  timeToVoteMs?: number | null
+  deviceType?: string | null
 }
 
 export type VoteUpdateWithoutMatchupInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   decision?: Prisma.EnumVoteDecisionFieldUpdateOperationsInput | $Enums.VoteDecision
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  timeToVoteMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deviceType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutVotesNestedInput
 }
 
@@ -551,6 +661,8 @@ export type VoteUncheckedUpdateWithoutMatchupInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   decision?: Prisma.EnumVoteDecisionFieldUpdateOperationsInput | $Enums.VoteDecision
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  timeToVoteMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deviceType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type VoteUncheckedUpdateManyWithoutMatchupInput = {
@@ -558,6 +670,8 @@ export type VoteUncheckedUpdateManyWithoutMatchupInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   decision?: Prisma.EnumVoteDecisionFieldUpdateOperationsInput | $Enums.VoteDecision
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  timeToVoteMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deviceType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -568,6 +682,8 @@ export type VoteSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   matchupId?: boolean
   decision?: boolean
   submittedAt?: boolean
+  timeToVoteMs?: boolean
+  deviceType?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   matchup?: boolean | Prisma.MatchupDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["vote"]>
@@ -578,6 +694,8 @@ export type VoteSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   matchupId?: boolean
   decision?: boolean
   submittedAt?: boolean
+  timeToVoteMs?: boolean
+  deviceType?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   matchup?: boolean | Prisma.MatchupDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["vote"]>
@@ -588,6 +706,8 @@ export type VoteSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   matchupId?: boolean
   decision?: boolean
   submittedAt?: boolean
+  timeToVoteMs?: boolean
+  deviceType?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   matchup?: boolean | Prisma.MatchupDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["vote"]>
@@ -598,9 +718,11 @@ export type VoteSelectScalar = {
   matchupId?: boolean
   decision?: boolean
   submittedAt?: boolean
+  timeToVoteMs?: boolean
+  deviceType?: boolean
 }
 
-export type VoteOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "matchupId" | "decision" | "submittedAt", ExtArgs["result"]["vote"]>
+export type VoteOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "matchupId" | "decision" | "submittedAt" | "timeToVoteMs" | "deviceType", ExtArgs["result"]["vote"]>
 export type VoteInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   matchup?: boolean | Prisma.MatchupDefaultArgs<ExtArgs>
@@ -626,6 +748,8 @@ export type $VotePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     matchupId: string
     decision: $Enums.VoteDecision
     submittedAt: Date
+    timeToVoteMs: number | null
+    deviceType: string | null
   }, ExtArgs["result"]["vote"]>
   composites: {}
 }
@@ -1056,6 +1180,8 @@ export interface VoteFieldRefs {
   readonly matchupId: Prisma.FieldRef<"Vote", 'String'>
   readonly decision: Prisma.FieldRef<"Vote", 'VoteDecision'>
   readonly submittedAt: Prisma.FieldRef<"Vote", 'DateTime'>
+  readonly timeToVoteMs: Prisma.FieldRef<"Vote", 'Int'>
+  readonly deviceType: Prisma.FieldRef<"Vote", 'String'>
 }
     
 

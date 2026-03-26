@@ -238,6 +238,7 @@ function GameContent() {
   const completedRoundRef = useRef(0);
   const redirectScheduled = useRef(false);
   const guestTokenRef = useRef<string | null>(getStoredGuestToken());
+  const roundStartRef = useRef<number>(Date.now());
 
   // Returns auth headers for API calls — Privy token or guest token
   const getAuthHeaders = useCallback(async (): Promise<Record<string, string>> => {
@@ -323,6 +324,7 @@ function GameContent() {
 
           // Go straight to playing — deposit handled server-side
           await fetchMatchups();
+          roundStartRef.current = Date.now();
           setPhase("playing");
           return;
         }
@@ -413,6 +415,23 @@ function GameContent() {
     }
   }, [fetchRoundResults, roundState]);
 
+  // Track video impressions when round changes
+  useEffect(() => {
+    const matchup = matchups[displayedRound - 1];
+    if (!matchup || !sessionId) return;
+
+    fetch("/api/analytics/events", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        events: [
+          { type: "video_impression", videoId: matchup.videoA.id, sessionId, matchupId: matchup.id },
+          { type: "video_impression", videoId: matchup.videoB.id, sessionId, matchupId: matchup.id },
+        ],
+      }),
+    }).catch(() => {});
+  }, [displayedRound, matchups, sessionId]);
+
   const handleVote = async (decision: "video_a" | "video_b") => {
     if (decision === voted) return;
 
@@ -424,6 +443,7 @@ function GameContent() {
 
     try {
       const headers = await getAuthHeaders();
+      const timeToVoteMs = Math.round(Date.now() - roundStartRef.current);
       await fetch("/api/votes", {
         method: "POST",
         headers: {
@@ -433,6 +453,7 @@ function GameContent() {
         body: JSON.stringify({
           matchupId: currentMatchup.id,
           decision,
+          timeToVoteMs,
         }),
       });
     } catch {
@@ -556,6 +577,7 @@ function GameContent() {
             setDisplayedRound(completedRoundRef.current + 1);
             setInterstitial(null);
             setVoted(null);
+            roundStartRef.current = Date.now();
           }}
         />
       ) : null}

@@ -25,7 +25,17 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { matchupId, decision } = parsed.data;
+  const { matchupId, decision, timeToVoteMs } = parsed.data;
+
+  // Parse device type from User-Agent
+  const ua = req.headers.get("user-agent") ?? "";
+  const deviceType = /mobile/i.test(ua)
+    ? "mobile"
+    : /tablet|ipad/i.test(ua)
+      ? "tablet"
+      : ua
+        ? "desktop"
+        : null;
 
   // Check matchup exists
   const matchup = await prisma.matchup.findUnique({
@@ -45,11 +55,13 @@ export async function POST(req: NextRequest) {
   // Upsert vote — allows changing pick while round is still active
   const vote = await prisma.vote.upsert({
     where: { userId_matchupId: { userId: user.id, matchupId } },
-    update: { decision },
+    update: { decision, timeToVoteMs, deviceType },
     create: {
       userId: user.id,
       matchupId,
       decision,
+      timeToVoteMs,
+      deviceType,
     },
   });
 

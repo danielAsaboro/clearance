@@ -96,11 +96,20 @@ async function main() {
     console.log("  Cleaned up previous demo session (week 99).");
   }
 
-  // Delete previous demo videos (uploaded by demo-seed user)
+  // Delete previous demo videos and their stats (uploaded by demo-seed user)
   const seedUser = await prisma.user.findUnique({
     where: { privyId: "demo-seed-user" },
   });
   if (seedUser) {
+    const demoVideoIds = await prisma.video.findMany({
+      where: { uploadedById: seedUser.id },
+      select: { id: true },
+    });
+    if (demoVideoIds.length > 0) {
+      await prisma.videoStats.deleteMany({
+        where: { videoId: { in: demoVideoIds.map((v) => v.id) } },
+      });
+    }
     await prisma.video.deleteMany({ where: { uploadedById: seedUser.id } });
   }
 
@@ -158,6 +167,66 @@ async function main() {
   }
   const mins = ((numMatchups * ROUND_DURATION) / 60).toFixed(1);
   console.log(`  Created ${numMatchups} matchups (${ROUND_DURATION}s each = ${mins} min total).`);
+
+  // ── Backfill VideoStats for any existing finalized matchups ──
+  const allMatchups = await prisma.matchup.findMany({
+    select: { videoAId: true, videoBId: true },
+  });
+  const allVideoIds = new Set<string>();
+  for (const m of allMatchups) {
+    allVideoIds.add(m.videoAId);
+    allVideoIds.add(m.videoBId);
+  }
+  if (allVideoIds.size > 0) {
+    let statsCount = 0;
+    for (const videoId of allVideoIds) {
+      const vMatchups = await prisma.matchup.findMany({
+        where: { OR: [{ videoAId: videoId }, { videoBId: videoId }] },
+        include: {
+          votes: { select: { decision: true } },
+          session: { select: { id: true, scheduledAt: true } },
+        },
+      });
+      if (vMatchups.length === 0) continue;
+
+      let timesUsed = 0, timesWon = 0, timesLost = 0;
+      let totalVotesFor = 0, totalVotesAgainst = 0;
+      let voteShareSum = 0, voteShareCount = 0;
+      const sessionIds = new Set<string>();
+      let lastUsedAt: Date | null = null;
+
+      for (const m of vMatchups) {
+        timesUsed++;
+        sessionIds.add(m.session.id);
+        if (!lastUsedAt || m.session.scheduledAt > lastUsedAt) lastUsedAt = m.session.scheduledAt;
+
+        const isVideoA = m.videoAId === videoId;
+        const votesA = m.votes.filter((v) => v.decision === "video_a").length;
+        const votesB = m.votes.filter((v) => v.decision === "video_b").length;
+        const votesFor = isVideoA ? votesA : votesB;
+        const votesAgainst = isVideoA ? votesB : votesA;
+        totalVotesFor += votesFor;
+        totalVotesAgainst += votesAgainst;
+
+        const total = votesFor + votesAgainst;
+        if (total > 0) { voteShareSum += (votesFor / total) * 100; voteShareCount++; }
+        if (m.winningVideoId) {
+          if (m.winningVideoId === videoId) timesWon++; else timesLost++;
+        }
+      }
+
+      const winRate = timesUsed > 0 ? (timesWon / timesUsed) * 100 : 0;
+      const avgVoteShare = voteShareCount > 0 ? voteShareSum / voteShareCount : 0;
+
+      await prisma.videoStats.upsert({
+        where: { videoId },
+        update: { timesUsed, timesWon, timesLost, totalVotesFor, totalVotesAgainst, winRate: Math.round(winRate * 10) / 10, avgVoteShare: Math.round(avgVoteShare * 10) / 10, sessionsAppeared: sessionIds.size, lastUsedAt },
+        create: { videoId, timesUsed, timesWon, timesLost, totalVotesFor, totalVotesAgainst, winRate: Math.round(winRate * 10) / 10, avgVoteShare: Math.round(avgVoteShare * 10) / 10, sessionsAppeared: sessionIds.size, lastUsedAt },
+      });
+      statsCount++;
+    }
+    console.log(`  Backfilled VideoStats for ${statsCount} videos.`);
+  }
 
   // ── Done ──
   console.log("\n  ════════════════════════════════════════");

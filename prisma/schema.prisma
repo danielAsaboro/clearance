@@ -96,6 +96,7 @@ model Video {
   matchupsAsA    Matchup[] @relation("VideoA")
   matchupsAsB    Matchup[] @relation("VideoB")
   wonMatchups    Matchup[] @relation("WinningVideo")
+  stats          VideoStats?
 }
 
 model VideoCategory {
@@ -144,13 +145,15 @@ model Matchup {
 }
 
 model Vote {
-  id          String       @id @default(cuid())
-  userId      String
-  user        User         @relation(fields: [userId], references: [id])
-  matchupId   String
-  matchup     Matchup      @relation(fields: [matchupId], references: [id])
-  decision    VoteDecision
-  submittedAt DateTime     @default(now())
+  id           String       @id @default(cuid())
+  userId       String
+  user         User         @relation(fields: [userId], references: [id])
+  matchupId    String
+  matchup      Matchup      @relation(fields: [matchupId], references: [id])
+  decision     VoteDecision
+  submittedAt  DateTime     @default(now())
+  timeToVoteMs Int?
+  deviceType   String?
 
   @@unique([userId, matchupId])
 }
@@ -232,4 +235,36 @@ model CampaignEnrollment {
   enrolledAt DateTime @default(now())
 
   @@unique([userId, campaignId])
+}
+
+model VideoStats {
+  id                String    @id @default(cuid())
+  videoId           String    @unique
+  video             Video     @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  timesUsed         Int       @default(0)
+  timesWon          Int       @default(0)
+  timesLost         Int       @default(0)
+  totalVotesFor     Int       @default(0)
+  totalVotesAgainst Int       @default(0)
+  winRate           Float     @default(0)
+  avgVoteShare      Float     @default(0)
+  sessionsAppeared  Int       @default(0)
+  lastUsedAt        DateTime?
+  updatedAt         DateTime  @default(now()) @updatedAt
+}
+
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  type      String
+  userId    String?
+  sessionId String?
+  videoId   String?
+  matchupId String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([type, createdAt])
+  @@index([videoId, type])
+  @@index([userId, type])
+  @@index([sessionId, type])
 }

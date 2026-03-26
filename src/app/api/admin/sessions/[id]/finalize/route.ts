@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { getAuthUser } from "@/lib/auth-helpers";
 import { calculateMajorityWinners, calculateTier } from "@/lib/session-engine";
 import { campaignConfig } from "@/lib/campaign-config";
+import { updateVideoStatsForSession } from "@/lib/video-stats";
 
 // POST /api/admin/sessions/:id/finalize — Calculate majority winners & assign tiers
 export async function POST(
@@ -103,6 +104,29 @@ export async function POST(
       },
     });
   }
+
+  // Update video performance stats (fire-and-forget)
+  void updateVideoStatsForSession(id);
+
+  // Log dropout events for players who didn't vote all matchups
+  const matchupCount = session.matchups.length;
+  void (async () => {
+    for (const result of gameResults) {
+      const voteCount = await prisma.vote.count({
+        where: { userId: result.userId, matchup: { sessionId: id } },
+      });
+      if (voteCount < matchupCount) {
+        await prisma.analyticsEvent.create({
+          data: {
+            type: "round_dropout",
+            userId: result.userId,
+            sessionId: id,
+            metadata: { lastVotedRound: voteCount, totalRounds: matchupCount },
+          },
+        });
+      }
+    }
+  })();
 
   return NextResponse.json({
     matchupsFinalized: session.matchups.length,
