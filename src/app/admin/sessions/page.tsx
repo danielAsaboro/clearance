@@ -13,6 +13,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import { clientEnv } from "@/lib/env";
 
 interface Session {
   id: string;
@@ -223,7 +224,7 @@ export default function AdminSessions() {
             <div className="flex items-center gap-2 text-xs text-[#888] mb-3">
               <span>
                 {session._count.matchups}/
-                {process.env.NEXT_PUBLIC_ROUNDS_PER_SESSION} matchups
+                {clientEnv.ROUNDS_PER_SESSION} matchups
               </span>
               <span>|</span>
               <span>{session._count.gameResults} participants</span>

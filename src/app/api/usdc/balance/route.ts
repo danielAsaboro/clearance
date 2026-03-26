@@ -3,15 +3,14 @@ import { Connection, PublicKey } from "@solana/web3.js";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { getAuthUser } from "@/lib/auth-helpers";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { serverEnv } from "@/lib/env";
 
 const connection = new Connection(
-  process.env.NEXT_PUBLIC_SOLANA_RPC_URL ?? "https://api.devnet.solana.com",
+  serverEnv.NEXT_PUBLIC_SOLANA_RPC_URL,
   "confirmed"
 );
 
-const USDC_MINT = new PublicKey(
-  process.env.USDC_MINT_ADDRESS ?? "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
-);
+const USDC_MINT = new PublicKey(serverEnv.USDC_MINT_ADDRESS);
 
 // GET /api/usdc/balance — returns fan's fake USDC balance
 export async function GET(req: NextRequest) {

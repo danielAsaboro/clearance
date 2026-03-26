@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { Connection } from "@solana/web3.js";
 import { prisma } from "@/lib/db";
 import { getAuthUser } from "@/lib/auth-helpers";
+import { serverEnv } from "@/lib/env";
 
 const connection = new Connection(
-  process.env.NEXT_PUBLIC_SOLANA_RPC_URL ?? "https://api.devnet.solana.com",
+  serverEnv.NEXT_PUBLIC_SOLANA_RPC_URL,
   "confirmed"
 );
 

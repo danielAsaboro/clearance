@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAuthUser } from "@/lib/auth-helpers";
-import { createReferral as tapestryReferral } from "@/lib/tapestry";
 
 // POST /api/referrals — Track a referral
 export async function POST(req: NextRequest) {
@@ -62,13 +61,6 @@ export async function POST(req: NextRequest) {
     where: { id: authUser.id },
     data: { referredBy: referralCode },
   });
-
-  // Mirror referral to on-chain social graph via Tapestry (fire-and-forget)
-  if (referrer.walletAddress && authUser.walletAddress) {
-    tapestryReferral(referrer.walletAddress, authUser.walletAddress).catch(
-      console.error
-    );
-  }
 
   const response = NextResponse.json(referral, { status: 201 });
   // Clear the cookie regardless of where the code came from

@@ -4,6 +4,7 @@ import { X, LogOut, User, Zap, Trophy, Crosshair } from 'lucide-react'
 import { usePrivy } from '@privy-io/react-auth'
 import { useWallets } from '@privy-io/react-auth/solana'
 import { useEffect, useState } from 'react'
+import { clientEnv } from '@/lib/env'
 
 interface ProfileModalProps {
   open: boolean
@@ -48,7 +49,7 @@ export default function ProfileModal({ open, onClose }: ProfileModalProps) {
 
   if (!open) return null
 
-  const tasteScoreMax = Number(process.env.TRIBE_TASTE_SCORE ?? 70)
+  const tasteScoreMax = clientEnv.TRIBE_TASTE_SCORE
   const tasteScorePct = stats ? Math.min(100, (stats.tasteScore / tasteScoreMax) * 100) : 0
 
   return (

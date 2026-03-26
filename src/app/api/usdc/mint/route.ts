@@ -7,23 +7,20 @@ import {
 } from "@solana/spl-token";
 import { getAuthUser } from "@/lib/auth-helpers";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { serverEnv } from "@/lib/env";
 
 const connection = new Connection(
-  process.env.NEXT_PUBLIC_SOLANA_RPC_URL ?? "https://api.devnet.solana.com",
+  serverEnv.NEXT_PUBLIC_SOLANA_RPC_URL,
   "confirmed"
 );
 
-const USDC_MINT_ADDRESS =
-  process.env.USDC_MINT_ADDRESS ??
-  "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+const USDC_MINT_ADDRESS = serverEnv.USDC_MINT_ADDRESS;
 
 // How much test USDC to give per request
 const FAUCET_AMOUNT_USDC = 10;
 
 function getMintAuthorityKeypair(): Keypair {
-  const secret = process.env.SOLANA_MINT_AUTHORITY_SECRET_KEY;
-  if (!secret) throw new Error("SOLANA_MINT_AUTHORITY_SECRET_KEY not set");
-  return Keypair.fromSecretKey(Uint8Array.from(JSON.parse(secret)));
+  return Keypair.fromSecretKey(Uint8Array.from(JSON.parse(serverEnv.SOLANA_MINT_AUTHORITY_SECRET_KEY)));
 }
 
 // POST /api/usdc/mint — mint test USDC to the authenticated fan's wallet

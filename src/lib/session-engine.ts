@@ -1,8 +1,8 @@
 import type { WeeklySession } from "@/generated/prisma/client";
+import { clientEnv } from "@/lib/env";
 
-// Use NEXT_PUBLIC_ vars so this module works in both server and client bundles
-const DEFAULT_MATCHUPS = parseInt(process.env.NEXT_PUBLIC_ROUNDS_PER_SESSION!);
-const DEFAULT_ROUND_DURATION = parseInt(process.env.NEXT_PUBLIC_VOTING_ROUND_DURATION_IN_SECONDS!);
+const DEFAULT_MATCHUPS = clientEnv.ROUNDS_PER_SESSION;
+const DEFAULT_ROUND_DURATION = clientEnv.VOTING_ROUND_DURATION_IN_SECONDS;
 
 export type SessionState = "future" | "today-waiting" | "live" | "ended";
 

@@ -10,10 +10,9 @@ import {
 } from "@solana/web3.js";
 import { prisma } from "@/lib/db";
 import { buildClaimWithNftTx } from "@/lib/vault-claim";
+import { serverEnv } from "@/lib/env";
 
-const connection = new Connection(
-  process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "https://api.devnet.solana.com"
-);
+const connection = new Connection(serverEnv.NEXT_PUBLIC_SOLANA_RPC_URL);
 
 // GET /api/actions/claim — Blink metadata for claiming USDC reward
 export async function GET(req: NextRequest) {

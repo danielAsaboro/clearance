@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, use } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import { ArrowLeft, Shuffle, Save, Film, Check } from "lucide-react";
 import Link from "next/link";
+import { clientEnv } from "@/lib/env";
 
 interface Video {
   id: string;
@@ -36,7 +37,7 @@ export default function MatchupBuilder({
   const [matchups, setMatchups] = useState<MatchupSlot[]>([]);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const totalSlots = parseInt(process.env.NEXT_PUBLIC_ROUNDS_PER_SESSION!);
+  const totalSlots = clientEnv.ROUNDS_PER_SESSION;
 
   const fetchData = useCallback(async () => {
     const token = await getAccessToken();

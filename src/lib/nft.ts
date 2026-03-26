@@ -11,6 +11,7 @@ import {
   type KeypairSigner,
 } from "@metaplex-foundation/umi";
 import { uploadNftMetadata } from "@/lib/nft-metadata";
+import { serverEnv } from "@/lib/env";
 
 export interface BlindBoxMetadata {
   tier: "participation" | "base" | "gold";
@@ -30,8 +31,8 @@ export async function createBlindBoxCollection(
   const metadataUri = await uploadNftMetadata({
     name: `Spotr TV Blind Box — Week ${sessionWeek}`,
     description: `Blind Box NFT collection for Spotr TV Week ${sessionWeek}. Reveal your box to discover your reward tier.`,
-    image: `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/icon-512x512.png`,
-    external_url: process.env.NEXT_PUBLIC_APP_URL ?? "https://spotr.tv",
+    image: `${serverEnv.NEXT_PUBLIC_APP_URL}/icon-512x512.png`,
+    external_url: serverEnv.NEXT_PUBLIC_APP_URL,
     attributes: [
       { trait_type: "Season", value: "1" },
       { trait_type: "Week", value: sessionWeek.toString() },
@@ -80,8 +81,8 @@ export async function mintBlindBox(
   const metadataUri = await uploadNftMetadata({
     name,
     description: `A mystery Blind Box from Spotr TV Week ${sessionWeek}. Reveal to discover your reward tier and claim USDC.`,
-    image: `${process.env.NEXT_PUBLIC_APP_URL ?? ""}${tierImages[tier] ?? "/icon-512x512.png"}`,
-    external_url: `${process.env.NEXT_PUBLIC_APP_URL ?? "https://spotr.tv"}/rewards`,
+    image: `${serverEnv.NEXT_PUBLIC_APP_URL}${tierImages[tier] ?? "/icon-512x512.png"}`,
+    external_url: `${serverEnv.NEXT_PUBLIC_APP_URL}/rewards`,
     attributes: [
       { trait_type: "Tier", value: tier },
       { trait_type: "Reward", value: `${rewardAmount} USDC` },

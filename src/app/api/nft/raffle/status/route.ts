@@ -5,6 +5,7 @@ import {
   fetchRaffleRecordOnChain,
   simulateVrfCallback,
 } from "@/lib/vault-claim";
+import { serverEnv } from "@/lib/env";
 
 // GET /api/nft/raffle/status?gameResultId=... — Poll RaffleRecord on-chain
 export async function GET(req: NextRequest) {
@@ -53,7 +54,7 @@ export async function GET(req: NextRequest) {
 
     // Auto-resolve VRF in testing mode: if raffle exists but not resolved,
     // simulate the VRF callback so the demo resolves within one poll cycle.
-    if (!record.resolved && process.env.VRF_TESTING_MODE === "true") {
+    if (!record.resolved && serverEnv.VRF_TESTING_MODE) {
       try {
         await simulateVrfCallback(
           walletAddress,

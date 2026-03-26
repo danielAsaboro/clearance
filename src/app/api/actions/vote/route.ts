@@ -10,14 +10,13 @@ import {
   TransactionInstruction,
 } from "@solana/web3.js";
 import { prisma } from "@/lib/db";
+import { serverEnv } from "@/lib/env";
 
 const MEMO_PROGRAM_ID = new PublicKey(
   "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"
 );
 
-const connection = new Connection(
-  process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "https://api.devnet.solana.com"
-);
+const connection = new Connection(serverEnv.NEXT_PUBLIC_SOLANA_RPC_URL);
 
 // GET /api/actions/vote — Blink metadata for voting on Spotr TV
 export async function GET(req: NextRequest) {

@@ -10,23 +10,17 @@ import {
   createTransferInstruction,
   getMint,
 } from "@solana/spl-token";
+import { serverEnv } from "@/lib/env";
 
 const connection = new Connection(
-  process.env.NEXT_PUBLIC_SOLANA_RPC_URL ?? "https://api.devnet.solana.com",
+  serverEnv.NEXT_PUBLIC_SOLANA_RPC_URL,
   "confirmed"
 );
 
-const USDC_MINT = new PublicKey(
-  process.env.USDC_MINT_ADDRESS ??
-    "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
-);
+const USDC_MINT = new PublicKey(serverEnv.USDC_MINT_ADDRESS);
 
 function getTreasuryKeypair(): Keypair {
-  const secret =
-    process.env.USDC_TREASURY_SECRET_KEY ??
-    process.env.SOLANA_MINT_AUTHORITY_SECRET_KEY;
-  if (!secret) throw new Error("Treasury secret key not configured");
-  return Keypair.fromSecretKey(Uint8Array.from(JSON.parse(secret)));
+  return Keypair.fromSecretKey(Uint8Array.from(JSON.parse(serverEnv.USDC_TREASURY_SECRET_KEY)));
 }
 
 /**

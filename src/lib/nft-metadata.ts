@@ -1,16 +1,17 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { serverEnv } from "@/lib/env";
 
 const s3 = new S3Client({
-  region: process.env.S3_REGION ?? "auto",
-  endpoint: process.env.S3_ENDPOINT,
+  region: serverEnv.S3_REGION,
+  endpoint: serverEnv.S3_ENDPOINT,
   credentials: {
-    accessKeyId: process.env.S3_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
+    accessKeyId: serverEnv.S3_ACCESS_KEY_ID,
+    secretAccessKey: serverEnv.S3_SECRET_ACCESS_KEY,
   },
 });
 
-const bucket = process.env.S3_BUCKET!;
-const publicUrl = process.env.S3_PUBLIC_URL!;
+const bucket = serverEnv.S3_BUCKET;
+const publicUrl = serverEnv.S3_PUBLIC_URL;
 
 interface NftMetadataAttribute {
   trait_type: string;

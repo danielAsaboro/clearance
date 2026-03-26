@@ -13,6 +13,7 @@ import BlindBoxCard from "@/components/BlindBoxCard";
 import ConnectWallet from "@/components/ConnectWallet";
 import LoyaltyBadges from "@/components/LoyaltyBadges";
 import { useCluster, getPrivySolanaChain } from "@/components/cluster/cluster-data-access";
+import { clientEnv } from "@/lib/env";
 
 interface GameResultNFT {
   id: string;
@@ -29,7 +30,7 @@ interface GameResultNFT {
 type RaffleStatus = "idle" | "requesting" | "polling" | "resolved";
 
 const solanaConnection = new Connection(
-  process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "https://api.devnet.solana.com",
+  clientEnv.SOLANA_RPC_URL,
   "confirmed"
 );
 
@@ -431,7 +432,7 @@ export default function RewardsPage() {
                     <p className="text-white font-bold text-sm mb-2">Participation NFT</p>
                     {result.nftTokenId && (
                       <a
-                        href={`https://explorer.solana.com/address/${result.nftTokenId}?cluster=${process.env.NEXT_PUBLIC_SOLANA_NETWORK || "devnet"}`}
+                        href={`https://explorer.solana.com/address/${result.nftTokenId}?cluster=${clientEnv.SOLANA_NETWORK}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-1.5 text-[#F5E642] text-xs hover:underline"

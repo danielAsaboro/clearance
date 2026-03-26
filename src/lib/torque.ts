@@ -1,5 +1,7 @@
+import { serverEnv } from "@/lib/env";
+
 const TORQUE_API_URL = "https://api.torque.so/v1";
-const TORQUE_API_KEY = process.env.TORQUE_API_KEY ?? "";
+const TORQUE_API_KEY = serverEnv.TORQUE_API_KEY;
 
 type LoyaltyAction =
   | "session_vote"

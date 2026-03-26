@@ -7,6 +7,7 @@ import { AlertCircle, User } from "lucide-react";
 import Link from "next/link";
 import MatchupPicker from "@/components/MatchupPicker";
 import ProgressBar from "@/components/ProgressBar";
+import { clientEnv } from "@/lib/env";
 
 interface MatchupVideo {
   id: string;
@@ -42,7 +43,7 @@ interface RoundResults {
 
 type GamePhase = "joining" | "playing" | "insufficient";
 
-const ENTRY_FEE = process.env.NEXT_PUBLIC_ENTRY_FEE_USDC!;
+const ENTRY_FEE = clientEnv.ENTRY_FEE_USDC;
 
 const GUEST_TOKEN_KEY = "spotr_guest_token";
 const GUEST_NAME_KEY = "spotr_guest_name";
@@ -511,7 +512,7 @@ function GameContent() {
   const roundDuration =
     roundState?.roundDuration ??
     defaultRoundDuration ??
-    parseInt(process.env.NEXT_PUBLIC_VOTING_ROUND_DURATION_IN_SECONDS!);
+    clientEnv.VOTING_ROUND_DURATION_IN_SECONDS;
   const secondsRemaining = interstitial ? roundDuration : (roundState?.secondsRemaining ?? roundDuration);
   const totalRounds = roundState?.totalRounds ?? matchups.length;
   const currentMatchup = matchups[displayedRound - 1] ?? matchups[0];

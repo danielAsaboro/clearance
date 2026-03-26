@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAuthUser } from "@/lib/auth-helpers";
+import { serverEnv } from "@/lib/env";
 
 // POST /api/admin/register
 // Body: { secret: string }
@@ -11,13 +12,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const adminSecret = process.env.ADMIN_SECRET;
-    if (!adminSecret) {
-        return NextResponse.json(
-            { error: "Admin registration is not configured on this server." },
-            { status: 503 }
-        );
-    }
+    const adminSecret = serverEnv.ADMIN_SECRET;
 
     const body = await req.json();
     const { secret } = body as { secret?: string };

@@ -10,17 +10,18 @@ import { pipeline } from "node:stream/promises";
 import { Readable } from "node:stream";
 import type { ReadableStream as NodeReadableStream } from "node:stream/web";
 import { getStorageAssetPath } from "@/lib/storage-url";
+import { serverEnv } from "@/lib/env";
 
 const s3 = new S3Client({
-  region: process.env.S3_REGION ?? "auto",
-  endpoint: process.env.S3_ENDPOINT,
+  region: serverEnv.S3_REGION,
+  endpoint: serverEnv.S3_ENDPOINT,
   credentials: {
-    accessKeyId: process.env.S3_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
+    accessKeyId: serverEnv.S3_ACCESS_KEY_ID,
+    secretAccessKey: serverEnv.S3_SECRET_ACCESS_KEY,
   },
 });
 
-const bucket = process.env.S3_BUCKET!;
+const bucket = serverEnv.S3_BUCKET;
 
 export async function getPresignedUploadUrl(
   key: string,

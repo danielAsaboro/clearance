@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { PrivyProvider, type PrivyClientConfig } from "@privy-io/react-auth";
 import { toSolanaWalletConnectors } from "@privy-io/react-auth/solana";
 import { useCluster, getPrivySolanaChain } from "@/components/cluster/cluster-data-access";
+import { clientEnv } from "@/lib/env";
 
 const solanaConnectors = toSolanaWalletConnectors({ shouldAutoConnect: true });
 
@@ -42,7 +43,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <PrivyProvider appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID!} config={config}>
+    <PrivyProvider appId={clientEnv.PRIVY_APP_ID} config={config}>
       {children}
     </PrivyProvider>
   );

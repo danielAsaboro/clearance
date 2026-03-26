@@ -7,6 +7,7 @@ import { Check, Copy, Home, LogIn, Share2, User } from 'lucide-react'
 import Link from 'next/link'
 import CircularProgress from '@/components/CircularProgress'
 import ProfileModal from '@/components/ProfileModal'
+import { clientEnv } from '@/lib/env'
 
 const GUEST_TOKEN_KEY = 'spotr_guest_token'
 const GUEST_NAME_KEY = 'spotr_guest_name'
@@ -128,7 +129,7 @@ function ResultsContent() {
   }
 
   const tasteScore = results?.tasteScore ?? (results ? results.correctVotes : 0)
-  const nftThreshold = Number(process.env.TRIBE_TASTE_SCORE ?? 70)
+  const nftThreshold = clientEnv.TRIBE_TASTE_SCORE
   const scorePct = Math.min(100, (tasteScore / nftThreshold) * 100)
 
   return (

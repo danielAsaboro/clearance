@@ -17,20 +17,17 @@ import {
   type Spotr,
 } from "../../anchor/src/spotr-exports";
 
+import { serverEnv } from "@/lib/env";
+
 const connection = new Connection(
-  process.env.NEXT_PUBLIC_SOLANA_RPC_URL ?? "https://api.devnet.solana.com",
+  serverEnv.NEXT_PUBLIC_SOLANA_RPC_URL,
   "confirmed"
 );
 
-const USDC_MINT = new PublicKey(
-  process.env.USDC_MINT_ADDRESS ??
-    "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
-);
+const USDC_MINT = new PublicKey(serverEnv.USDC_MINT_ADDRESS);
 
 function getAdminKeypair(): Keypair {
-  const secret = process.env.SOLANA_MINT_AUTHORITY_SECRET_KEY;
-  if (!secret) throw new Error("SOLANA_MINT_AUTHORITY_SECRET_KEY not set");
-  return Keypair.fromSecretKey(Uint8Array.from(JSON.parse(secret)));
+  return Keypair.fromSecretKey(Uint8Array.from(JSON.parse(serverEnv.SOLANA_MINT_AUTHORITY_SECRET_KEY)));
 }
 
 let _program: Program<Spotr> | null = null;

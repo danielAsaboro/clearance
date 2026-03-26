@@ -22,7 +22,8 @@ export function generateGuestUsername(): string {
 }
 
 function getSecret(): string {
-  return process.env.GUEST_TOKEN_SECRET || "spotr-guest-dev-secret-2026";
+  // Validated at startup via serverEnv
+  return process.env.GUEST_TOKEN_SECRET!;
 }
 
 export function signGuestToken(userId: string): string {

@@ -13,10 +13,8 @@ function localPathForKey(key: string) {
 }
 
 function getLocalUploadSigningSecret() {
-  return process.env.LOCAL_UPLOAD_SIGNING_SECRET ??
-    process.env.PRIVY_APP_SECRET ??
-    process.env.ADMIN_SECRET ??
-    null;
+  // Validated at startup via serverEnv
+  return process.env.LOCAL_UPLOAD_SIGNING_SECRET!;
 }
 
 function createLocalUploadSignature(input: {
@@ -25,11 +23,6 @@ function createLocalUploadSignature(input: {
   expires: number;
 }) {
   const secret = getLocalUploadSigningSecret();
-  if (!secret) {
-    throw new Error(
-      "LOCAL_UPLOAD_SIGNING_SECRET, PRIVY_APP_SECRET, or ADMIN_SECRET is required for local signed uploads"
-    );
-  }
 
   return crypto
     .createHmac("sha256", secret)
@@ -58,7 +51,8 @@ export function verifyLocalUploadSignature(input: {
 }
 
 export function getStorageMode() {
-  return process.env.STORAGE_MODE ?? "local";
+  // Validated at startup via serverEnv
+  return process.env.STORAGE_MODE!;
 }
 
 export function getPublicUrlForKey(key: string) {

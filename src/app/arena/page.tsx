@@ -9,6 +9,7 @@ import PageHeader from '@/components/PageHeader'
 import SessionStateDisplay from '@/components/SessionStateDisplay'
 import { getSessionState } from '@/lib/session-engine'
 import type { SessionState } from '@/lib/session-engine'
+import { clientEnv } from '@/lib/env'
 
 interface SessionData {
   id: string
@@ -22,7 +23,7 @@ interface SessionData {
   isSample?: boolean
 }
 
-const ENTRY_FEE = process.env.NEXT_PUBLIC_ENTRY_FEE_USDC ?? '1.00'
+const ENTRY_FEE = clientEnv.ENTRY_FEE_USDC
 
 export default function Arena() {
   const { authenticated, getAccessToken } = usePrivy()
@@ -126,7 +127,7 @@ export default function Arena() {
                 { icon: <Star className="h-3.5 w-3.5 text-[#d3b93b]" />, text: 'Build your Taste Score' },
                 {
                   icon: <Gift className="h-3.5 w-3.5 text-[#d3b93b]" />,
-                  text: `NFT whitelist eligibility at ${process.env.TRIBE_TASTE_SCORE ?? 21} points`,
+                  text: `NFT whitelist eligibility at ${clientEnv.TRIBE_TASTE_SCORE} points`,
                 },
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-3">

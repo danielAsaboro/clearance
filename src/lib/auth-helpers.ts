@@ -3,10 +3,11 @@ import { prisma } from "@/lib/db";
 import { nanoid } from "nanoid";
 import { NextRequest } from "next/server";
 import { verifyGuestToken } from "@/lib/guest-auth";
+import { serverEnv } from "@/lib/env";
 
 const privy = new PrivyClient(
-  process.env.NEXT_PUBLIC_PRIVY_APP_ID!,
-  process.env.PRIVY_APP_SECRET!
+  serverEnv.NEXT_PUBLIC_PRIVY_APP_ID,
+  serverEnv.PRIVY_APP_SECRET
 );
 
 function getLinkedSolanaWalletAddress(privyUser: Awaited<ReturnType<typeof privy.getUser>>) {

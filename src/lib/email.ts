@@ -1,17 +1,17 @@
 import { Resend } from "resend";
 import { campaignConfig } from "@/lib/campaign-config";
+import { serverEnv } from "@/lib/env";
 
 let _resend: Resend | null = null;
 function getResend(): Resend {
   if (!_resend) {
-    if (!process.env.RESEND_API_KEY) throw new Error("RESEND_API_KEY not set");
-    _resend = new Resend(process.env.RESEND_API_KEY);
+    _resend = new Resend(serverEnv.RESEND_API_KEY);
   }
   return _resend;
 }
 
-const from = process.env.RESEND_FROM_EMAIL ?? "Spotr TV <noreply@spotr.tv>";
-const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://spotr.tv";
+const from = serverEnv.RESEND_FROM_EMAIL;
+const appUrl = serverEnv.NEXT_PUBLIC_APP_URL;
 
 export async function sendSessionReminder(
   to: string,

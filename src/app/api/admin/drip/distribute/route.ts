@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/db";
 import { uploadNftMetadata } from "@/lib/nft-metadata";
+import { serverEnv } from "@/lib/env";
 
-const DRIP_API_URL = process.env.DRIP_API_URL ?? "https://api.drip.re/v1";
-const DRIP_API_KEY = process.env.DRIP_API_KEY;
+const DRIP_API_URL = serverEnv.DRIP_API_URL;
+const DRIP_API_KEY = serverEnv.DRIP_API_KEY;
 
 // POST /api/admin/drip/distribute — Trigger DRiP collectible distribution
 export async function POST(req: NextRequest) {
@@ -62,8 +63,8 @@ export async function POST(req: NextRequest) {
     {
       name: collectibleName,
       description: collectibleDescription,
-      image: `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/icon-512x512.png`,
-      external_url: process.env.NEXT_PUBLIC_APP_URL ?? "https://spotr.tv",
+      image: `${serverEnv.NEXT_PUBLIC_APP_URL}/icon-512x512.png`,
+      external_url: serverEnv.NEXT_PUBLIC_APP_URL,
       attributes: [
         { trait_type: "Type", value: "Participation" },
         { trait_type: "Week", value: session.weekNumber.toString() },

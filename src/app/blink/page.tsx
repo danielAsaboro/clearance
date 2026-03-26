@@ -7,6 +7,7 @@ import { usePrivy } from '@privy-io/react-auth'
 import PageHeader from '@/components/PageHeader'
 import ShareQR from '@/components/ShareQR'
 import SpotrIcon from '@/components/SpotrIcon'
+import { clientEnv } from '@/lib/env'
 
 function BlinkContent() {
   const searchParams = useSearchParams()
@@ -92,7 +93,7 @@ function BlinkContent() {
     window.open(`https://t.me/share/url?url=${encodeURIComponent(fullUrl)}&text=${encodeURIComponent(text)}`, '_blank')
   }
 
-  const nftThreshold = Number(process.env.TRIBE_TASTE_SCORE ?? 70)
+  const nftThreshold = clientEnv.TRIBE_TASTE_SCORE
   const scorePct = tribeScore !== null ? Math.min(100, (tribeScore / nftThreshold) * 100) : 0
   const backHref = sessionId ? `/arena/results?session=${sessionId}` : '/arena/results'
 
