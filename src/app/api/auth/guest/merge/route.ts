@@ -29,6 +29,14 @@ export async function POST(req: NextRequest) {
 
   // Migrate all guest data to the real user in a transaction
   await prisma.$transaction(async (tx) => {
+    // Carry over guest display name if the real user doesn't have one
+    if (!realUser.displayName && guestUser.displayName) {
+      await tx.user.update({
+        where: { id: realUser.id },
+        data: { displayName: guestUser.displayName },
+      });
+    }
+
     // Transfer GameResults (skip if real user already has one for that session)
     const guestResults = await tx.gameResult.findMany({
       where: { userId: guestUser.id },

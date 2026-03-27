@@ -80,6 +80,15 @@ async function clearDB() {
   console.log(`  WeeklySession: ${sessions.count} deleted`);
   const videos = await prisma.video.deleteMany();
   console.log(`  Video: ${videos.count} deleted`);
+  const guestIds = (await prisma.user.findMany({ where: { isGuest: true }, select: { id: true } })).map(u => u.id);
+  if (guestIds.length > 0) {
+    const referrals = await prisma.referral.deleteMany({
+      where: { OR: [{ referrerId: { in: guestIds } }, { referredUserId: { in: guestIds } }] },
+    });
+    console.log(`  Referrals (guest): ${referrals.count} deleted`);
+  }
+  const guests = await prisma.user.deleteMany({ where: { isGuest: true } });
+  console.log(`  Guest Users: ${guests.count} deleted`);
   console.log("DB clear done.\n");
 }
 

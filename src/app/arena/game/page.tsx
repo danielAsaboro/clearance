@@ -344,6 +344,7 @@ function GameContent() {
   const redirectScheduled = useRef(false);
   const guestTokenRef = useRef<string | null>(getStoredGuestToken());
   const roundStartRef = useRef<number>(Date.now());
+  const joinCalledRef = useRef(false);
 
   // Returns auth headers for API calls — Privy token or guest token
   const getAuthHeaders = useCallback(async (): Promise<Record<string, string>> => {
@@ -399,7 +400,8 @@ function GameContent() {
   }, [sessionId, getAuthHeaders]);
 
   useEffect(() => {
-    if (!sessionId) return;
+    if (!sessionId || joinCalledRef.current) return;
+    joinCalledRef.current = true;
 
     (async () => {
       setPhase("joining");
@@ -416,6 +418,15 @@ function GameContent() {
 
           // If user already played this session, show their score instead
           if (data.alreadyJoined) {
+            // Sample/replay sessions use per-player timing — let them continue
+            if (isSample || isReplay || data.asyncReplay) {
+              if (data.asyncReplay) setAsyncReplay(true);
+              await fetchMatchups();
+              roundStartRef.current = Date.now();
+              setPhase("playing");
+              return;
+            }
+
             // Fetch their results and referral code in parallel
             const [resultsRes, referralRes] = await Promise.all([
               fetch(`/api/sessions/${sessionId}/results`, { headers }),
@@ -481,30 +492,42 @@ function GameContent() {
     })();
   }, [fetchMatchups, getAuthHeaders, sessionId]);
 
+  // Poll for round state every 1.5s instead of SSE (works on serverless/Vercel)
   useEffect(() => {
     if (phase !== "playing" || !sessionId) return;
 
-    const streamUrl = (isSample || isReplay || asyncReplay)
-      ? `/api/sessions/sample/stream?sessionId=${sessionId}&async=true`
+    const startedAt = Date.now();
+    const pollUrl = (isSample || isReplay || asyncReplay)
+      ? `/api/sessions/sample/stream?sessionId=${sessionId}&async=true&startedAt=${startedAt}`
       : `/api/sessions/${sessionId}/stream`;
 
-    const es = new EventSource(streamUrl);
+    let stopped = false;
 
-    es.onmessage = (event) => {
-      const data: RoundState = JSON.parse(event.data);
-      setRoundState(data);
+    const poll = async () => {
+      if (stopped) return;
+      try {
+        const res = await fetch(pollUrl);
+        if (!res.ok) return;
+        const data: RoundState = await res.json();
+        if (stopped) return;
+        setRoundState(data);
 
-      if (data.status === "ended") {
-        setGameOver(true);
-        es.close();
+        if (data.status === "ended") {
+          setGameOver(true);
+          stopped = true;
+        }
+      } catch {
+        // Network error — will retry on next interval
       }
     };
 
-    es.onerror = () => {
-      es.close();
-    };
+    poll(); // initial fetch immediately
+    const intervalId = setInterval(poll, 1500);
 
-    return () => es.close();
+    return () => {
+      stopped = true;
+      clearInterval(intervalId);
+    };
   }, [isSample, isReplay, asyncReplay, phase, sessionId]);
 
   const fetchRoundResults = useCallback(

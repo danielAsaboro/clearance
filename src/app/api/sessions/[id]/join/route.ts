@@ -128,11 +128,7 @@ export async function POST(
     });
   } catch (err) {
     console.error("[join] server-side deposit failed:", err);
-    // Still allow user to play even if deposit fails
-    await prisma.gameResult.update({
-      where: { id: gameResult.id },
-      data: { depositConfirmed: true },
-    });
+    // Deposit failed — do NOT mark as confirmed; user can still play but won't be in the reward pool
   }
 
   return NextResponse.json(

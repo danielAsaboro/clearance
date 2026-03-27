@@ -62,7 +62,7 @@ function ResultsContent() {
     ;(async () => {
       try {
         const token = await getAccessToken()
-        await fetch('/api/auth/guest/merge', {
+        const res = await fetch('/api/auth/guest/merge', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -71,9 +71,13 @@ function ResultsContent() {
           body: JSON.stringify({ guestToken }),
         })
 
-        localStorage.removeItem(GUEST_TOKEN_KEY)
-        localStorage.removeItem(GUEST_NAME_KEY)
-        setMerged(true)
+        if (res.ok) {
+          localStorage.removeItem(GUEST_TOKEN_KEY)
+          localStorage.removeItem(GUEST_NAME_KEY)
+          setMerged(true)
+        } else {
+          console.error('[results] merge failed:', res.status, await res.text())
+        }
       } catch (err) {
         console.error('[results] merge failed:', err)
       } finally {
@@ -118,7 +122,7 @@ function ResultsContent() {
     }
 
     fetchResults()
-  }, [sessionId, getAuthHeaders])
+  }, [sessionId, getAuthHeaders, merged])
 
   if (loading) {
     return (

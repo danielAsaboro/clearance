@@ -66,6 +66,8 @@ model User {
   referralReceived Referral?  @relation("Referred")
   enrollments      CampaignEnrollment[]
   discountCodes    DiscountCode[]
+
+  @@index([walletAddress])
 }
 
 model Video {
@@ -142,6 +144,7 @@ model Matchup {
   votes           Vote[]
 
   @@unique([sessionId, matchupNumber])
+  @@index([sessionId])
 }
 
 model Vote {
@@ -156,6 +159,7 @@ model Vote {
   deviceType   String?
 
   @@unique([userId, matchupId])
+  @@index([matchupId])
 }
 
 model GameResult {
@@ -181,6 +185,7 @@ model GameResult {
   depositTxHash     String?
 
   @@unique([userId, sessionId])
+  @@index([sessionId])
 }
 
 model DiscountCode {

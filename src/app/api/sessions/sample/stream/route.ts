@@ -1,22 +1,27 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { campaignConfig } from "@/lib/campaign-config";
 
-const TICK_INTERVAL_MS = 1000;
 const RESULTS_DURATION = 5; // seconds of results overlay between rounds
 
-// GET /api/sessions/sample/stream — SSE endpoint for sample session
-// Per-player timing: starts "now" when the client connects and runs through all rounds.
+// Per-player start times for sample/async sessions
+// Key: sessionId:clientStartParam → start timestamp
+const playerStartTimes = new Map<string, number>();
+
+// GET /api/sessions/sample/stream — Polling endpoint for sample/async replay sessions
+// Per-player timing: each player's clock starts when they first poll.
+// Client must pass ?sessionId=...&async=true&startedAt=<timestamp> to maintain timing.
 export async function GET(req: NextRequest) {
   const isAsyncReplay = req.nextUrl.searchParams.get("async") === "true";
 
   if (!isAsyncReplay && !campaignConfig.sampleSessionEnabled) {
-    return new Response("Sample session is disabled", { status: 404 });
+    return NextResponse.json({ error: "Sample session is disabled" }, { status: 404 });
   }
 
   const sessionId = req.nextUrl.searchParams.get("sessionId");
+  const clientStartedAt = req.nextUrl.searchParams.get("startedAt");
 
-  // Determine total matchups from DB if sessionId provided, otherwise fall back to config
+  // Determine total matchups from DB if sessionId provided
   let totalMatchups = campaignConfig.matchupsPerSession;
   if (sessionId) {
     const count = await prisma.matchup.count({ where: { sessionId } });
@@ -24,65 +29,55 @@ export async function GET(req: NextRequest) {
   }
 
   const roundDuration = campaignConfig.votingRoundDurationSeconds;
-  const startTime = Date.now();
 
-  const stream = new ReadableStream({
-    start(controller) {
-      let closed = false;
+  // Track per-player start time using clientStartedAt as the key
+  const cacheKey = `${sessionId ?? "sample"}:${clientStartedAt ?? "default"}`;
+  let startTime = playerStartTimes.get(cacheKey);
+  if (!startTime) {
+    startTime = clientStartedAt ? parseInt(clientStartedAt, 10) : Date.now();
+    playerStartTimes.set(cacheKey, startTime);
+    // Evict old entries
+    if (playerStartTimes.size > 1000) {
+      const cutoff = Date.now() - 3600_000; // 1 hour
+      for (const [key, val] of playerStartTimes) {
+        if (val < cutoff) playerStartTimes.delete(key);
+      }
+    }
+  }
 
-      const sendEvent = (data: object) => {
-        if (closed) return;
-        const payload = `data: ${JSON.stringify(data)}\n\n`;
-        try {
-          controller.enqueue(new TextEncoder().encode(payload));
-        } catch {
-          // client disconnected
-          closed = true;
-        }
-      };
+  const elapsed = Math.max(0, Math.floor((Date.now() - startTime) / 1000));
+  const slotDuration = roundDuration + RESULTS_DURATION;
+  const totalDuration = totalMatchups * slotDuration;
 
-      const tick = () => {
-        if (closed) { clearInterval(intervalId); return; }
+  if (elapsed >= totalDuration) {
+    return NextResponse.json({
+      status: "ended",
+      round: totalMatchups,
+      secondsRemaining: 0,
+      totalRounds: totalMatchups,
+      roundDuration,
+    });
+  }
 
-        const elapsed = Math.max(0, Math.floor((Date.now() - startTime) / 1000));
-        const slotDuration = roundDuration + RESULTS_DURATION;
-        const totalDuration = totalMatchups * slotDuration;
+  const slotIndex = Math.floor(elapsed / slotDuration);
+  const secondsIntoSlot = elapsed % slotDuration;
+  const currentRound = slotIndex + 1;
 
-        if (elapsed >= totalDuration) {
-          sendEvent({ status: "ended", round: totalMatchups, secondsRemaining: 0, totalRounds: totalMatchups, roundDuration });
-          clearInterval(intervalId);
-          closed = true;
-          controller.close();
-          return;
-        }
+  if (secondsIntoSlot < roundDuration) {
+    return NextResponse.json({
+      status: "live",
+      round: currentRound,
+      secondsRemaining: roundDuration - secondsIntoSlot,
+      totalRounds: totalMatchups,
+      roundDuration,
+    });
+  }
 
-        const slotIndex = Math.floor(elapsed / slotDuration);
-        const secondsIntoSlot = elapsed % slotDuration;
-        const currentRound = slotIndex + 1;
-
-        if (secondsIntoSlot < roundDuration) {
-          // Voting phase
-          const secondsRemaining = roundDuration - secondsIntoSlot;
-          sendEvent({ status: "live", round: currentRound, secondsRemaining, totalRounds: totalMatchups, roundDuration });
-        } else {
-          // Results phase — hold at this round, timer frozen
-          sendEvent({ status: "results", round: currentRound, secondsRemaining: 0, totalRounds: totalMatchups, roundDuration });
-        }
-      };
-
-      tick();
-      const intervalId = setInterval(tick, TICK_INTERVAL_MS);
-
-      return () => clearInterval(intervalId);
-    },
-  });
-
-  return new Response(stream, {
-    headers: {
-      "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache, no-transform",
-      Connection: "keep-alive",
-      "X-Accel-Buffering": "no",
-    },
+  return NextResponse.json({
+    status: "results",
+    round: currentRound,
+    secondsRemaining: 0,
+    totalRounds: totalMatchups,
+    roundDuration,
   });
 }

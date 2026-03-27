@@ -73,24 +73,42 @@ export async function POST(
 
   const totalMatchups = session.matchups.length;
 
-  // First pass: calculate correctVotes for every player
+  // Batch-fetch ALL votes for this session in one query (avoids N+1 per player)
+  const allVotes = await prisma.vote.findMany({
+    where: { matchup: { sessionId: id } },
+    select: { userId: true, matchupId: true, decision: true },
+  });
+
+  // Build a matchup lookup for videoAId/videoBId
+  const matchupLookup = new Map(
+    session.matchups.map((m) => [m.id, { videoAId: m.videoAId, videoBId: m.videoBId }])
+  );
+
+  // Group votes by userId
+  const votesByUser = new Map<string, typeof allVotes>();
+  for (const vote of allVotes) {
+    let userVotes = votesByUser.get(vote.userId);
+    if (!userVotes) {
+      userVotes = [];
+      votesByUser.set(vote.userId, userVotes);
+    }
+    userVotes.push(vote);
+  }
+
+  // Calculate correctVotes for every player
   const playerScores: { resultId: string; totalVotes: number; correctVotes: number; tier: "participation" | "base" | "gold" }[] = [];
 
   for (const result of gameResults) {
-    const votes = await prisma.vote.findMany({
-      where: {
-        userId: result.userId,
-        matchup: { sessionId: id },
-      },
-      include: { matchup: true },
-    });
+    const votes = votesByUser.get(result.userId) ?? [];
 
     const correctVotes = votes.filter((v) => {
       const winner = winnerMap.get(v.matchupId);
       if (!winner) return false;
+      const matchup = matchupLookup.get(v.matchupId);
+      if (!matchup) return false;
       return (
-        (v.decision === "video_a" && winner === v.matchup.videoAId) ||
-        (v.decision === "video_b" && winner === v.matchup.videoBId)
+        (v.decision === "video_a" && winner === matchup.videoAId) ||
+        (v.decision === "video_b" && winner === matchup.videoBId)
       );
     }).length;
 
@@ -103,40 +121,39 @@ export async function POST(
   const totalDeposits = depositCount * campaignConfig.entryFeeUsdc;
   const totalTasteScores = playerScores.reduce((sum, p) => sum + p.correctVotes, 0);
 
-  // Second pass: persist scores and pool-based reward amounts
-  for (const player of playerScores) {
-    const rewardAmount = calculatePoolReward(player.correctVotes, totalTasteScores, totalDeposits, campaignConfig.playerPoolPercent);
-    await prisma.gameResult.update({
-      where: { id: player.resultId },
-      data: {
-        totalVotes: player.totalVotes,
-        correctVotes: player.correctVotes,
-        tier: player.tier,
-        rewardAmount: Math.round(rewardAmount * 100) / 100,
-      },
-    });
-  }
+  // Second pass: persist scores and pool-based reward amounts (batched)
+  await prisma.$transaction(
+    playerScores.map((player) => {
+      const rewardAmount = calculatePoolReward(player.correctVotes, totalTasteScores, totalDeposits, campaignConfig.playerPoolPercent);
+      return prisma.gameResult.update({
+        where: { id: player.resultId },
+        data: {
+          totalVotes: player.totalVotes,
+          correctVotes: player.correctVotes,
+          tier: player.tier,
+          rewardAmount: Math.round(rewardAmount * 100) / 100,
+        },
+      });
+    })
+  );
 
   // Update video performance stats (fire-and-forget)
   void updateVideoStatsForSession(id);
 
-  // Log dropout events for players who didn't vote all matchups
+  // Log dropout events for players who didn't vote all matchups (uses already-fetched votesByUser)
   const matchupCount = session.matchups.length;
   void (async () => {
-    for (const result of gameResults) {
-      const voteCount = await prisma.vote.count({
-        where: { userId: result.userId, matchup: { sessionId: id } },
-      });
-      if (voteCount < matchupCount) {
-        await prisma.analyticsEvent.create({
-          data: {
-            type: "round_dropout",
-            userId: result.userId,
-            sessionId: id,
-            metadata: { lastVotedRound: voteCount, totalRounds: matchupCount },
-          },
-        });
-      }
+    const dropoutEvents = gameResults
+      .map((result) => {
+        const voteCount = (votesByUser.get(result.userId) ?? []).length;
+        return voteCount < matchupCount
+          ? { type: "round_dropout" as const, userId: result.userId, sessionId: id, metadata: { lastVotedRound: voteCount, totalRounds: matchupCount } }
+          : null;
+      })
+      .filter(Boolean);
+
+    if (dropoutEvents.length > 0) {
+      await prisma.analyticsEvent.createMany({ data: dropoutEvents as any[] });
     }
   })();
 

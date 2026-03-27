@@ -72,7 +72,7 @@ function countCorrectVotes(
 async function getPlayerRankings(winnerMap: Map<string, string>) {
   const players = await prisma.user.findMany({
     where: {
-      role: "player",
+      isGuest: false,
       gameResults: { some: {} },
     },
     select: {
