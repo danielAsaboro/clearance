@@ -2,7 +2,7 @@ import { PrivyClient } from "@privy-io/server-auth";
 import { prisma } from "@/lib/db";
 import { nanoid } from "nanoid";
 import { NextRequest } from "next/server";
-import { verifyGuestToken } from "@/lib/guest-auth";
+import { verifyGuestToken, generateGuestUsername } from "@/lib/guest-auth";
 import { serverEnv } from "@/lib/env";
 
 const privy = new PrivyClient(
@@ -70,6 +70,7 @@ export async function getAuthUser(req: NextRequest) {
               email,
               phone,
               walletAddress,
+              displayName: generateGuestUsername(),
               referralCode: nanoid(8).toUpperCase(),
             },
           });

@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Crown, Trophy, Users, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Crown, Trophy, Users, X } from "lucide-react";
 import Link from "next/link";
+
+const PAGE_SIZE = 20;
 
 interface PlayerRanking {
   rank: number;
@@ -52,10 +54,12 @@ function truncateWallet(name: string) {
   return name.length > 10 ? `${name.slice(0, 4)}...${name.slice(-4)}` : name;
 }
 
-function PlayerLeaderboard({ rankings }: { rankings: PlayerRanking[] }) {
-  const showPodium = rankings.length >= 3;
+function PlayerLeaderboard({ rankings, page, onPageChange }: { rankings: PlayerRanking[]; page: number; onPageChange: (p: number) => void }) {
+  const showPodium = rankings.length >= 3 && page === 0;
   const podium = showPodium ? [rankings[1], rankings[0], rankings[2]] : [];
-  const rest = showPodium ? rankings.slice(3) : rankings;
+  const allRest = page === 0 ? rankings.slice(3) : rankings;
+  const totalPages = Math.ceil(allRest.length / PAGE_SIZE);
+  const pageItems = allRest.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
   return (
     <>
@@ -108,7 +112,7 @@ function PlayerLeaderboard({ rankings }: { rankings: PlayerRanking[] }) {
           <span className="text-right">Games</span>
         </div>
 
-        {rest.map((player) => (
+        {pageItems.map((player) => (
           <div
             key={player.userId}
             className="grid grid-cols-[36px_minmax(0,1fr)_minmax(0,1fr)_58px_58px_58px] gap-2 border-b border-white/6 px-4 py-[14px] text-[14px] last:border-b-0"
@@ -122,14 +126,20 @@ function PlayerLeaderboard({ rankings }: { rankings: PlayerRanking[] }) {
           </div>
         ))}
       </div>
+
+      {totalPages > 1 && (
+        <PaginationControls page={page} totalPages={totalPages} onPageChange={onPageChange} />
+      )}
     </>
   );
 }
 
-function TribeLeaderboard({ tribes }: { tribes: TribeRanking[] }) {
-  const showPodium = tribes.length >= 3;
+function TribeLeaderboard({ tribes, page, onPageChange }: { tribes: TribeRanking[]; page: number; onPageChange: (p: number) => void }) {
+  const showPodium = tribes.length >= 3 && page === 0;
   const podium = showPodium ? [tribes[1], tribes[0], tribes[2]] : [];
-  const rest = showPodium ? tribes.slice(3) : tribes;
+  const allRest = page === 0 ? tribes.slice(3) : tribes;
+  const totalPages = Math.ceil(allRest.length / PAGE_SIZE);
+  const pageItems = allRest.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
   return (
     <>
@@ -180,7 +190,7 @@ function TribeLeaderboard({ tribes }: { tribes: TribeRanking[] }) {
           <span className="text-right">Score</span>
         </div>
 
-        {rest.map((tribe) => (
+        {pageItems.map((tribe) => (
           <div
             key={tribe.leaderId}
             className="grid grid-cols-[44px_minmax(0,1fr)_74px_74px] gap-2 border-b border-white/6 px-4 py-[14px] text-[14px] last:border-b-0"
@@ -203,10 +213,38 @@ function TribeLeaderboard({ tribes }: { tribes: TribeRanking[] }) {
         </div>
       )}
 
+      {totalPages > 1 && (
+        <PaginationControls page={page} totalPages={totalPages} onPageChange={onPageChange} />
+      )}
+
       <p className="mt-5 text-center text-[12px] text-[#646464]">
         Tribes are ranked by the combined score of the leader and all referred members
       </p>
     </>
+  );
+}
+
+function PaginationControls({ page, totalPages, onPageChange }: { page: number; totalPages: number; onPageChange: (p: number) => void }) {
+  return (
+    <div className="mt-4 flex items-center justify-center gap-3">
+      <button
+        onClick={() => onPageChange(page - 1)}
+        disabled={page === 0}
+        className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 text-[#9b9b9b] transition-colors hover:bg-white/5 disabled:opacity-30 disabled:hover:bg-transparent"
+      >
+        <ChevronLeft className="h-4 w-4" />
+      </button>
+      <span className="text-[13px] text-[#8e8e8e]">
+        {page + 1} / {totalPages}
+      </span>
+      <button
+        onClick={() => onPageChange(page + 1)}
+        disabled={page >= totalPages - 1}
+        className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 text-[#9b9b9b] transition-colors hover:bg-white/5 disabled:opacity-30 disabled:hover:bg-transparent"
+      >
+        <ChevronRight className="h-4 w-4" />
+      </button>
+    </div>
   );
 }
 
@@ -215,6 +253,8 @@ export default function LeaderboardPage() {
   const [playerRankings, setPlayerRankings] = useState<PlayerRanking[]>([]);
   const [tribeRankings, setTribeRankings] = useState<TribeRanking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [playerPage, setPlayerPage] = useState(0);
+  const [tribePage, setTribePage] = useState(0);
 
   useEffect(() => {
     setLoading(true);
@@ -282,10 +322,10 @@ export default function LeaderboardPage() {
               <p className="text-[15px] text-[#8e8e8e]">No rankings yet.</p>
             </div>
           ) : (
-            <PlayerLeaderboard rankings={playerRankings} />
+            <PlayerLeaderboard rankings={playerRankings} page={playerPage} onPageChange={setPlayerPage} />
           )
         ) : (
-          <TribeLeaderboard tribes={tribeRankings} />
+          <TribeLeaderboard tribes={tribeRankings} page={tribePage} onPageChange={setTribePage} />
         )}
       </div>
     </div>
