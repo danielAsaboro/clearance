@@ -80,9 +80,10 @@ export default function ProfilePage() {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [referralCode, setReferralCode] = useState<string | null>(null);
 
-  const referralLink = privyUser?.id
-    ? `${window.location.origin}/ref/${privyUser.id}`
+  const referralLink = referralCode
+    ? `${typeof window !== "undefined" ? window.location.origin : "https://spotr.tv"}/ref/${referralCode}`
     : null;
 
   const copyReferralLink = async () => {
@@ -116,6 +117,14 @@ export default function ProfilePage() {
         const data = await res.json();
         setOverview(data.overview);
         setTrend(data.recentTrend);
+      }
+      // Fetch referral code
+      const refRes = await fetch("/api/referrals", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (refRes.ok) {
+        const refData = await refRes.json();
+        setReferralCode(refData.code ?? null);
       }
     } catch {
       // ignore
