@@ -156,6 +156,27 @@ async function getPlayerRankings(winnerMap: Map<string, string>, currentUserId: 
 }
 
 async function getTribeRankings(winnerMap: Map<string, string>, currentUserId: string | null) {
+  // Resolve current user's tribe leader (could be themselves or their referrer)
+  let currentUserTribeLeaderId: string | null = null;
+  if (currentUserId) {
+    const currentUser = await prisma.user.findUnique({
+      where: { id: currentUserId },
+      select: {
+        referralsMade: { select: { id: true }, take: 1 },
+        referralReceived: { select: { referrerId: true } },
+      },
+    });
+    if (currentUser) {
+      if (currentUser.referralsMade.length > 0) {
+        // User is a tribe leader
+        currentUserTribeLeaderId = currentUserId;
+      } else if (currentUser.referralReceived) {
+        // User is a tribe member — their leader is their referrer
+        currentUserTribeLeaderId = currentUser.referralReceived.referrerId;
+      }
+    }
+  }
+
   // Find all users who have referred at least one person (tribe leaders)
   const leaders = await prisma.user.findMany({
     where: {
@@ -213,5 +234,5 @@ async function getTribeRankings(winnerMap: Map<string, string>, currentUserId: s
     .sort((a, b) => b.tribeScore - a.tribeScore)
     .map((t, i) => ({ ...t, rank: i + 1 }));
 
-  return NextResponse.json({ tribes, currentUserId });
+  return NextResponse.json({ tribes, currentUserId, currentUserTribeLeaderId });
 }

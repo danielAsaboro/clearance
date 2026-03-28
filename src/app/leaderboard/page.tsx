@@ -186,17 +186,17 @@ function PlayerLeaderboard({ rankings, page, onPageChange, currentUserId }: { ra
   );
 }
 
-function TribeLeaderboard({ tribes, page, onPageChange, currentUserId }: { tribes: TribeRanking[]; page: number; onPageChange: (p: number) => void; currentUserId: string | null }) {
+function TribeLeaderboard({ tribes, page, onPageChange, myTribeLeaderId }: { tribes: TribeRanking[]; page: number; onPageChange: (p: number) => void; myTribeLeaderId: string | null }) {
   const showPodium = tribes.length >= 3 && page === 0;
   const podium = showPodium ? [tribes[1], tribes[0], tribes[2]] : [];
   const allRest = page === 0 ? tribes.slice(3) : tribes;
   const totalPages = Math.ceil(allRest.length / PAGE_SIZE);
   const pageItems = allRest.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
-  const myTribe = currentUserId ? tribes.find((t) => t.leaderId === currentUserId) : null;
+  const myTribe = myTribeLeaderId ? tribes.find((t) => t.leaderId === myTribeLeaderId) : null;
   const isMyTribeOnPage = myTribe
-    ? pageItems.some((t) => t.leaderId === currentUserId) ||
-      (showPodium && podium.some((t) => t.leaderId === currentUserId))
+    ? pageItems.some((t) => t.leaderId === myTribeLeaderId) ||
+      (showPodium && podium.some((t) => t.leaderId === myTribeLeaderId))
     : false;
 
   return (
@@ -205,7 +205,7 @@ function TribeLeaderboard({ tribes, page, onPageChange, currentUserId }: { tribe
         <div className="mb-6 mt-2 flex items-end justify-center gap-6 px-4">
           {podium.map((tribe, index) => {
             const style = PODIUM_STYLES[index];
-            const isYou = tribe.leaderId === currentUserId;
+            const isYou = tribe.leaderId === myTribeLeaderId;
             return (
               <div key={tribe.leaderId} className="flex w-[120px] flex-col items-center">
                 <div className="mb-2 flex h-10 items-end justify-center">{style.icon}</div>
@@ -250,7 +250,7 @@ function TribeLeaderboard({ tribes, page, onPageChange, currentUserId }: { tribe
         </div>
 
         {pageItems.map((tribe) => (
-          <TribeRow key={tribe.leaderId} tribe={tribe} isYou={tribe.leaderId === currentUserId} />
+          <TribeRow key={tribe.leaderId} tribe={tribe} isYou={tribe.leaderId === myTribeLeaderId} />
         ))}
 
         {myTribe && !isMyTribeOnPage && (
@@ -308,6 +308,7 @@ export default function LeaderboardPage() {
   const [playerRankings, setPlayerRankings] = useState<PlayerRanking[]>([]);
   const [tribeRankings, setTribeRankings] = useState<TribeRanking[]>([]);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [myTribeLeaderId, setMyTribeLeaderId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [playerPage, setPlayerPage] = useState(0);
   const [tribePage, setTribePage] = useState(0);
@@ -332,6 +333,7 @@ export default function LeaderboardPage() {
         setPlayerRankings(data.rankings ?? data);
       }
       setCurrentUserId(data.currentUserId ?? null);
+      if (data.currentUserTribeLeaderId) setMyTribeLeaderId(data.currentUserTribeLeaderId);
       setLoading(false);
     })();
     return () => { cancelled = true; };
@@ -391,7 +393,7 @@ export default function LeaderboardPage() {
             <PlayerLeaderboard rankings={playerRankings} page={playerPage} onPageChange={setPlayerPage} currentUserId={currentUserId} />
           )
         ) : (
-          <TribeLeaderboard tribes={tribeRankings} page={tribePage} onPageChange={setTribePage} currentUserId={currentUserId} />
+          <TribeLeaderboard tribes={tribeRankings} page={tribePage} onPageChange={setTribePage} myTribeLeaderId={myTribeLeaderId} />
         )}
       </div>
     </div>
