@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, Crown, Trophy, Users, X } from "lucide-react";
+import { usePrivy } from "@privy-io/react-auth";
 import Link from "next/link";
 
 const PAGE_SIZE = 20;
@@ -54,12 +55,65 @@ function truncateWallet(name: string) {
   return name.length > 10 ? `${name.slice(0, 4)}...${name.slice(-4)}` : name;
 }
 
-function PlayerLeaderboard({ rankings, page, onPageChange }: { rankings: PlayerRanking[]; page: number; onPageChange: (p: number) => void }) {
+function PlayerRow({ player, isYou }: { player: PlayerRanking; isYou: boolean }) {
+  return (
+    <div
+      className={`grid grid-cols-[36px_minmax(0,1fr)_minmax(0,1fr)_58px_58px_58px] gap-2 border-b border-white/6 px-4 py-[14px] text-[14px] last:border-b-0 ${
+        isYou ? "bg-[#f5d63d]/10" : ""
+      }`}
+    >
+      <span className={isYou ? "font-semibold text-[#f5d63d]" : "text-[#8d8d8d]"}>
+        #{player.rank}
+      </span>
+      <span className={`truncate ${isYou ? "font-semibold text-[#f5d63d]" : "text-[#e4e4e4]"}`}>
+        {truncateWallet(player.displayName)}{isYou ? " (You)" : ""}
+      </span>
+      <span className="truncate text-[#6b6b6b] text-[12px]">{player.tribeName ?? "—"}</span>
+      <span className={`text-right font-semibold ${isYou ? "text-[#f5d63d]" : "text-[#e4e4e4]"}`}>
+        {player.correctPredictions}
+      </span>
+      <span className="text-right text-[#9b9b9b]">{player.winRate}%</span>
+      <span className="text-right text-[#9b9b9b]">{player.sessionsPlayed}</span>
+    </div>
+  );
+}
+
+function TribeRow({ tribe, isYou }: { tribe: TribeRanking; isYou: boolean }) {
+  return (
+    <div
+      className={`grid grid-cols-[44px_minmax(0,1fr)_74px_74px] gap-2 border-b border-white/6 px-4 py-[14px] text-[14px] last:border-b-0 ${
+        isYou ? "bg-[#f5d63d]/10" : ""
+      }`}
+    >
+      <span className={isYou ? "font-semibold text-[#f5d63d]" : "text-[#8d8d8d]"}>
+        #{tribe.rank}
+      </span>
+      <div className="flex items-center gap-2 truncate">
+        <Users className="h-3.5 w-3.5 shrink-0 text-[#6b6b6b]" />
+        <span className={`truncate ${isYou ? "font-semibold text-[#f5d63d]" : "text-[#e4e4e4]"}`}>
+          {tribe.leaderName}&apos;s Tribe{isYou ? " (You)" : ""}
+        </span>
+      </div>
+      <span className="text-right text-[#9b9b9b]">{tribe.memberCount + 1}</span>
+      <span className={`text-right font-semibold ${isYou ? "text-[#f5d63d]" : "text-[#f5d63d]"}`}>
+        {tribe.tribeScore}
+      </span>
+    </div>
+  );
+}
+
+function PlayerLeaderboard({ rankings, page, onPageChange, currentUserId }: { rankings: PlayerRanking[]; page: number; onPageChange: (p: number) => void; currentUserId: string | null }) {
   const showPodium = rankings.length >= 3 && page === 0;
   const podium = showPodium ? [rankings[1], rankings[0], rankings[2]] : [];
   const allRest = page === 0 ? rankings.slice(3) : rankings;
   const totalPages = Math.ceil(allRest.length / PAGE_SIZE);
   const pageItems = allRest.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+
+  const myEntry = currentUserId ? rankings.find((p) => p.userId === currentUserId) : null;
+  const isMyEntryOnPage = myEntry
+    ? pageItems.some((p) => p.userId === currentUserId) ||
+      (showPodium && podium.some((p) => p.userId === currentUserId))
+    : false;
 
   return (
     <>
@@ -67,6 +121,7 @@ function PlayerLeaderboard({ rankings, page, onPageChange }: { rankings: PlayerR
         <div className="mb-6 mt-2 flex items-end justify-center gap-6 px-4">
           {podium.map((player, index) => {
             const style = PODIUM_STYLES[index];
+            const isYou = player.userId === currentUserId;
             return (
               <div key={player.userId} className="flex w-[120px] flex-col items-center">
                 <div className="mb-2 flex h-10 items-end justify-center">{style.icon}</div>
@@ -86,8 +141,8 @@ function PlayerLeaderboard({ rankings, page, onPageChange }: { rankings: PlayerR
                     </span>
                   )}
                 </div>
-                <p className="max-w-full truncate text-[11px] text-[#8e8e8e]">
-                  {truncateWallet(player.displayName)}
+                <p className={`max-w-full truncate text-[11px] ${isYou ? "font-semibold text-[#f5d63d]" : "text-[#8e8e8e]"}`}>
+                  {truncateWallet(player.displayName)}{isYou ? " (You)" : ""}
                 </p>
                 <p className="mt-1 text-[30px] font-semibold leading-none tracking-[-0.05em] text-[#f5d63d]">
                   {player.correctPredictions}
@@ -113,18 +168,15 @@ function PlayerLeaderboard({ rankings, page, onPageChange }: { rankings: PlayerR
         </div>
 
         {pageItems.map((player) => (
-          <div
-            key={player.userId}
-            className="grid grid-cols-[36px_minmax(0,1fr)_minmax(0,1fr)_58px_58px_58px] gap-2 border-b border-white/6 px-4 py-[14px] text-[14px] last:border-b-0"
-          >
-            <span className="text-[#8d8d8d]">{player.rank}</span>
-            <span className="truncate text-[#e4e4e4]">{truncateWallet(player.displayName)}</span>
-            <span className="truncate text-[#6b6b6b] text-[12px]">{player.tribeName ?? "—"}</span>
-            <span className="text-right font-semibold text-[#e4e4e4]">{player.correctPredictions}</span>
-            <span className="text-right text-[#9b9b9b]">{player.winRate}%</span>
-            <span className="text-right text-[#9b9b9b]">{player.sessionsPlayed}</span>
-          </div>
+          <PlayerRow key={player.userId} player={player} isYou={player.userId === currentUserId} />
         ))}
+
+        {myEntry && !isMyEntryOnPage && (
+          <>
+            <div className="border-t border-dashed border-[#f5d63d]/30" />
+            <PlayerRow player={myEntry} isYou />
+          </>
+        )}
       </div>
 
       {totalPages > 1 && (
@@ -134,12 +186,18 @@ function PlayerLeaderboard({ rankings, page, onPageChange }: { rankings: PlayerR
   );
 }
 
-function TribeLeaderboard({ tribes, page, onPageChange }: { tribes: TribeRanking[]; page: number; onPageChange: (p: number) => void }) {
+function TribeLeaderboard({ tribes, page, onPageChange, currentUserId }: { tribes: TribeRanking[]; page: number; onPageChange: (p: number) => void; currentUserId: string | null }) {
   const showPodium = tribes.length >= 3 && page === 0;
   const podium = showPodium ? [tribes[1], tribes[0], tribes[2]] : [];
   const allRest = page === 0 ? tribes.slice(3) : tribes;
   const totalPages = Math.ceil(allRest.length / PAGE_SIZE);
   const pageItems = allRest.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+
+  const myTribe = currentUserId ? tribes.find((t) => t.leaderId === currentUserId) : null;
+  const isMyTribeOnPage = myTribe
+    ? pageItems.some((t) => t.leaderId === currentUserId) ||
+      (showPodium && podium.some((t) => t.leaderId === currentUserId))
+    : false;
 
   return (
     <>
@@ -147,6 +205,7 @@ function TribeLeaderboard({ tribes, page, onPageChange }: { tribes: TribeRanking
         <div className="mb-6 mt-2 flex items-end justify-center gap-6 px-4">
           {podium.map((tribe, index) => {
             const style = PODIUM_STYLES[index];
+            const isYou = tribe.leaderId === currentUserId;
             return (
               <div key={tribe.leaderId} className="flex w-[120px] flex-col items-center">
                 <div className="mb-2 flex h-10 items-end justify-center">{style.icon}</div>
@@ -166,8 +225,8 @@ function TribeLeaderboard({ tribes, page, onPageChange }: { tribes: TribeRanking
                     </span>
                   )}
                 </div>
-                <p className="max-w-full truncate text-[11px] text-[#8e8e8e]">
-                  {tribe.leaderName}&apos;s Tribe
+                <p className={`max-w-full truncate text-[11px] ${isYou ? "font-semibold text-[#f5d63d]" : "text-[#8e8e8e]"}`}>
+                  {tribe.leaderName}&apos;s Tribe{isYou ? " (You)" : ""}
                 </p>
                 <p className="mt-1 text-[30px] font-semibold leading-none tracking-[-0.05em] text-[#f5d63d]">
                   {tribe.tribeScore}
@@ -191,19 +250,15 @@ function TribeLeaderboard({ tribes, page, onPageChange }: { tribes: TribeRanking
         </div>
 
         {pageItems.map((tribe) => (
-          <div
-            key={tribe.leaderId}
-            className="grid grid-cols-[44px_minmax(0,1fr)_74px_74px] gap-2 border-b border-white/6 px-4 py-[14px] text-[14px] last:border-b-0"
-          >
-            <span className="text-[#8d8d8d]">{tribe.rank}</span>
-            <div className="flex items-center gap-2 truncate">
-              <Users className="h-3.5 w-3.5 shrink-0 text-[#6b6b6b]" />
-              <span className="truncate text-[#e4e4e4]">{tribe.leaderName}&apos;s Tribe</span>
-            </div>
-            <span className="text-right text-[#9b9b9b]">{tribe.memberCount + 1}</span>
-            <span className="text-right font-semibold text-[#f5d63d]">{tribe.tribeScore}</span>
-          </div>
+          <TribeRow key={tribe.leaderId} tribe={tribe} isYou={tribe.leaderId === currentUserId} />
         ))}
+
+        {myTribe && !isMyTribeOnPage && (
+          <>
+            <div className="border-t border-dashed border-[#f5d63d]/30" />
+            <TribeRow tribe={myTribe} isYou />
+          </>
+        )}
       </div>
 
       {tribes.length === 0 && (
@@ -252,24 +307,35 @@ export default function LeaderboardPage() {
   const [tab, setTab] = useState<Tab>("players");
   const [playerRankings, setPlayerRankings] = useState<PlayerRanking[]>([]);
   const [tribeRankings, setTribeRankings] = useState<TribeRanking[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [playerPage, setPlayerPage] = useState(0);
   const [tribePage, setTribePage] = useState(0);
+  const { getAccessToken, authenticated } = usePrivy();
 
   useEffect(() => {
-    setLoading(true);
-    const url = tab === "tribes" ? "/api/leaderboard?tab=tribes" : "/api/leaderboard";
-    fetch(url)
-      .then((res) => res.json())
-      .then((data) => {
-        if (tab === "tribes") {
-          setTribeRankings(data);
-        } else {
-          setPlayerRankings(data);
-        }
-      })
-      .finally(() => setLoading(false));
-  }, [tab]);
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      const url = tab === "tribes" ? "/api/leaderboard?tab=tribes" : "/api/leaderboard";
+      const headers: Record<string, string> = {};
+      if (authenticated) {
+        const token = await getAccessToken();
+        if (token) headers.Authorization = `Bearer ${token}`;
+      }
+      const res = await fetch(url, { headers });
+      if (cancelled) return;
+      const data = await res.json();
+      if (tab === "tribes") {
+        setTribeRankings(data.tribes ?? data);
+      } else {
+        setPlayerRankings(data.rankings ?? data);
+      }
+      setCurrentUserId(data.currentUserId ?? null);
+      setLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [tab, authenticated, getAccessToken]);
 
   return (
     <div className="spotr-page min-h-dvh px-4 py-3 md:px-6">
@@ -322,10 +388,10 @@ export default function LeaderboardPage() {
               <p className="text-[15px] text-[#8e8e8e]">No rankings yet.</p>
             </div>
           ) : (
-            <PlayerLeaderboard rankings={playerRankings} page={playerPage} onPageChange={setPlayerPage} />
+            <PlayerLeaderboard rankings={playerRankings} page={playerPage} onPageChange={setPlayerPage} currentUserId={currentUserId} />
           )
         ) : (
-          <TribeLeaderboard tribes={tribeRankings} page={tribePage} onPageChange={setTribePage} />
+          <TribeLeaderboard tribes={tribeRankings} page={tribePage} onPageChange={setTribePage} currentUserId={currentUserId} />
         )}
       </div>
     </div>

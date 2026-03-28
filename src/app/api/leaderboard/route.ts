@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { calculateMajorityWinners } from "@/lib/session-engine";
+import { getAuthUser } from "@/lib/auth-helpers";
 
 export interface PlayerRanking {
   rank: number;
@@ -48,11 +49,18 @@ export async function GET(req: NextRequest) {
     }))
   );
 
+  // Optionally resolve current user (won't fail if unauthenticated)
+  let currentUserId: string | null = null;
+  try {
+    const user = await getAuthUser(req);
+    currentUserId = user?.id ?? null;
+  } catch {}
+
   if (tab === "tribes") {
-    return getTribeRankings(winnerMap);
+    return getTribeRankings(winnerMap, currentUserId);
   }
 
-  return getPlayerRankings(winnerMap);
+  return getPlayerRankings(winnerMap, currentUserId);
 }
 
 function countCorrectVotes(
@@ -69,7 +77,7 @@ function countCorrectVotes(
   }).length;
 }
 
-async function getPlayerRankings(winnerMap: Map<string, string>) {
+async function getPlayerRankings(winnerMap: Map<string, string>, currentUserId: string | null) {
   const players = await prisma.user.findMany({
     where: {
       gameResults: { some: {} },
@@ -144,10 +152,10 @@ async function getPlayerRankings(winnerMap: Map<string, string>) {
     )
     .map((p, i) => ({ ...p, rank: i + 1 }));
 
-  return NextResponse.json(rankings);
+  return NextResponse.json({ rankings, currentUserId });
 }
 
-async function getTribeRankings(winnerMap: Map<string, string>) {
+async function getTribeRankings(winnerMap: Map<string, string>, currentUserId: string | null) {
   // Find all users who have referred at least one person (tribe leaders)
   const leaders = await prisma.user.findMany({
     where: {
@@ -205,5 +213,5 @@ async function getTribeRankings(winnerMap: Map<string, string>) {
     .sort((a, b) => b.tribeScore - a.tribeScore)
     .map((t, i) => ({ ...t, rank: i + 1 }));
 
-  return NextResponse.json(tribes);
+  return NextResponse.json({ tribes, currentUserId });
 }
