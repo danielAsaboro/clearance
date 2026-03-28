@@ -8,8 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import ProfileModal from "@/components/ProfileModal";
 
 // ─── Winners crawl goes live at 9:00 AM GMT+1 on March 29, 2026 ───
-const WINNERS_GO_LIVE = new Date("2026-03-29T08:00:00Z"); // 9am WAT (GMT+1)
-const SHOW_WINNERS = Date.now() >= WINNERS_GO_LIVE.getTime();
+const WINNERS_GO_LIVE = new Date("2026-03-29T08:00:00Z").getTime(); // 9am WAT (GMT+1)
 // ───────────────────────────────────────────────────────────────────
 
 // ════════════════════════════════════════════════════
@@ -610,7 +609,13 @@ function CrawlViewport({ players, tribes }: { players: PlayerRanking[]; tribes: 
 // ════════════════════════════════════════════════════
 
 export default function Home() {
-  if (SHOW_WINNERS) {
+  const [showWinners, setShowWinners] = useState(false);
+
+  useEffect(() => {
+    setShowWinners(Date.now() >= WINNERS_GO_LIVE);
+  }, []);
+
+  if (showWinners) {
     return <WinnersCrawl />;
   }
   return <OriginalHome />;
