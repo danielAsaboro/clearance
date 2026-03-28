@@ -27,7 +27,7 @@ process.env.RESEND_API_KEY = "test-resend-key";
 process.env.RESEND_FROM_EMAIL = "Test <test@test.com>";
 
 // Campaign
-process.env.PLAYER_POOL_PERCENT = "0.84";
+process.env.HOUSE_CUT = "0.23";
 
 // NEXT_PUBLIC_*
 process.env.NEXT_PUBLIC_SOLANA_RPC_URL = "https://api.devnet.solana.com";

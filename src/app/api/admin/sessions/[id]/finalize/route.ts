@@ -116,7 +116,7 @@ export async function POST(
     playerScores.push({ resultId: result.id, totalVotes: votes.length, correctVotes, tier });
   }
 
-  // Pool-based rewards: (userScore / totalScores) * 84% of total deposits
+  // Pool-based rewards: (userScore / totalScores) * (1 - houseCut) of total deposits
   const depositCount = gameResults.filter((r) => r.depositConfirmed).length;
   const totalDeposits = depositCount * campaignConfig.entryFeeUsdc;
   const totalTasteScores = playerScores.reduce((sum, p) => sum + p.correctVotes, 0);
@@ -124,7 +124,7 @@ export async function POST(
   // Second pass: persist scores and pool-based reward amounts (batched)
   await prisma.$transaction(
     playerScores.map((player) => {
-      const rewardAmount = calculatePoolReward(player.correctVotes, totalTasteScores, totalDeposits, campaignConfig.playerPoolPercent);
+      const rewardAmount = calculatePoolReward(player.correctVotes, totalTasteScores, totalDeposits, campaignConfig.houseCut);
       return prisma.gameResult.update({
         where: { id: player.resultId },
         data: {

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAuthUser } from "@/lib/auth-helpers";
-import { campaignConfig } from "@/lib/campaign-config";
 
 // GET /api/users/me/stats — Personal performance stats
 export async function GET(req: NextRequest) {
@@ -36,10 +35,7 @@ export async function GET(req: NextRequest) {
         totalClaimed: 0,
         pendingRewards: 0,
         nftsMinted: 0,
-        currentStreak: 0,
-        bestStreak: 0,
       },
-      tierHistory: { gold: 0, base: 0, participation: 0 },
       recentTrend: [],
     });
   }
@@ -47,42 +43,12 @@ export async function GET(req: NextRequest) {
   const totalVotes = results.reduce((s, r) => s + r.totalVotes, 0);
   const correctVotes = results.reduce((s, r) => s + r.correctVotes, 0);
 
-  // Earnings formula: (entryFee / totalRounds) * correctVotes per session
-  const entryFee = campaignConfig.entryFeeUsdc;
-  function sessionEarnings(r: { correctVotes: number; session: { _count: { matchups: number } } }) {
-    const rounds = r.session._count.matchups;
-    if (rounds === 0) return 0;
-    return (entryFee / rounds) * r.correctVotes;
-  }
-
-  const totalEarnings = results.reduce((s, r) => s + sessionEarnings(r), 0);
+  // Use stored rewardAmount from pool-based calculation (set at finalize time)
+  const totalEarnings = results.reduce((s, r) => s + (r.rewardAmount ?? 0), 0);
   const totalClaimed = results
     .filter((r) => r.usdcClaimed)
-    .reduce((s, r) => s + sessionEarnings(r), 0);
+    .reduce((s, r) => s + (r.rewardAmount ?? 0), 0);
   const nftsMinted = results.filter((r) => r.nftMinted).length;
-
-  // Tier distribution
-  const tierHistory = { gold: 0, base: 0, participation: 0 };
-  for (const r of results) {
-    if (r.tier === "gold") tierHistory.gold++;
-    else if (r.tier === "base") tierHistory.base++;
-    else tierHistory.participation++;
-  }
-
-  // Streak calculation (consecutive gold tiers, sorted by session date desc)
-  let currentStreak = 0;
-  let bestStreak = 0;
-  let streak = 0;
-  for (const r of results) {
-    if (r.tier === "gold") {
-      streak++;
-      if (streak > bestStreak) bestStreak = streak;
-    } else {
-      if (streak > 0 && currentStreak === 0) currentStreak = streak;
-      streak = 0;
-    }
-  }
-  if (currentStreak === 0) currentStreak = streak;
 
   // Recent trend (last 10 sessions)
   const recentTrend = results.slice(0, 10).map((r) => {
@@ -95,8 +61,7 @@ export async function GET(req: NextRequest) {
       correctVotes: r.correctVotes,
       totalVotes: r.totalVotes,
       accuracy: Math.round((r.correctVotes / rounds) * 1000) / 10,
-      tier: r.tier,
-      earnings: Math.round(sessionEarnings(r) * 100) / 100,
+      earnings: Math.round((r.rewardAmount ?? 0) * 100) / 100,
       nftMinted: r.nftMinted,
       usdcClaimed: r.usdcClaimed,
     };
@@ -113,10 +78,7 @@ export async function GET(req: NextRequest) {
       totalClaimed: Math.round(totalClaimed * 100) / 100,
       pendingRewards: Math.round((totalEarnings - totalClaimed) * 100) / 100,
       nftsMinted,
-      currentStreak,
-      bestStreak,
     },
-    tierHistory,
     recentTrend,
   });
 }

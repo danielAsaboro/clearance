@@ -8,13 +8,14 @@ import {
   Award,
   ChevronLeft,
   ChevronRight,
+  Copy,
+  Check,
   DollarSign,
-  Flame,
   Loader2,
   Package,
+  Share2,
   Target,
   TrendingUp,
-  Trophy,
 } from "lucide-react";
 
 interface Overview {
@@ -26,14 +27,6 @@ interface Overview {
   totalClaimed: number;
   pendingRewards: number;
   nftsMinted: number;
-  currentStreak: number;
-  bestStreak: number;
-}
-
-interface TierHistory {
-  gold: number;
-  base: number;
-  participation: number;
 }
 
 interface TrendItem {
@@ -42,7 +35,6 @@ interface TrendItem {
   weekNumber: number;
   scheduledAt: string;
   accuracy: number;
-  tier: string | null;
   earnings: number;
 }
 
@@ -55,7 +47,6 @@ interface GameHistoryItem {
   correctVotes: number;
   totalMatchups: number;
   accuracy: number;
-  tier: string | null;
   rewardAmount: number;
   nftMinted: boolean;
   usdcClaimed: boolean;
@@ -80,35 +71,39 @@ function StatCard({
   );
 }
 
-function TierBadge({ tier }: { tier: string | null }) {
-  if (tier === "gold")
-    return (
-      <span className="rounded-full bg-[#F5E642]/10 px-2 py-0.5 text-[10px] font-bold text-[#F5E642]">
-        ELITE
-      </span>
-    );
-  if (tier === "base")
-    return (
-      <span className="rounded-full bg-[#888]/10 px-2 py-0.5 text-[10px] font-bold text-[#ccc]">
-        RISING
-      </span>
-    );
-  return (
-    <span className="rounded-full bg-[#333]/30 px-2 py-0.5 text-[10px] text-[#888]">
-      ROOKIE
-    </span>
-  );
-}
-
 export default function ProfilePage() {
   const { getAccessToken, user: privyUser, authenticated, ready } = usePrivy();
   const [overview, setOverview] = useState<Overview | null>(null);
-  const [tierHistory, setTierHistory] = useState<TierHistory | null>(null);
   const [trend, setTrend] = useState<TrendItem[]>([]);
   const [history, setHistory] = useState<GameHistoryItem[]>([]);
   const [historyPage, setHistoryPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
+
+  const referralLink = privyUser?.id
+    ? `${window.location.origin}/ref/${privyUser.id}`
+    : null;
+
+  const copyReferralLink = async () => {
+    if (!referralLink) return;
+    await navigator.clipboard.writeText(referralLink);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const shareReferralLink = async () => {
+    if (!referralLink) return;
+    if (navigator.share) {
+      await navigator.share({
+        title: "Join me on Spotr TV",
+        text: "Predict, compete & earn on Spotr TV!",
+        url: referralLink,
+      });
+    } else {
+      await copyReferralLink();
+    }
+  };
 
   const fetchStats = useCallback(async () => {
     try {
@@ -120,7 +115,6 @@ export default function ProfilePage() {
       if (res.ok) {
         const data = await res.json();
         setOverview(data.overview);
-        setTierHistory(data.tierHistory);
         setTrend(data.recentTrend);
       }
     } catch {
@@ -207,39 +201,25 @@ export default function ProfilePage() {
           </div>
         )}
 
-        {/* Streaks */}
-        {overview && (overview.currentStreak > 0 || overview.bestStreak > 0) && (
-          <div className="flex gap-3">
-            <div className="flex-1 rounded-2xl border border-[#2A2A2A] bg-[#1A1A1A] p-4 text-center">
-              <Flame className="mx-auto mb-1 h-5 w-5 text-orange-400" />
-              <p className="text-xl font-bold text-white">{overview.currentStreak}</p>
-              <p className="text-[10px] text-[#888]">Current Gold Streak</p>
-            </div>
-            <div className="flex-1 rounded-2xl border border-[#2A2A2A] bg-[#1A1A1A] p-4 text-center">
-              <Trophy className="mx-auto mb-1 h-5 w-5 text-[#F5E642]" />
-              <p className="text-xl font-bold text-white">{overview.bestStreak}</p>
-              <p className="text-[10px] text-[#888]">Best Gold Streak</p>
-            </div>
-          </div>
-        )}
-
-        {/* Tier Distribution */}
-        {tierHistory && overview && overview.sessionsPlayed > 0 && (
+        {/* Referral Link */}
+        {referralLink && (
           <div>
-            <p className="mb-3 text-xs font-semibold text-[#888] uppercase tracking-wider">Tier History</p>
-            <div className="grid grid-cols-3 gap-3">
-              <div className="rounded-2xl border border-[#2A2A2A] bg-[#1A1A1A] p-3 text-center">
-                <p className="text-xl font-bold text-[#F5E642]">{tierHistory.gold}</p>
-                <p className="text-[10px] text-[#888]">Gold</p>
+            <p className="mb-3 text-xs font-semibold text-[#888] uppercase tracking-wider">Invite Friends</p>
+            <div className="rounded-2xl border border-[#2A2A2A] bg-[#1A1A1A] p-4 space-y-3">
+              <p className="text-xs text-[#888]">Share your link and earn when friends join!</p>
+              <div className="flex items-center gap-2 rounded-xl bg-black/50 border border-[#333] px-3 py-2">
+                <span className="flex-1 truncate text-xs text-[#ccc]">{referralLink}</span>
+                <button onClick={copyReferralLink} className="text-[#888] hover:text-white">
+                  {copied ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
+                </button>
               </div>
-              <div className="rounded-2xl border border-[#2A2A2A] bg-[#1A1A1A] p-3 text-center">
-                <p className="text-xl font-bold text-[#ccc]">{tierHistory.base}</p>
-                <p className="text-[10px] text-[#888]">Base</p>
-              </div>
-              <div className="rounded-2xl border border-[#2A2A2A] bg-[#1A1A1A] p-3 text-center">
-                <p className="text-xl font-bold text-[#666]">{tierHistory.participation}</p>
-                <p className="text-[10px] text-[#888]">Participation</p>
-              </div>
+              <button
+                onClick={shareReferralLink}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#F5E642] py-2.5 text-sm font-semibold text-black"
+              >
+                <Share2 className="h-4 w-4" />
+                Share Referral Link
+              </button>
             </div>
           </div>
         )}
@@ -280,9 +260,9 @@ export default function ProfilePage() {
                 .map((t) => {
                   const height = Math.max(8, (t.accuracy / 100) * 60);
                   const color =
-                    t.tier === "gold"
+                    t.accuracy >= 70
                       ? "bg-[#F5E642]"
-                      : t.tier === "base"
+                      : t.accuracy >= 40
                         ? "bg-[#888]"
                         : "bg-[#444]";
                   return (
@@ -318,14 +298,11 @@ export default function ProfilePage() {
                   key={g.sessionId}
                   className="rounded-2xl border border-[#242424] bg-[#111] p-4"
                 >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <p className="text-sm font-semibold text-white">{g.sessionTitle}</p>
-                      <p className="text-[10px] text-[#666]">
-                        {new Date(g.scheduledAt).toLocaleDateString()} {g.lateJoin ? "- Late Join" : ""}
-                      </p>
-                    </div>
-                    <TierBadge tier={g.tier} />
+                  <div>
+                    <p className="text-sm font-semibold text-white">{g.sessionTitle}</p>
+                    <p className="text-[10px] text-[#666]">
+                      {new Date(g.scheduledAt).toLocaleDateString()} {g.lateJoin ? "- Late Join" : ""}
+                    </p>
                   </div>
                   <div className="mt-3 flex items-center gap-4 text-xs text-[#ccc]">
                     <span>

@@ -29,7 +29,7 @@ const serverSchema = z.object({
   RESEND_FROM_EMAIL: z.string(),
 
   // Campaign
-  PLAYER_POOL_PERCENT: z.string().transform(Number),
+  HOUSE_CUT: z.string().transform(Number),
 
   // Optional flags
   SAMPLE_SESSION_ENABLED: z

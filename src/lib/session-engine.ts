@@ -69,17 +69,17 @@ export function calculateTier(
 }
 
 /**
- * Pool-based reward: (userTasteScore / totalTasteScores) * playerPoolPercent * totalDeposits.
- * Returns 0 if totalTasteScores is 0 (no one scored anything).
+ * Pool-based reward: (userScore / totalScores) * (1 - houseCut) * totalDeposits.
+ * Returns 0 if totalScores is 0 (no one scored anything).
  */
 export function calculatePoolReward(
-  userTasteScore: number,
-  totalTasteScores: number,
+  userScore: number,
+  totalScores: number,
   totalDeposits: number,
-  playerPoolPercent: number
+  houseCut: number
 ): number {
-  if (totalTasteScores <= 0) return 0;
-  return (userTasteScore / totalTasteScores) * playerPoolPercent * totalDeposits;
+  if (totalScores <= 0) return 0;
+  return (userScore / totalScores) * (1 - houseCut) * totalDeposits;
 }
 
 /**

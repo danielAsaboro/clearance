@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAuthUser } from "@/lib/auth-helpers";
-import { campaignConfig } from "@/lib/campaign-config";
 
 // GET /api/users/me/history — Paginated game history
 export async function GET(req: NextRequest) {
@@ -53,10 +52,7 @@ export async function GET(req: NextRequest) {
           totalMatchups > 0
             ? Math.round((g.correctVotes / totalMatchups) * 1000) / 10
             : 0,
-        tier: g.tier,
-        rewardAmount: totalMatchups > 0
-          ? Math.round((campaignConfig.entryFeeUsdc / totalMatchups) * g.correctVotes * 100) / 100
-          : 0,
+        rewardAmount: Math.round((g.rewardAmount ?? 0) * 100) / 100,
         nftMinted: g.nftMinted,
         nftRevealed: g.nftRevealed,
         usdcClaimed: g.usdcClaimed,

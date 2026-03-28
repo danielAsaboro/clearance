@@ -102,7 +102,7 @@ export async function GET(
 
     const totalDeposits = depositCount * campaignConfig.entryFeeUsdc;
     const totalTasteScores = allScores._sum.correctVotes ?? 0;
-    const rewardAmount = calculatePoolReward(correctVotes, totalTasteScores, totalDeposits, campaignConfig.playerPoolPercent);
+    const rewardAmount = calculatePoolReward(correctVotes, totalTasteScores, totalDeposits, campaignConfig.houseCut);
 
     gameResult = await prisma.gameResult.update({
       where: { id: gameResult.id },
