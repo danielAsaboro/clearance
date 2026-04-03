@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, Crown, Trophy, Users, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ChevronDown, ChevronLeft, ChevronRight, Crown, Trophy, Users, X } from "lucide-react";
 import { usePrivy } from "@privy-io/react-auth";
 import Link from "next/link";
 
@@ -26,6 +26,15 @@ interface TribeRanking {
   leaderPhoto: string | null;
   memberCount: number;
   tribeScore: number;
+}
+
+interface Campaign {
+  id: string;
+  cycleNumber: number;
+  title: string;
+  status: string;
+  startDate: string;
+  endDate: string;
 }
 
 type Tab = "players" | "tribes";
@@ -312,27 +321,58 @@ export default function LeaderboardPage() {
   const [loading, setLoading] = useState(true);
   const [playerPage, setPlayerPage] = useState(0);
   const [tribePage, setTribePage] = useState(0);
-  const [seasonLabel, setSeasonLabel] = useState("");
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const { getAccessToken, authenticated } = usePrivy();
 
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside click
   useEffect(() => {
-    fetch("/api/campaigns/active")
+    function handleClick(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  // Load campaigns list
+  useEffect(() => {
+    fetch("/api/campaigns")
       .then((r) => r.json())
       .then((data) => {
-        if (data.campaign) {
-          const end = new Date(data.campaign.endDate);
-          const month = end.toLocaleString("en-US", { month: "long" });
-          setSeasonLabel(`${data.campaign.title} — ${month} ${end.getFullYear()}`);
-        }
+        const list: Campaign[] = data.campaigns ?? [];
+        setCampaigns(list);
+        // Default to the active campaign
+        const active = list.find((c) => c.status === "active");
+        if (active) setSelectedCampaignId(active.id);
       })
       .catch(() => {});
   }, []);
 
+  const selectedCampaign = campaigns.find((c) => c.id === selectedCampaignId);
+
+  const seasonLabel = selectedCampaign
+    ? (() => {
+        const end = new Date(selectedCampaign.endDate);
+        const month = end.toLocaleString("en-US", { month: "long" });
+        return `${selectedCampaign.title} — ${month} ${end.getFullYear()}`;
+      })()
+    : "";
+
+  // Fetch leaderboard data when tab or selected campaign changes
   useEffect(() => {
+    if (!selectedCampaignId) return;
     let cancelled = false;
     (async () => {
       setLoading(true);
-      const url = tab === "tribes" ? "/api/leaderboard?tab=tribes" : "/api/leaderboard";
+      const params = new URLSearchParams();
+      if (tab === "tribes") params.set("tab", "tribes");
+      params.set("campaignId", selectedCampaignId);
+      const url = `/api/leaderboard?${params}`;
       const headers: Record<string, string> = {};
       if (authenticated) {
         const token = await getAccessToken();
@@ -348,10 +388,12 @@ export default function LeaderboardPage() {
       }
       setCurrentUserId(data.currentUserId ?? null);
       if (data.currentUserTribeLeaderId) setMyTribeLeaderId(data.currentUserTribeLeaderId);
+      setPlayerPage(0);
+      setTribePage(0);
       setLoading(false);
     })();
     return () => { cancelled = true; };
-  }, [tab, authenticated, getAccessToken]);
+  }, [tab, selectedCampaignId, authenticated, getAccessToken]);
 
   return (
     <div className="spotr-page min-h-dvh px-4 py-3 md:px-6">
@@ -359,7 +401,40 @@ export default function LeaderboardPage() {
         <div className="mb-5 flex items-start justify-between border-b border-white/10 pb-3">
           <div>
             <h1 className="text-[28px] font-semibold leading-none tracking-[-0.05em] text-white">LEADERBOARD</h1>
-            <p className="mt-1 text-[13px] text-[#6e6e6e]">{seasonLabel}</p>
+            <div ref={dropdownRef} className="relative mt-1">
+              <button
+                onClick={() => setDropdownOpen((o) => !o)}
+                className="flex items-center gap-1.5 text-[13px] text-[#6e6e6e] transition-colors hover:text-[#9b9b9b]"
+              >
+                {seasonLabel}
+                <ChevronDown className={`h-3 w-3 transition-transform ${dropdownOpen ? "rotate-180" : ""}`} />
+              </button>
+              {dropdownOpen && campaigns.length > 1 && (
+                <div className="absolute left-0 top-full z-50 mt-1 min-w-[180px] overflow-hidden rounded-[10px] border border-white/10 bg-[#1a1a1a] shadow-xl">
+                  {campaigns.map((c) => (
+                    <button
+                      key={c.id}
+                      onClick={() => {
+                        setSelectedCampaignId(c.id);
+                        setDropdownOpen(false);
+                      }}
+                      className={`flex w-full items-center gap-2 px-3 py-2.5 text-left text-[13px] transition-colors hover:bg-white/5 ${
+                        c.id === selectedCampaignId
+                          ? "font-medium text-[#f5d63d]"
+                          : "text-[#b0b0b0]"
+                      }`}
+                    >
+                      {c.title}
+                      {c.status === "active" && (
+                        <span className="rounded-full bg-[#f5d63d]/15 px-1.5 py-0.5 text-[10px] font-semibold text-[#f5d63d]">
+                          LIVE
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           <Link href="/" className="text-[#9b9b9b] transition-colors hover:text-white">
