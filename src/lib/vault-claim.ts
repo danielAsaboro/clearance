@@ -1,19 +1,15 @@
-import { Connection, Keypair, PublicKey, Transaction } from "@solana/web3.js";
+import { Connection, Keypair, PublicKey } from "@solana/web3.js";
 import { AnchorProvider, Program } from "@coral-xyz/anchor";
 import NodeWallet from "@coral-xyz/anchor/dist/esm/nodewallet";
-import { randomBytes } from "crypto";
 import {
   buildAdminDepositTransaction,
-  buildCallbackRaffleTransaction,
+  buildClaimRewardTransaction,
   buildClaimWithNftTransaction,
-  buildClaimWithRaffleTransaction,
   buildFanDepositTransaction,
+  buildFinalizeVaultTransaction,
   buildInitializeVaultTransaction,
-  buildRequestRaffleTransaction,
-  fetchRaffleRecord,
+  buildWithdrawTransaction,
   getSpotrProgram,
-  getRaffleRecordAddress,
-  getVaultAddress,
   type Spotr,
 } from "../../anchor/src/spotr-exports";
 
@@ -78,21 +74,6 @@ export async function buildFanDepositTx({
 }
 
 /**
- * Execute a fan deposit server-side using the admin keypair.
- * The admin deposits on behalf of the fan so the user doesn't need to sign.
- * Returns the transaction signature.
- */
-export async function executeFanDepositServerSide({
-  sessionWeekNumber,
-  amountUsdc,
-}: {
-  sessionWeekNumber: number;
-  amountUsdc: number;
-}): Promise<string> {
-  return adminDepositToVault(sessionWeekNumber, amountUsdc);
-}
-
-/**
  * Build a partially-signed `claim_with_nft` transaction.
  * Returns a base64-serialized transaction that the user must co-sign.
  */
@@ -130,96 +111,6 @@ export async function buildClaimWithNftTx({
   return Buffer.from(
     tx.serialize({ requireAllSignatures: false })
   ).toString("base64");
-}
-
-/**
- * Build a partially-signed `request_raffle` transaction.
- * Admin co-signs to attest the fan's tier. Fan must sign before submitting.
- * Returns a base64-serialized transaction.
- */
-export async function buildRequestRaffleTx({
-  fanWalletAddress,
-  sessionWeekNumber,
-  tier,
-}: {
-  fanWalletAddress: string;
-  sessionWeekNumber: number;
-  tier: number;
-}): Promise<string> {
-  const admin = getAdminKeypair();
-  const program = getProgram();
-  const fanPublicKey = new PublicKey(fanWalletAddress);
-
-  const tx = await buildRequestRaffleTransaction({
-    connection,
-    program,
-    admin,
-    fanPublicKey,
-    sessionId: sessionWeekNumber,
-    tier,
-  });
-
-  return Buffer.from(
-    tx.serialize({ requireAllSignatures: false })
-  ).toString("base64");
-}
-
-/**
- * Build a partially-signed `claim_with_raffle` transaction.
- * No amount parameter — reads reward_amount from RaffleRecord on-chain.
- * Returns a base64-serialized transaction that the fan must co-sign.
- */
-export async function buildClaimWithRaffleTx({
-  userWalletAddress,
-  nftAssetAddress,
-  sessionWeekNumber,
-}: {
-  userWalletAddress: string;
-  nftAssetAddress: string;
-  sessionWeekNumber: number;
-}): Promise<string> {
-  const admin = getAdminKeypair();
-  const program = getProgram();
-  const fanPublicKey = new PublicKey(userWalletAddress);
-  const nftAsset = new PublicKey(nftAssetAddress);
-
-  const tx = await buildClaimWithRaffleTransaction({
-    connection,
-    program,
-    admin,
-    fanPublicKey,
-    sessionId: sessionWeekNumber,
-    nftAsset,
-    usdcMint: USDC_MINT,
-  });
-
-  return Buffer.from(
-    tx.serialize({ requireAllSignatures: false })
-  ).toString("base64");
-}
-
-/**
- * Fetch a RaffleRecord from on-chain for a given fan and session.
- * Returns null if no record exists.
- */
-export async function fetchRaffleRecordOnChain({
-  fanWalletAddress,
-  sessionWeekNumber,
-}: {
-  fanWalletAddress: string;
-  sessionWeekNumber: number;
-}): Promise<{ resolved: boolean; rewardAmount: number } | null> {
-  const program = getProgram();
-  const fanPublicKey = new PublicKey(fanWalletAddress);
-  const [vaultPda] = getVaultAddress(sessionWeekNumber);
-
-  const record = await fetchRaffleRecord(program, vaultPda, fanPublicKey);
-  if (!record) return null;
-
-  return {
-    resolved: record.resolved,
-    rewardAmount: record.rewardAmount,
-  };
 }
 
 /**
@@ -268,34 +159,84 @@ export async function adminDepositToVault(
 }
 
 /**
- * Simulate a VRF callback to resolve a raffle (testing mode only).
- * Admin acts as the VRF oracle identity.
- * Returns the resolved reward amount in USDC.
+ * Finalize a vault on-chain (admin marks session as done).
+ * No more deposits allowed after this.
+ * Returns the tx signature.
  */
-export async function simulateVrfCallback(
-  fanWalletAddress: string,
-  sessionWeekNumber: number,
-  randomnessOverride?: number[]
-): Promise<number> {
+export async function finalizeVault(
+  sessionWeekNumber: number
+): Promise<string> {
   const admin = getAdminKeypair();
   const program = getProgram();
-  const fanPublicKey = new PublicKey(fanWalletAddress);
 
-  const rand =
-    randomnessOverride ?? Array.from(randomBytes(32));
-
-  await buildCallbackRaffleTransaction({
+  return buildFinalizeVaultTransaction({
     connection,
     program,
     admin,
-    fanPublicKey,
     sessionId: sessionWeekNumber,
-    randomness: rand,
+  });
+}
+
+/**
+ * Build a partially-signed `claim_reward` transaction.
+ * Admin co-signs the reward amount. User must sign before submitting.
+ * Returns a base64-serialized transaction.
+ */
+export async function buildClaimRewardTx({
+  userWalletAddress,
+  sessionWeekNumber,
+  amountUsdc,
+}: {
+  userWalletAddress: string;
+  sessionWeekNumber: number;
+  amountUsdc: number;
+}): Promise<string> {
+  const admin = getAdminKeypair();
+  const program = getProgram();
+  const userPublicKey = new PublicKey(userWalletAddress);
+
+  const amount = Math.round(amountUsdc * 1_000_000);
+
+  const tx = await buildClaimRewardTransaction({
+    connection,
+    program,
+    admin,
+    userPublicKey,
+    sessionId: sessionWeekNumber,
+    usdcMint: USDC_MINT,
+    amount,
   });
 
-  // Fetch the resolved record to get the reward amount
-  const [vaultPda] = getVaultAddress(sessionWeekNumber);
-  const record = await fetchRaffleRecord(program, vaultPda, fanPublicKey);
+  return Buffer.from(
+    tx.serialize({ requireAllSignatures: false })
+  ).toString("base64");
+}
 
-  return record ? record.rewardAmount / 1_000_000 : 0;
+/**
+ * Build an unsigned `withdraw` transaction for a user.
+ * Returns a base64-serialized transaction that the user must sign and submit.
+ */
+export async function buildWithdrawTx({
+  userWalletAddress,
+  amountUsdc,
+}: {
+  userWalletAddress: string;
+  amountUsdc: number;
+}): Promise<string> {
+  const program = getProgram();
+  const userPublicKey = new PublicKey(userWalletAddress);
+
+  const amount = Math.round(amountUsdc * 1_000_000);
+
+  const tx = await buildWithdrawTransaction({
+    connection,
+    program,
+    userPublicKey,
+    usdcMint: USDC_MINT,
+    amount,
+  });
+
+  return Buffer.from(
+    tx.serialize({ requireAllSignatures: false })
+  ).toString("base64");
 }

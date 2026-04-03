@@ -3,12 +3,23 @@
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { usePrivy } from "@privy-io/react-auth";
+import {
+  useWallets,
+  useSignTransaction,
+} from "@privy-io/react-auth/solana";
+import { Connection } from "@solana/web3.js";
 import { AlertCircle, Check, Share2, User } from "lucide-react";
 import Link from "next/link";
 import MatchupPicker from "@/components/MatchupPicker";
 import ProgressBar from "@/components/ProgressBar";
 import CircularProgress from "@/components/CircularProgress";
+import { useCluster, getPrivySolanaChain } from "@/components/cluster/cluster-data-access";
 import { clientEnv } from "@/lib/env";
+
+const solanaConnection = new Connection(
+  clientEnv.SOLANA_RPC_URL,
+  "confirmed"
+);
 
 interface MatchupVideo {
   id: string;
@@ -321,6 +332,9 @@ function GameContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session");
   const { getAccessToken, authenticated } = usePrivy();
+  const { wallets: solanaWallets } = useWallets();
+  const { signTransaction } = useSignTransaction();
+  const { cluster } = useCluster();
   const isSample = searchParams.get("sample") === "true";
   const isReplay = searchParams.get("replay") === "true";
   const [phase, setPhase] = useState<GamePhase>("joining");
@@ -466,7 +480,37 @@ function GameContent() {
           // Record referral if cookie exists (fire-and-forget)
           fetch("/api/referrals", { method: "POST", headers }).catch(() => {});
 
-          // Go straight to playing — deposit handled server-side
+          // Sign deposit tx in the background — user plays immediately
+          if (data.requiresSignature && data.unsignedTx) {
+            const wallet = solanaWallets[0];
+            if (wallet) {
+              (async () => {
+                try {
+                  const txBytes = Uint8Array.from(Buffer.from(data.unsignedTx, "base64"));
+                  const { signedTransaction } = await signTransaction({
+                    transaction: txBytes,
+                    wallet,
+                    chain: getPrivySolanaChain(cluster),
+                  });
+                  const txHash = await solanaConnection.sendRawTransaction(signedTransaction, {
+                    skipPreflight: false,
+                  });
+                  // Confirm deposit with backend
+                  const confirmHeaders = await getAuthHeaders();
+                  await fetch(`/api/sessions/${sessionId}/confirm-deposit`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", ...confirmHeaders },
+                    body: JSON.stringify({ txSignature: txHash }),
+                  });
+                } catch (err) {
+                  console.error("[game] deposit signing failed:", err);
+                  // User plays for free — excluded from reward pool
+                }
+              })();
+            }
+          }
+
+          // Go straight to playing — deposit signing happens in background
           await fetchMatchups();
           roundStartRef.current = Date.now();
           setPhase("playing");

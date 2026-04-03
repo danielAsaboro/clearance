@@ -1,5 +1,4 @@
 #![allow(clippy::result_large_err)]
-#![allow(unexpected_cfgs)]
 
 use anchor_lang::prelude::*;
 use anchor_spl::associated_token::AssociatedToken;
@@ -31,6 +30,7 @@ pub mod spotrtv {
         vault.session_id = session_id;
         vault.total_deposited = 0;
         vault.total_claimed = 0;
+        vault.finalized = false;
         vault.bump = ctx.bumps.vault;
         Ok(())
     }
@@ -176,10 +176,12 @@ pub mod spotrtv {
         Ok(())
     }
 
-    /// Fan deposits $3.50 USDC entry fee directly into the vault.
+    /// Fan deposits USDC entry fee directly into the vault.
     /// A FanDepositRecord PDA is created — if it already exists the tx fails (double-entry prevention).
+    /// Also creates a UserAccount PDA (init_if_needed) so rewards can be distributed later.
     pub fn fan_deposit(ctx: Context<FanDeposit>, amount: u64) -> Result<()> {
         require!(amount > 0, SpotrError::ZeroAmount);
+        require!(!ctx.accounts.vault.finalized, SpotrError::VaultFinalized);
 
         transfer(
             CpiContext::new(
@@ -198,6 +200,12 @@ pub mod spotrtv {
             .total_deposited
             .checked_add(amount)
             .ok_or(SpotrError::Overflow)?;
+
+        // Populate UserAccount (idempotent — same values every time)
+        let user_account = &mut ctx.accounts.user_account;
+        user_account.user = ctx.accounts.fan.key();
+        user_account.usdc_mint = vault.usdc_mint;
+        user_account.bump = ctx.bumps.user_account;
 
         let deposit_record = &mut ctx.accounts.deposit_record;
         deposit_record.user = ctx.accounts.fan.key();
@@ -249,158 +257,43 @@ pub mod spotrtv {
         Ok(())
     }
 
-    /// Fan requests VRF raffle to determine reward amount.
-    /// Admin co-signs to attest the fan's tier.
-    /// In production, triggers VRF oracle; in testing, callback is called directly.
-    pub fn request_raffle(ctx: Context<RequestRaffle>, tier: u8) -> Result<()> {
-        require!(tier <= 2, SpotrError::Unauthorized);
-
-        let raffle = &mut ctx.accounts.raffle_record;
-        raffle.fan = ctx.accounts.fan.key();
-        raffle.vault = ctx.accounts.vault.key();
-        raffle.session_id = ctx.accounts.vault.session_id;
-        raffle.tier = tier;
-        raffle.reward_amount = 0;
-        raffle.resolved = false;
-        raffle.bump = ctx.bumps.raffle_record;
-
-        #[cfg(not(feature = "testing"))]
-        {
-            use anchor_lang::solana_program::program::invoke_signed;
-            use ephemeral_vrf_sdk::consts::IDENTITY;
-            use ephemeral_vrf_sdk::instructions::{
-                create_request_randomness_ix, RequestRandomnessParams,
-            };
-            use ephemeral_vrf_sdk::types::SerializableAccountMeta;
-
-            // Fan pubkey is already 32 bytes — unique per fan
-            let caller_seed = ctx.accounts.fan.key().to_bytes();
-
-            // Anchor instruction discriminator for callback_raffle
-            let callback_disc = <crate::instruction::CallbackRaffle as anchor_lang::Discriminator>::DISCRIMINATOR.to_vec();
-
-            let ix = create_request_randomness_ix(RequestRandomnessParams {
-                payer: ctx.accounts.fan.key(),
-                oracle_queue: ctx.accounts.oracle_queue.key(),
-                callback_program_id: crate::ID,
-                callback_discriminator: callback_disc,
-                caller_seed,
-                accounts_metas: Some(vec![SerializableAccountMeta {
-                    pubkey: ctx.accounts.raffle_record.key(),
-                    is_signer: false,
-                    is_writable: true,
-                }]),
-                ..Default::default()
-            });
-
-            let (_, identity_bump) = Pubkey::find_program_address(
-                &[IDENTITY],
-                ctx.program_id,
-            );
-
-            invoke_signed(
-                &ix,
-                &[
-                    ctx.accounts.fan.to_account_info(),
-                    ctx.accounts.program_identity.to_account_info(),
-                    ctx.accounts.oracle_queue.to_account_info(),
-                    ctx.accounts.system_program.to_account_info(),
-                    ctx.accounts.slot_hashes.to_account_info(),
-                ],
-                &[&[IDENTITY, &[identity_bump]]],
-            )?;
-        }
-
+    /// Admin marks the vault as finalized — no more deposits allowed.
+    /// Must be called before distribute_reward.
+    pub fn finalize_vault(ctx: Context<FinalizeVault>) -> Result<()> {
+        let vault = &mut ctx.accounts.vault;
+        require!(!vault.finalized, SpotrError::AlreadyFinalized);
+        vault.finalized = true;
         Ok(())
     }
 
-    /// VRF oracle callback — resolves the raffle reward amount.
-    /// In testing mode, admin calls this directly.
-    pub fn callback_raffle(ctx: Context<CallbackRaffle>, randomness: [u8; 32]) -> Result<()> {
-        #[cfg(not(feature = "testing"))]
-        require!(
-            ctx.accounts.vrf_program_identity.key()
-                == ephemeral_vrf_sdk::consts::VRF_PROGRAM_IDENTITY,
-            SpotrError::Unauthorized
-        );
-
-        let raffle = &mut ctx.accounts.raffle_record;
-        require!(!raffle.resolved, SpotrError::AlreadyResolved);
-
-        let high_payout = randomness[0] < 26; // ~10.2% chance
-
-        raffle.reward_amount = match raffle.tier {
-            2 => {
-                if high_payout {
-                    3_500_000
-                } else {
-                    1_750_000
-                }
-            } // Gold
-            1 => {
-                if high_payout {
-                    1_750_000
-                } else {
-                    0
-                }
-            } // Base
-            _ => 0, // Participation
-        };
-        raffle.resolved = true;
-
-        Ok(())
-    }
-
-    /// Fan claims USDC based on VRF-resolved raffle result.
-    /// Reads reward_amount from RaffleRecord — no amount parameter.
-    pub fn claim_with_raffle(ctx: Context<ClaimWithRaffle>) -> Result<()> {
-        let amount = ctx.accounts.raffle_record.reward_amount;
+    /// User claims a pool reward from the vault into their UserAccount PDA ATA.
+    /// Admin co-signs to attest the reward amount (from off-chain pool calculation).
+    /// A RewardRecord PDA prevents double-claims per vault per user.
+    pub fn claim_reward(ctx: Context<ClaimReward>, amount: u64) -> Result<()> {
         require!(amount > 0, SpotrError::ZeroAmount);
 
-        // ---- Verify the NFT asset via raw byte parsing ----
-        let nft_data = ctx.accounts.nft_asset.try_borrow_data()?;
-        require!(nft_data.len() >= 66, SpotrError::InvalidNftAccount);
-        require!(
-            nft_data[0] == MPL_CORE_KEY_ASSET,
-            SpotrError::InvalidNftAccount
-        );
-        let nft_owner = Pubkey::try_from(&nft_data[1..33])
-            .map_err(|_| error!(SpotrError::InvalidNftAccount))?;
-        require!(
-            nft_owner == ctx.accounts.fan.key(),
-            SpotrError::NftOwnerMismatch
-        );
-        require!(
-            nft_data[33] == MPL_CORE_UA_TYPE_ADDRESS,
-            SpotrError::InvalidNftAuthority
-        );
-        let nft_authority = Pubkey::try_from(&nft_data[34..66])
-            .map_err(|_| error!(SpotrError::InvalidNftAccount))?;
-        require!(
-            nft_authority == ctx.accounts.admin.key(),
-            SpotrError::InvalidNftAuthority
-        );
-        drop(nft_data);
-
-        // ---- Vault claim logic ----
         let vault = &ctx.accounts.vault;
+        require!(vault.finalized, SpotrError::VaultNotFinalized);
+
         let available = vault
             .total_deposited
             .checked_sub(vault.total_claimed)
             .ok_or(SpotrError::Overflow)?;
         require!(amount <= available, SpotrError::InsufficientFunds);
 
+        // PDA signer seeds for the vault
         let session_bytes = vault.session_id.to_le_bytes();
         let bump = &[vault.bump];
         let seeds: &[&[u8]] = &[b"vault", session_bytes.as_ref(), bump];
         let signer_seeds = &[seeds];
 
+        // Transfer from vault ATA → user_account ATA
         transfer(
             CpiContext::new_with_signer(
                 ctx.accounts.token_program.to_account_info(),
                 Transfer {
                     from: ctx.accounts.vault_token_account.to_account_info(),
-                    to: ctx.accounts.fan_token_account.to_account_info(),
+                    to: ctx.accounts.user_account_token.to_account_info(),
                     authority: ctx.accounts.vault.to_account_info(),
                 },
                 signer_seeds,
@@ -408,18 +301,47 @@ pub mod spotrtv {
             amount,
         )?;
 
+        // Update vault totals
         let vault = &mut ctx.accounts.vault;
         vault.total_claimed = vault
             .total_claimed
             .checked_add(amount)
             .ok_or(SpotrError::Overflow)?;
 
-        let claim_record = &mut ctx.accounts.claim_record;
-        claim_record.user = ctx.accounts.fan.key();
-        claim_record.vault = vault.key();
-        claim_record.amount = amount;
-        claim_record.claimed_at = Clock::get()?.unix_timestamp;
-        claim_record.bump = ctx.bumps.claim_record;
+        // Fill reward record
+        let reward_record = &mut ctx.accounts.reward_record;
+        reward_record.user = ctx.accounts.user.key();
+        reward_record.vault = vault.key();
+        reward_record.amount = amount;
+        reward_record.distributed_at = Clock::get()?.unix_timestamp;
+        reward_record.bump = ctx.bumps.reward_record;
+
+        Ok(())
+    }
+
+    /// User withdraws USDC from their UserAccount PDA ATA to their own wallet.
+    pub fn withdraw(ctx: Context<Withdraw>, amount: u64) -> Result<()> {
+        require!(amount > 0, SpotrError::ZeroAmount);
+
+        // PDA signer seeds for user_account
+        let user_key = ctx.accounts.user.key();
+        let bump = &[ctx.accounts.user_account.bump];
+        let seeds: &[&[u8]] = &[b"user_account", user_key.as_ref(), bump];
+        let signer_seeds = &[seeds];
+
+        // Transfer from user_account ATA → user wallet ATA
+        transfer(
+            CpiContext::new_with_signer(
+                ctx.accounts.token_program.to_account_info(),
+                Transfer {
+                    from: ctx.accounts.user_account_token.to_account_info(),
+                    to: ctx.accounts.user_token_account.to_account_info(),
+                    authority: ctx.accounts.user_account.to_account_info(),
+                },
+                signer_seeds,
+            ),
+            amount,
+        )?;
 
         Ok(())
     }
@@ -610,6 +532,16 @@ pub struct FanDeposit<'info> {
     )]
     pub vault: Account<'info, Vault>,
 
+    /// User account PDA — created on first deposit so rewards can be distributed later.
+    #[account(
+        init_if_needed,
+        payer = fan,
+        space = 8 + UserAccount::INIT_SPACE,
+        seeds = [b"user_account", fan.key().as_ref()],
+        bump,
+    )]
+    pub user_account: Account<'info, UserAccount>,
+
     /// One-time deposit record per fan per vault — prevents double-entry.
     #[account(
         init,
@@ -670,63 +602,9 @@ pub struct CloseVault<'info> {
 }
 
 #[derive(Accounts)]
-#[instruction(tier: u8)]
-pub struct RequestRaffle<'info> {
-    #[account(mut)]
-    pub fan: Signer<'info>,
-
-    pub admin: Signer<'info>,
-
-    #[account(
-        has_one = admin @ SpotrError::Unauthorized,
-        seeds = [b"vault", vault.session_id.to_le_bytes().as_ref()],
-        bump = vault.bump,
-    )]
-    pub vault: Account<'info, Vault>,
-
-    #[account(
-        init,
-        payer = fan,
-        space = 8 + RaffleRecord::INIT_SPACE,
-        seeds = [b"raffle", vault.key().as_ref(), fan.key().as_ref()],
-        bump,
-    )]
-    pub raffle_record: Account<'info, RaffleRecord>,
-
-    /// CHECK: Oracle queue for VRF randomness (only used in production mode)
-    #[account(mut)]
-    pub oracle_queue: AccountInfo<'info>,
-
-    /// CHECK: Program identity PDA for VRF signing (only used in production mode)
-    pub program_identity: AccountInfo<'info>,
-
-    /// CHECK: Slot hashes sysvar (only used in production mode)
-    pub slot_hashes: AccountInfo<'info>,
-
-    pub system_program: Program<'info, System>,
-}
-
-#[derive(Accounts)]
-pub struct CallbackRaffle<'info> {
-    /// VRF oracle identity signer. In testing mode, admin acts as oracle.
-    pub vrf_program_identity: Signer<'info>,
-
-    #[account(
-        mut,
-        seeds = [b"raffle", raffle_record.vault.as_ref(), raffle_record.fan.as_ref()],
-        bump = raffle_record.bump,
-    )]
-    pub raffle_record: Account<'info, RaffleRecord>,
-}
-
-#[derive(Accounts)]
-pub struct ClaimWithRaffle<'info> {
-    /// Admin co-signs to authorize the claim.
+pub struct FinalizeVault<'info> {
     #[account(mut)]
     pub admin: Signer<'info>,
-
-    /// The fan receiving the USDC (must also own the NFT).
-    pub fan: Signer<'info>,
 
     #[account(
         mut,
@@ -735,23 +613,42 @@ pub struct ClaimWithRaffle<'info> {
         bump = vault.bump,
     )]
     pub vault: Account<'info, Vault>,
+}
+
+#[derive(Accounts)]
+pub struct ClaimReward<'info> {
+    /// Admin co-signs to attest the reward amount from the off-chain pool calculation.
+    #[account(mut)]
+    pub admin: Signer<'info>,
+
+    /// The user claiming their reward — must sign.
+    pub user: Signer<'info>,
 
     #[account(
-        seeds = [b"raffle", vault.key().as_ref(), fan.key().as_ref()],
-        bump = raffle_record.bump,
-        constraint = raffle_record.fan == fan.key() @ SpotrError::Unauthorized,
-        constraint = raffle_record.resolved @ SpotrError::RaffleNotResolved,
+        mut,
+        has_one = admin @ SpotrError::Unauthorized,
+        constraint = vault.finalized @ SpotrError::VaultNotFinalized,
+        seeds = [b"vault", vault.session_id.to_le_bytes().as_ref()],
+        bump = vault.bump,
     )]
-    pub raffle_record: Account<'info, RaffleRecord>,
+    pub vault: Account<'info, Vault>,
 
+    #[account(
+        seeds = [b"user_account", user.key().as_ref()],
+        bump = user_account.bump,
+        constraint = user_account.user == user.key() @ SpotrError::Unauthorized,
+    )]
+    pub user_account: Account<'info, UserAccount>,
+
+    /// One-time reward record per vault per user — prevents double-claims.
     #[account(
         init,
         payer = admin,
-        space = 8 + ClaimRecord::INIT_SPACE,
-        seeds = [b"claim", vault.key().as_ref(), fan.key().as_ref()],
+        space = 8 + RewardRecord::INIT_SPACE,
+        seeds = [b"reward", vault.key().as_ref(), user.key().as_ref()],
         bump,
     )]
-    pub claim_record: Account<'info, ClaimRecord>,
+    pub reward_record: Account<'info, RewardRecord>,
 
     #[account(
         mut,
@@ -760,24 +657,57 @@ pub struct ClaimWithRaffle<'info> {
     )]
     pub vault_token_account: Account<'info, TokenAccount>,
 
-    /// Fan's associated token account — init_if_needed so first-time users don't need to pre-create.
+    /// User account's ATA — init_if_needed so it's created on first reward.
     #[account(
         init_if_needed,
         payer = admin,
         associated_token::mint = usdc_mint,
-        associated_token::authority = fan,
+        associated_token::authority = user_account,
     )]
-    pub fan_token_account: Account<'info, TokenAccount>,
+    pub user_account_token: Account<'info, TokenAccount>,
 
     #[account(
         constraint = usdc_mint.key() == vault.usdc_mint @ SpotrError::Unauthorized,
     )]
     pub usdc_mint: Account<'info, Mint>,
+    pub system_program: Program<'info, System>,
+    pub token_program: Program<'info, Token>,
+    pub associated_token_program: Program<'info, AssociatedToken>,
+}
 
-    /// CHECK: Manually verified via raw byte parsing in the instruction handler.
-    #[account(constraint = nft_asset.owner == &MPL_CORE_PROGRAM_ID @ SpotrError::InvalidNftAccount)]
-    pub nft_asset: AccountInfo<'info>,
+#[derive(Accounts)]
+pub struct Withdraw<'info> {
+    #[account(mut)]
+    pub user: Signer<'info>,
 
+    #[account(
+        seeds = [b"user_account", user.key().as_ref()],
+        bump = user_account.bump,
+        constraint = user_account.user == user.key() @ SpotrError::Unauthorized,
+    )]
+    pub user_account: Account<'info, UserAccount>,
+
+    /// The user account's USDC ATA (PDA-owned).
+    #[account(
+        mut,
+        associated_token::mint = usdc_mint,
+        associated_token::authority = user_account,
+    )]
+    pub user_account_token: Account<'info, TokenAccount>,
+
+    /// User's own wallet ATA — init_if_needed.
+    #[account(
+        init_if_needed,
+        payer = user,
+        associated_token::mint = usdc_mint,
+        associated_token::authority = user,
+    )]
+    pub user_token_account: Account<'info, TokenAccount>,
+
+    #[account(
+        constraint = usdc_mint.key() == user_account.usdc_mint @ SpotrError::Unauthorized,
+    )]
+    pub usdc_mint: Account<'info, Mint>,
     pub system_program: Program<'info, System>,
     pub token_program: Program<'info, Token>,
     pub associated_token_program: Program<'info, AssociatedToken>,
@@ -790,12 +720,21 @@ pub struct ClaimWithRaffle<'info> {
 #[account]
 #[derive(InitSpace)]
 pub struct Vault {
-    pub admin: Pubkey,       // 32
-    pub usdc_mint: Pubkey,   // 32
-    pub session_id: u64,     // 8
+    pub admin: Pubkey,        // 32
+    pub usdc_mint: Pubkey,    // 32
+    pub session_id: u64,      // 8
     pub total_deposited: u64, // 8
-    pub total_claimed: u64,  // 8
-    pub bump: u8,            // 1
+    pub total_claimed: u64,   // 8
+    pub finalized: bool,      // 1
+    pub bump: u8,             // 1
+}
+
+#[account]
+#[derive(InitSpace)]
+pub struct UserAccount {
+    pub user: Pubkey,      // 32
+    pub usdc_mint: Pubkey, // 32
+    pub bump: u8,          // 1
 }
 
 #[account]
@@ -810,6 +749,16 @@ pub struct ClaimRecord {
 
 #[account]
 #[derive(InitSpace)]
+pub struct RewardRecord {
+    pub user: Pubkey,         // 32
+    pub vault: Pubkey,        // 32
+    pub amount: u64,          // 8
+    pub distributed_at: i64,  // 8
+    pub bump: u8,             // 1
+}
+
+#[account]
+#[derive(InitSpace)]
 pub struct FanDepositRecord {
     pub user: Pubkey,           // 32
     pub vault: Pubkey,          // 32
@@ -818,19 +767,6 @@ pub struct FanDepositRecord {
     pub deposited_at: i64,      // 8
     pub bump: u8,               // 1
 }
-
-#[account]
-#[derive(InitSpace)]
-pub struct RaffleRecord {
-    pub fan: Pubkey,         // 32
-    pub vault: Pubkey,       // 32
-    pub session_id: u64,     // 8
-    pub tier: u8,            // 1
-    pub reward_amount: u64,  // 8
-    pub resolved: bool,      // 1
-    pub bump: u8,            // 1
-}
-// INIT_SPACE = 83; total space = 8 + 83 = 91
 
 // ---------------------------------------------------------------------------
 // Errors
@@ -852,8 +788,10 @@ pub enum SpotrError {
     NftOwnerMismatch,
     #[msg("NFT update authority does not match the vault admin")]
     InvalidNftAuthority,
-    #[msg("Raffle has not been resolved yet")]
-    RaffleNotResolved,
-    #[msg("Raffle has already been resolved")]
-    AlreadyResolved,
+    #[msg("Vault has already been finalized")]
+    AlreadyFinalized,
+    #[msg("Vault has not been finalized yet")]
+    VaultNotFinalized,
+    #[msg("Vault is finalized — no more deposits allowed")]
+    VaultFinalized,
 }

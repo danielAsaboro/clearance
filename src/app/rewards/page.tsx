@@ -1,32 +1,28 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import {
   useWallets,
   useSignTransaction,
 } from "@privy-io/react-auth/solana";
 import { Connection } from "@solana/web3.js";
-import { ArrowLeft, Eye, Gift, Link2, ExternalLink, Loader2 } from "lucide-react";
+import { ArrowLeft, Eye, Gift, ExternalLink, Loader2 } from "lucide-react";
 import Link from "next/link";
-import BlindBoxCard from "@/components/BlindBoxCard";
 import ConnectWallet from "@/components/ConnectWallet";
 import { useCluster, getPrivySolanaChain } from "@/components/cluster/cluster-data-access";
 import { clientEnv } from "@/lib/env";
 
-interface GameResultNFT {
+interface GameResultReward {
   id: string;
+  sessionId: string;
   tier: "participation" | "base" | "gold";
   rewardAmount: number;
-  nftMinted: boolean;
-  nftTokenId: string | null;
-  nftRevealed: boolean;
+  depositConfirmed: boolean;
   usdcClaimed: boolean;
   claimTxHash: string | null;
-  session: { title: string; weekNumber: number };
+  session: { title: string; weekNumber: number; status: string };
 }
-
-type RaffleStatus = "idle" | "requesting" | "polling" | "resolved";
 
 const solanaConnection = new Connection(
   clientEnv.SOLANA_RPC_URL,
@@ -38,10 +34,9 @@ export default function RewardsPage() {
   const { wallets: solanaWallets } = useWallets();
   const { signTransaction } = useSignTransaction();
   const { cluster } = useCluster();
-  const [results, setResults] = useState<GameResultNFT[]>([]);
+  const [results, setResults] = useState<GameResultReward[]>([]);
   const [loading, setLoading] = useState(true);
-  const [raffleStatus, setRaffleStatus] = useState<Record<string, RaffleStatus>>({});
-  const pollTimers = useRef<Record<string, ReturnType<typeof setInterval>>>({});
+  const [claiming, setClaiming] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const fetchRewards = async () => {
@@ -64,215 +59,107 @@ export default function RewardsPage() {
     fetchRewards();
   }, [getAccessToken]);
 
-  // Cleanup poll timers on unmount
-  useEffect(() => {
-    return () => {
-      Object.values(pollTimers.current).forEach(clearInterval);
-    };
-  }, []);
-
-  const pollRaffleStatus = useCallback(
-    (gameResultId: string) => {
-      // Clear any existing poll for this result
-      if (pollTimers.current[gameResultId]) {
-        clearInterval(pollTimers.current[gameResultId]);
-      }
-
-      pollTimers.current[gameResultId] = setInterval(async () => {
-        try {
-          const token = await getAccessToken();
-          const res = await fetch(
-            `/api/nft/raffle/status?gameResultId=${gameResultId}`,
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-          if (!res.ok) return;
-
-          const { resolved, rewardAmount } = await res.json();
-          if (resolved) {
-            clearInterval(pollTimers.current[gameResultId]);
-            delete pollTimers.current[gameResultId];
-
-            setRaffleStatus((prev) => ({ ...prev, [gameResultId]: "resolved" }));
-            setResults((prev) =>
-              prev.map((r) =>
-                r.id === gameResultId ? { ...r, rewardAmount } : r
-              )
-            );
-          }
-        } catch {
-          // continue polling
-        }
-      }, 3000);
-    },
-    [getAccessToken]
-  );
-
-  const handleOpenBox = async (gameResultId: string) => {
-    const wallet = solanaWallets[0];
-    if (!wallet) {
-      alert("No Solana wallet connected. Please connect a wallet first.");
-      return;
-    }
-
-    setRaffleStatus((prev) => ({ ...prev, [gameResultId]: "requesting" }));
-
-    try {
-      const token = await getAccessToken();
-
-      // 1. Get partially-signed raffle tx from server
-      const res = await fetch("/api/nft/raffle", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ gameResultId }),
-      });
-
-      if (!res.ok) {
-        const { error } = await res.json();
-        alert(error || "Failed to start raffle. Please try again.");
-        setRaffleStatus((prev) => ({ ...prev, [gameResultId]: "idle" }));
+  const handleClaim = useCallback(
+    async (result: GameResultReward) => {
+      const wallet = solanaWallets[0];
+      if (!wallet) {
+        alert("No Solana wallet connected. Please connect a wallet first.");
         return;
       }
 
-      const { unsignedTx } = await res.json();
+      setClaiming((prev) => ({ ...prev, [result.id]: true }));
 
-      // 2. Fan signs the tx
-      const txBytes = Uint8Array.from(Buffer.from(unsignedTx, "base64"));
+      try {
+        const token = await getAccessToken();
 
-      const { signedTransaction } = await signTransaction({
-        transaction: txBytes,
-        wallet,
-        chain: getPrivySolanaChain(cluster),
-      });
+        // 1. Get claim + withdraw txs from server
+        const res = await fetch(`/api/sessions/${result.sessionId}/withdraw`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-      // 3. Submit to Solana
-      await solanaConnection.sendRawTransaction(signedTransaction, {
-        skipPreflight: false,
-      });
+        if (res.status === 409) {
+          const { claimTxHash } = await res.json();
+          setResults((prev) =>
+            prev.map((r) =>
+              r.id === result.id ? { ...r, usdcClaimed: true, claimTxHash } : r
+            )
+          );
+          return;
+        }
 
-      // 4. Start polling for VRF resolution
-      setRaffleStatus((prev) => ({ ...prev, [gameResultId]: "polling" }));
-      pollRaffleStatus(gameResultId);
-    } catch (err) {
-      console.error("Open box failed:", err);
-      alert("Failed to open box. Please try again.");
-      setRaffleStatus((prev) => ({ ...prev, [gameResultId]: "idle" }));
-    }
-  };
+        if (!res.ok) {
+          const { error } = await res.json();
+          alert(error || "Claim failed. Please try again.");
+          return;
+        }
 
-  const handleReveal = async (gameResultId: string) => {
-    const token = await getAccessToken();
-    const res = await fetch("/api/nft/reveal", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ gameResultId }),
-    });
+        const { claimTransaction, withdrawTransaction } = await res.json();
 
-    if (res.ok) {
-      const { rewardAmount } = await res.json();
-      setResults((prev) =>
-        prev.map((r) =>
-          r.id === gameResultId ? { ...r, nftRevealed: true, rewardAmount } : r
-        )
-      );
-      setRaffleStatus((prev) => {
-        const next = { ...prev };
-        delete next[gameResultId];
-        return next;
-      });
-    }
-  };
+        // 2. Sign and send claim_reward tx (vault → PDA ATA)
+        const claimBytes = Uint8Array.from(Buffer.from(claimTransaction, "base64"));
+        const { signedTransaction: signedClaim } = await signTransaction({
+          transaction: claimBytes,
+          wallet,
+          chain: getPrivySolanaChain(cluster),
+        });
+        const claimTxHash = await solanaConnection.sendRawTransaction(signedClaim, {
+          skipPreflight: false,
+        });
+        // Wait for claim to confirm before withdrawing
+        await solanaConnection.confirmTransaction(claimTxHash, "confirmed");
 
-  const handleClaim = async (gameResultId: string) => {
-    const wallet = solanaWallets[0];
-    if (!wallet) {
-      alert("No Solana wallet connected. Please connect a wallet first.");
-      return;
-    }
+        // 3. Sign and send withdraw tx (PDA ATA → wallet)
+        let txHash = claimTxHash;
+        try {
+          const withdrawBytes = Uint8Array.from(Buffer.from(withdrawTransaction, "base64"));
+          const { signedTransaction: signedWithdraw } = await signTransaction({
+            transaction: withdrawBytes,
+            wallet,
+            chain: getPrivySolanaChain(cluster),
+          });
+          txHash = await solanaConnection.sendRawTransaction(signedWithdraw, {
+            skipPreflight: false,
+          });
+        } catch (withdrawErr) {
+          console.error("[rewards] withdraw failed, funds safe in PDA:", withdrawErr);
+          // Claim succeeded — funds are in PDA ATA, user can withdraw later
+        }
 
-    try {
-      const token = await getAccessToken();
+        // 4. Confirm with backend
+        await fetch(`/api/sessions/${result.sessionId}/confirm-withdraw`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ txSignature: txHash }),
+        });
 
-      // 1. Get partially-signed tx from server
-      const res = await fetch("/api/nft/claim", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ gameResultId }),
-      });
-
-      if (res.status === 409) {
-        const { claimTxHash } = await res.json();
         setResults((prev) =>
           prev.map((r) =>
-            r.id === gameResultId
-              ? { ...r, usdcClaimed: true, claimTxHash }
-              : r
+            r.id === result.id ? { ...r, usdcClaimed: true, claimTxHash: txHash } : r
           )
         );
-        return;
+      } catch (err) {
+        console.error("Claim failed:", err);
+        alert("Claim failed. Please try again.");
+      } finally {
+        setClaiming((prev) => ({ ...prev, [result.id]: false }));
       }
-
-      if (!res.ok) {
-        const { error } = await res.json();
-        alert(error || "Claim failed. Please try again.");
-        return;
-      }
-
-      const { transaction } = await res.json();
-
-      // 2. Deserialize and sign with user's wallet
-      const txBytes = Uint8Array.from(
-        Buffer.from(transaction, "base64")
-      );
-
-      const { signedTransaction } = await signTransaction({
-        transaction: txBytes,
-        wallet,
-        chain: getPrivySolanaChain(cluster),
-      });
-
-      // 3. Send signed tx to the network
-      const txHash = await solanaConnection.sendRawTransaction(
-        signedTransaction,
-        { skipPreflight: false }
-      );
-
-      // 4. Confirm with backend
-      await fetch("/api/nft/claim/confirm", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ gameResultId, txHash }),
-      });
-
-      setResults((prev) =>
-        prev.map((r) =>
-          r.id === gameResultId
-            ? { ...r, usdcClaimed: true, claimTxHash: txHash }
-            : r
-        )
-      );
-    } catch (err) {
-      console.error("Claim failed:", err);
-      alert("Claim failed. Please try again.");
-    }
-  };
-
-  const blindBoxResults = results.filter(
-    (r) => r.nftMinted && (r.tier === "base" || r.tier === "gold")
+    },
+    [getAccessToken, signTransaction, solanaWallets, cluster]
   );
-  const participationResults = results.filter(
-    (r) => r.nftMinted && r.tier === "participation"
+
+  const claimableResults = results.filter(
+    (r) =>
+      r.depositConfirmed &&
+      r.rewardAmount > 0 &&
+      r.session.status === "ended"
+  );
+
+  const noRewardResults = results.filter(
+    (r) => !r.depositConfirmed || r.rewardAmount <= 0
   );
 
   return (
@@ -289,7 +176,7 @@ export default function RewardsPage() {
         </div>
         <div>
           <h1 className="text-white font-bold text-lg">My Rewards</h1>
-          <p className="text-[#888] text-xs">Blind Box Collection</p>
+          <p className="text-[#888] text-xs">Pool Rewards</p>
         </div>
       </div>
 
@@ -302,12 +189,12 @@ export default function RewardsPage() {
         <div className="flex items-center justify-center py-20">
           <div className="w-8 h-8 border-2 border-[#F5E642] border-t-transparent rounded-full animate-spin" />
         </div>
-      ) : blindBoxResults.length === 0 && participationResults.length === 0 ? (
+      ) : claimableResults.length === 0 && noRewardResults.length === 0 ? (
         <div className="text-center py-16">
           <Gift className="w-16 h-16 text-[#555] mx-auto mb-4" />
-          <h2 className="text-white font-bold text-lg mb-2">No NFTs Yet</h2>
+          <h2 className="text-white font-bold text-lg mb-2">No Rewards Yet</h2>
           <p className="text-[#888] text-sm mb-6">
-            Play a live session to earn NFT rewards!
+            Play a live session and deposit to earn pool rewards!
           </p>
           <Link
             href="/arena"
@@ -318,105 +205,70 @@ export default function RewardsPage() {
         </div>
       ) : (
         <>
-          {blindBoxResults.length === 0 && participationResults.length > 0 ? null : (
-          <div className="grid grid-cols-1 gap-6">
-            {blindBoxResults.map((result) => {
-              const status = raffleStatus[result.id] ?? "idle";
-              const needsRaffle = !result.nftRevealed && status === "idle";
-              const isPolling = status === "polling";
-              const isRequesting = status === "requesting";
-              const isResolved = status === "resolved";
-
-              return (
-                <div key={result.id}>
-                  <p className="text-[#888] text-xs mb-2">
+          {claimableResults.length > 0 && (
+            <div className="space-y-4">
+              <h3 className="text-white font-bold text-sm">Claimable Rewards</h3>
+              {claimableResults.map((result) => (
+                <div
+                  key={result.id}
+                  className="bg-[#1A1A1A] rounded-2xl p-5 border border-[#2A2A2A]"
+                >
+                  <p className="text-[#888] text-xs mb-1">
                     {result.session?.title || "Session"} — Week{" "}
                     {result.session?.weekNumber}
                   </p>
-
-                  {/* Polling overlay */}
-                  {(isRequesting || isPolling) && (
-                    <div className="mb-3 bg-[#1A1A1A] rounded-xl p-4 border border-[#F5E642]/20 flex items-center gap-3">
-                      <Loader2 className="w-5 h-5 text-[#F5E642] animate-spin" />
-                      <div>
-                        <p className="text-white text-sm font-medium">
-                          {isRequesting
-                            ? "Submitting raffle transaction..."
-                            : "Resolving randomness on-chain..."}
-                        </p>
-                        <p className="text-[#888] text-xs">
-                          {isPolling && "This usually takes ~3 seconds"}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Resolved — show reward + "Reveal" button */}
-                  {isResolved && !result.nftRevealed && (
-                    <div className="mb-3 bg-[#1A1A1A] rounded-xl p-4 border border-green-500/20">
-                      <p className="text-green-400 text-sm font-medium mb-2">
-                        Raffle resolved! Your reward: ${result.rewardAmount.toFixed(2)} USDC
+                  <div className="flex items-center justify-between mt-2">
+                    <div>
+                      <p className="text-white font-bold text-lg">
+                        ${result.rewardAmount.toFixed(2)} USDC
                       </p>
-                      <button
-                        onClick={() => handleReveal(result.id)}
-                        className="btn-yellow w-full py-2.5 rounded-xl font-bold text-sm"
-                      >
-                        Reveal NFT
-                      </button>
+                      <p className="text-[#888] text-xs capitalize">
+                        {result.tier} tier
+                      </p>
                     </div>
-                  )}
 
-                  {/* "Open Box" button — before raffle */}
-                  {needsRaffle && (
-                    <div className="mb-3">
+                    {result.usdcClaimed ? (
+                      <div className="flex flex-col items-end gap-1">
+                        <span className="text-green-400 text-sm font-medium">Claimed</span>
+                        {result.claimTxHash && (
+                          <a
+                            href={`https://explorer.solana.com/tx/${result.claimTxHash}?cluster=${clientEnv.SOLANA_NETWORK}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 text-[#F5E642] text-xs hover:underline"
+                          >
+                            <ExternalLink className="w-3 h-3" />
+                            View tx
+                          </a>
+                        )}
+                      </div>
+                    ) : (
                       <button
-                        onClick={() => handleOpenBox(result.id)}
-                        className="btn-yellow w-full py-3 rounded-xl font-bold text-sm"
+                        onClick={() => handleClaim(result)}
+                        disabled={claiming[result.id]}
+                        className="btn-yellow px-5 py-2.5 rounded-xl font-bold text-sm disabled:opacity-50 flex items-center gap-2"
                       >
-                        Open Box
+                        {claiming[result.id] ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Claiming...
+                          </>
+                        ) : (
+                          `Claim $${result.rewardAmount.toFixed(2)}`
+                        )}
                       </button>
-                    </div>
-                  )}
-
-                  <BlindBoxCard
-                    gameResultId={result.id}
-                    tier={result.tier as "base" | "gold"}
-                    rewardAmount={result.rewardAmount}
-                    revealed={result.nftRevealed}
-                    tokenId={result.nftTokenId}
-                    onReveal={handleReveal}
-                    usdcClaimed={result.usdcClaimed}
-                    claimTxHash={result.claimTxHash}
-                    onClaim={handleClaim}
-                  />
-                  {/* Share Claim Link as Blink */}
-                  {result.nftRevealed && !result.usdcClaimed && (
-                    <button
-                      onClick={() => {
-                        const origin = window.location.origin;
-                        const actionUrl = `${origin}/api/actions/claim?result=${result.id}`;
-                        const blinkUrl = `https://dial.to/?action=solana-action:${encodeURIComponent(actionUrl)}`;
-                        navigator.clipboard.writeText(blinkUrl);
-                        alert("Claim Blink URL copied!");
-                      }}
-                      className="mt-2 w-full bg-[#1A1A1A] rounded-xl py-2.5 text-xs text-white flex items-center justify-center gap-2 border border-[#2A2A2A] hover:border-[#F5E642]/30 transition-colors"
-                    >
-                      <Link2 className="w-3.5 h-3.5 text-[#F5E642]" />
-                      Share Claim Link
-                    </button>
-                  )}
+                    )}
+                  </div>
                 </div>
-              );
-            })}
-          </div>
+              ))}
+            </div>
           )}
 
-          {/* Participation NFTs */}
-          {participationResults.length > 0 && (
+          {noRewardResults.length > 0 && (
             <div className="mt-8">
-              <h3 className="text-white font-bold text-sm mb-4">Participation NFTs</h3>
+              <h3 className="text-white font-bold text-sm mb-4">Past Sessions</h3>
               <div className="grid grid-cols-1 gap-4">
-                {participationResults.map((result) => (
+                {noRewardResults.map((result) => (
                   <div
                     key={result.id}
                     className="bg-[#1A1A1A] rounded-2xl p-5 border border-[#2A2A2A]"
@@ -425,24 +277,16 @@ export default function RewardsPage() {
                       {result.session?.title || "Session"} — Week{" "}
                       {result.session?.weekNumber}
                     </p>
-                    <p className="text-white font-bold text-sm mb-2">Participation NFT</p>
-                    {result.nftTokenId && (
-                      <a
-                        href={`https://explorer.solana.com/address/${result.nftTokenId}?cluster=${clientEnv.SOLANA_NETWORK}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 text-[#F5E642] text-xs hover:underline"
-                      >
-                        <ExternalLink className="w-3 h-3" />
-                        View on Solana Explorer
-                      </a>
-                    )}
+                    <p className="text-white font-bold text-sm">
+                      {!result.depositConfirmed
+                        ? "No deposit — played for free"
+                        : "No reward earned"}
+                    </p>
                   </div>
                 ))}
               </div>
             </div>
           )}
-
         </>
       )}
     </div>

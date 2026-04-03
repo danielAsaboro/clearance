@@ -4,6 +4,7 @@ import { getAuthUser } from "@/lib/auth-helpers";
 import { calculateMajorityWinners, calculateTier, calculatePoolReward } from "@/lib/session-engine";
 import { campaignConfig } from "@/lib/campaign-config";
 import { updateVideoStatsForSession } from "@/lib/video-stats";
+import { finalizeVault } from "@/lib/vault-claim";
 
 // POST /api/admin/sessions/:id/finalize — Calculate majority winners & assign tiers
 export async function POST(
@@ -136,6 +137,18 @@ export async function POST(
       });
     })
   );
+
+  // On-chain: finalize vault so no more deposits + users can claim (fire-and-forget)
+  void (async () => {
+    try {
+      await finalizeVault(session.weekNumber);
+    } catch (err) {
+      // AlreadyFinalized is fine (idempotent), log others
+      if (!String(err).includes("AlreadyFinalized")) {
+        console.error("[finalize] finalizeVault failed:", err);
+      }
+    }
+  })();
 
   // Update video performance stats (fire-and-forget)
   void updateVideoStatsForSession(id);

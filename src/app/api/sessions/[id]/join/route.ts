@@ -4,7 +4,7 @@ import { getAuthUser } from "@/lib/auth-helpers";
 import { canLateJoin, getCurrentRound } from "@/lib/session-engine";
 import { campaignConfig } from "@/lib/campaign-config";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { executeFanDepositServerSide } from "@/lib/vault-claim";
+import { buildFanDepositTx } from "@/lib/vault-claim";
 
 // POST /api/sessions/:id/join — Fan joins a session
 // Returns an unsigned fan_deposit transaction for the fan to sign.
@@ -47,7 +47,7 @@ export async function POST(
       joinedAtRound,
       alreadyJoined: true,
       asyncReplay: isEnded,
-      ...(user.isGuest ? { isGuest: true, displayName: user.displayName } : { depositConfirmed: true }),
+      ...(user.isGuest ? { isGuest: true, displayName: user.displayName } : { depositConfirmed: existing.depositConfirmed }),
     });
   }
 
@@ -91,7 +91,7 @@ export async function POST(
     return NextResponse.json({ error: "Wallet not connected" }, { status: 400 });
   }
 
-  // Create GameResult upfront so it exists for the results page
+  // Create GameResult upfront (depositConfirmed: false — user must sign)
   let gameResult;
   try {
     gameResult = await prisma.gameResult.create({
@@ -100,11 +100,11 @@ export async function POST(
         sessionId: id,
         walletAddress: user.walletAddress,
         lateJoin: isLateJoin,
+        depositConfirmed: false,
       },
     });
   } catch (err: any) {
     if (err?.code === 'P2002') {
-      // Another concurrent request created the record — fetch it
       gameResult = await prisma.gameResult.findUnique({
         where: { userId_sessionId: { userId: user.id, sessionId: id } },
       });
@@ -114,25 +114,26 @@ export async function POST(
     throw err;
   }
 
-  // Execute deposit server-side — user doesn't need to sign
-  let depositTxHash: string | undefined;
+  // Build unsigned fan_deposit tx for the user to sign
+  let unsignedTx: string | undefined;
   try {
-    depositTxHash = await executeFanDepositServerSide({
+    unsignedTx = await buildFanDepositTx({
+      fanWalletAddress: user.walletAddress,
       sessionWeekNumber: session.weekNumber,
       amountUsdc: campaignConfig.entryFeeUsdc,
     });
-
-    await prisma.gameResult.update({
-      where: { id: gameResult.id },
-      data: { depositConfirmed: true, depositTxHash },
-    });
   } catch (err) {
-    console.error("[join] server-side deposit failed:", err);
-    // Deposit failed — do NOT mark as confirmed; user can still play but won't be in the reward pool
+    console.error("[join] buildFanDepositTx failed:", err);
+    // Tx build failed — user plays for free but won't be in reward pool
   }
 
-  return NextResponse.json(
-    { ...gameResult, joinedAtRound, depositConfirmed: true, asyncReplay: isEnded },
-    { status: 200 }
-  );
+  return NextResponse.json({
+    ...gameResult,
+    joinedAtRound,
+    asyncReplay: isEnded,
+    entryFeeUsdc: campaignConfig.entryFeeUsdc,
+    ...(unsignedTx
+      ? { unsignedTx, requiresSignature: true }
+      : { depositConfirmed: false }),
+  });
 }

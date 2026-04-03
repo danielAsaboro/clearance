@@ -2,83 +2,17 @@
  * Program IDL in camelCase format in order to be used in JS/TS.
  *
  * Note that this is only a type helper and is not the actual IDL. The original
- * IDL can be found at `target/idl/clearance.json`.
+ * IDL can be found at `target/idl/spotrtv.json`.
  */
-export type Clearance = {
+export type Spotrtv = {
   "address": "D3pfeCb4sgYoHWXcYbeKtQbUSJBoDPorp6kETv1SexxU",
   "metadata": {
-    "name": "clearance",
+    "name": "spotrtv",
     "version": "0.1.0",
     "spec": "0.1.0",
-    "description": "Clearance USDC vault program"
+    "description": "Spotr TV USDC vault program"
   },
   "instructions": [
-    {
-      "name": "callbackRaffle",
-      "docs": [
-        "VRF oracle callback — resolves the raffle reward amount.",
-        "In testing mode, admin calls this directly."
-      ],
-      "discriminator": [
-        153,
-        29,
-        157,
-        35,
-        250,
-        56,
-        94,
-        19
-      ],
-      "accounts": [
-        {
-          "name": "vrfProgramIdentity",
-          "docs": [
-            "VRF oracle identity signer. In testing mode, admin acts as oracle."
-          ],
-          "signer": true
-        },
-        {
-          "name": "raffleRecord",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  114,
-                  97,
-                  102,
-                  102,
-                  108,
-                  101
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "raffle_record.vault",
-                "account": "raffleRecord"
-              },
-              {
-                "kind": "account",
-                "path": "raffle_record.fan",
-                "account": "raffleRecord"
-              }
-            ]
-          }
-        }
-      ],
-      "args": [
-        {
-          "name": "randomness",
-          "type": {
-            "array": [
-              "u8",
-              32
-            ]
-          }
-        }
-      ]
-    },
     {
       "name": "claim",
       "docs": [
@@ -265,6 +199,330 @@ export type Clearance = {
               {
                 "kind": "account",
                 "path": "user"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "usdcMint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "usdcMint"
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "tokenProgram",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "associatedTokenProgram",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "claimReward",
+      "docs": [
+        "User claims a pool reward from the vault into their UserAccount PDA ATA.",
+        "Admin co-signs to attest the reward amount (from off-chain pool calculation).",
+        "A RewardRecord PDA prevents double-claims per vault per user."
+      ],
+      "discriminator": [
+        149,
+        95,
+        181,
+        242,
+        94,
+        90,
+        158,
+        162
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "docs": [
+            "Admin co-signs to attest the reward amount from the off-chain pool calculation."
+          ],
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "vault"
+          ]
+        },
+        {
+          "name": "user",
+          "docs": [
+            "The user claiming their reward — must sign."
+          ],
+          "signer": true
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault.session_id",
+                "account": "vault"
+              }
+            ]
+          }
+        },
+        {
+          "name": "userAccount",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  97,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "rewardRecord",
+          "docs": [
+            "One-time reward record per vault per user — prevents double-claims."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  119,
+                  97,
+                  114,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault"
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vaultTokenAccount",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "vault"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault.usdc_mint",
+                "account": "vault"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "userAccountToken",
+          "docs": [
+            "User account's ATA — init_if_needed so it's created on first reward."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "userAccount"
               },
               {
                 "kind": "const",
@@ -667,321 +925,6 @@ export type Clearance = {
           "type": "u64"
         }
       ]
-    },
-    {
-      "name": "claimWithRaffle",
-      "docs": [
-        "Fan claims USDC based on VRF-resolved raffle result.",
-        "Reads reward_amount from RaffleRecord — no amount parameter."
-      ],
-      "discriminator": [
-        57,
-        228,
-        202,
-        161,
-        194,
-        12,
-        170,
-        36
-      ],
-      "accounts": [
-        {
-          "name": "admin",
-          "docs": [
-            "Admin co-signs to authorize the claim."
-          ],
-          "writable": true,
-          "signer": true,
-          "relations": [
-            "vault"
-          ]
-        },
-        {
-          "name": "fan",
-          "docs": [
-            "The fan receiving the USDC (must also own the NFT)."
-          ],
-          "signer": true
-        },
-        {
-          "name": "vault",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  118,
-                  97,
-                  117,
-                  108,
-                  116
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "vault.session_id",
-                "account": "vault"
-              }
-            ]
-          }
-        },
-        {
-          "name": "raffleRecord",
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  114,
-                  97,
-                  102,
-                  102,
-                  108,
-                  101
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "vault"
-              },
-              {
-                "kind": "account",
-                "path": "fan"
-              }
-            ]
-          }
-        },
-        {
-          "name": "claimRecord",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  99,
-                  108,
-                  97,
-                  105,
-                  109
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "vault"
-              },
-              {
-                "kind": "account",
-                "path": "fan"
-              }
-            ]
-          }
-        },
-        {
-          "name": "vaultTokenAccount",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "account",
-                "path": "vault"
-              },
-              {
-                "kind": "const",
-                "value": [
-                  6,
-                  221,
-                  246,
-                  225,
-                  215,
-                  101,
-                  161,
-                  147,
-                  217,
-                  203,
-                  225,
-                  70,
-                  206,
-                  235,
-                  121,
-                  172,
-                  28,
-                  180,
-                  133,
-                  237,
-                  95,
-                  91,
-                  55,
-                  145,
-                  58,
-                  140,
-                  245,
-                  133,
-                  126,
-                  255,
-                  0,
-                  169
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "vault.usdc_mint",
-                "account": "vault"
-              }
-            ],
-            "program": {
-              "kind": "const",
-              "value": [
-                140,
-                151,
-                37,
-                143,
-                78,
-                36,
-                137,
-                241,
-                187,
-                61,
-                16,
-                41,
-                20,
-                142,
-                13,
-                131,
-                11,
-                90,
-                19,
-                153,
-                218,
-                255,
-                16,
-                132,
-                4,
-                142,
-                123,
-                216,
-                219,
-                233,
-                248,
-                89
-              ]
-            }
-          }
-        },
-        {
-          "name": "fanTokenAccount",
-          "docs": [
-            "Fan's associated token account — init_if_needed so first-time users don't need to pre-create."
-          ],
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "account",
-                "path": "fan"
-              },
-              {
-                "kind": "const",
-                "value": [
-                  6,
-                  221,
-                  246,
-                  225,
-                  215,
-                  101,
-                  161,
-                  147,
-                  217,
-                  203,
-                  225,
-                  70,
-                  206,
-                  235,
-                  121,
-                  172,
-                  28,
-                  180,
-                  133,
-                  237,
-                  95,
-                  91,
-                  55,
-                  145,
-                  58,
-                  140,
-                  245,
-                  133,
-                  126,
-                  255,
-                  0,
-                  169
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "usdcMint"
-              }
-            ],
-            "program": {
-              "kind": "const",
-              "value": [
-                140,
-                151,
-                37,
-                143,
-                78,
-                36,
-                137,
-                241,
-                187,
-                61,
-                16,
-                41,
-                20,
-                142,
-                13,
-                131,
-                11,
-                90,
-                19,
-                153,
-                218,
-                255,
-                16,
-                132,
-                4,
-                142,
-                123,
-                216,
-                219,
-                233,
-                248,
-                89
-              ]
-            }
-          }
-        },
-        {
-          "name": "usdcMint"
-        },
-        {
-          "name": "nftAsset"
-        },
-        {
-          "name": "systemProgram",
-          "address": "11111111111111111111111111111111"
-        },
-        {
-          "name": "tokenProgram",
-          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
-        },
-        {
-          "name": "associatedTokenProgram",
-          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
-        }
-      ],
-      "args": []
     },
     {
       "name": "closeVault",
@@ -1463,8 +1406,9 @@ export type Clearance = {
     {
       "name": "fanDeposit",
       "docs": [
-        "Fan deposits $3.50 USDC entry fee directly into the vault.",
-        "A FanDepositRecord PDA is created — if it already exists the tx fails (double-entry prevention)."
+        "Fan deposits USDC entry fee directly into the vault.",
+        "A FanDepositRecord PDA is created — if it already exists the tx fails (double-entry prevention).",
+        "Also creates a UserAccount PDA (init_if_needed) so rewards can be distributed later."
       ],
       "discriminator": [
         59,
@@ -1504,6 +1448,38 @@ export type Clearance = {
                 "kind": "account",
                 "path": "vault.session_id",
                 "account": "vault"
+              }
+            ]
+          }
+        },
+        {
+          "name": "userAccount",
+          "docs": [
+            "User account PDA — created on first deposit so rewards can be distributed later."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  97,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "fan"
               }
             ]
           }
@@ -1738,6 +1714,57 @@ export type Clearance = {
       ]
     },
     {
+      "name": "finalizeVault",
+      "docs": [
+        "Admin marks the vault as finalized — no more deposits allowed.",
+        "Must be called before distribute_reward."
+      ],
+      "discriminator": [
+        195,
+        53,
+        158,
+        38,
+        238,
+        100,
+        137,
+        6
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "vault"
+          ]
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault.session_id",
+                "account": "vault"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "initializeVault",
       "docs": [
         "Create a per-session vault PDA and its associated USDC token account."
@@ -1897,103 +1924,260 @@ export type Clearance = {
       ]
     },
     {
-      "name": "requestRaffle",
+      "name": "withdraw",
       "docs": [
-        "Fan requests VRF raffle to determine reward amount.",
-        "Admin co-signs to attest the fan's tier.",
-        "In production, triggers VRF oracle; in testing, callback is called directly."
+        "User withdraws USDC from their UserAccount PDA ATA to their own wallet."
       ],
       "discriminator": [
-        124,
-        141,
-        209,
-        159,
-        244,
-        154,
-        220,
-        187
+        183,
+        18,
+        70,
+        156,
+        148,
+        109,
+        161,
+        34
       ],
       "accounts": [
         {
-          "name": "fan",
+          "name": "user",
           "writable": true,
           "signer": true
         },
         {
-          "name": "admin",
-          "signer": true,
-          "relations": [
-            "vault"
-          ]
-        },
-        {
-          "name": "vault",
+          "name": "userAccount",
           "pda": {
             "seeds": [
               {
                 "kind": "const",
                 "value": [
-                  118,
-                  97,
                   117,
-                  108,
+                  115,
+                  101,
+                  114,
+                  95,
+                  97,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
                   116
                 ]
               },
               {
                 "kind": "account",
-                "path": "vault.session_id",
-                "account": "vault"
+                "path": "user"
               }
             ]
           }
         },
         {
-          "name": "raffleRecord",
+          "name": "userAccountToken",
+          "docs": [
+            "The user account's USDC ATA (PDA-owned)."
+          ],
           "writable": true,
           "pda": {
             "seeds": [
               {
+                "kind": "account",
+                "path": "userAccount"
+              },
+              {
                 "kind": "const",
                 "value": [
-                  114,
-                  97,
-                  102,
-                  102,
-                  108,
-                  101
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
                 ]
               },
               {
                 "kind": "account",
-                "path": "vault"
-              },
-              {
-                "kind": "account",
-                "path": "fan"
+                "path": "usdcMint"
               }
-            ]
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
           }
         },
         {
-          "name": "oracleQueue",
-          "writable": true
+          "name": "userTokenAccount",
+          "docs": [
+            "User's own wallet ATA — init_if_needed."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "user"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "usdcMint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
         },
         {
-          "name": "programIdentity"
-        },
-        {
-          "name": "slotHashes"
+          "name": "usdcMint"
         },
         {
           "name": "systemProgram",
           "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "tokenProgram",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "associatedTokenProgram",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
         }
       ],
       "args": [
         {
-          "name": "tier",
-          "type": "u8"
+          "name": "amount",
+          "type": "u64"
         }
       ]
     }
@@ -2026,16 +2210,29 @@ export type Clearance = {
       ]
     },
     {
-      "name": "raffleRecord",
+      "name": "rewardRecord",
       "discriminator": [
-        139,
-        39,
-        220,
-        191,
-        64,
-        197,
-        163,
-        171
+        44,
+        129,
+        188,
+        244,
+        91,
+        0,
+        49,
+        222
+      ]
+    },
+    {
+      "name": "userAccount",
+      "discriminator": [
+        211,
+        33,
+        136,
+        16,
+        186,
+        110,
+        242,
+        127
       ]
     },
     {
@@ -2090,13 +2287,18 @@ export type Clearance = {
     },
     {
       "code": 6007,
-      "name": "raffleNotResolved",
-      "msg": "Raffle has not been resolved yet"
+      "name": "alreadyFinalized",
+      "msg": "Vault has already been finalized"
     },
     {
       "code": 6008,
-      "name": "alreadyResolved",
-      "msg": "Raffle has already been resolved"
+      "name": "vaultNotFinalized",
+      "msg": "Vault has not been finalized yet"
+    },
+    {
+      "code": 6009,
+      "name": "vaultFinalized",
+      "msg": "Vault is finalized — no more deposits allowed"
     }
   ],
   "types": [
@@ -2161,12 +2363,12 @@ export type Clearance = {
       }
     },
     {
-      "name": "raffleRecord",
+      "name": "rewardRecord",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "fan",
+            "name": "user",
             "type": "pubkey"
           },
           {
@@ -2174,20 +2376,32 @@ export type Clearance = {
             "type": "pubkey"
           },
           {
-            "name": "sessionId",
+            "name": "amount",
             "type": "u64"
           },
           {
-            "name": "tier",
+            "name": "distributedAt",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
             "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "userAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
           },
           {
-            "name": "rewardAmount",
-            "type": "u64"
-          },
-          {
-            "name": "resolved",
-            "type": "bool"
+            "name": "usdcMint",
+            "type": "pubkey"
           },
           {
             "name": "bump",
@@ -2220,6 +2434,10 @@ export type Clearance = {
           {
             "name": "totalClaimed",
             "type": "u64"
+          },
+          {
+            "name": "finalized",
+            "type": "bool"
           },
           {
             "name": "bump",
