@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { getAuthUser } from "@/lib/auth-helpers";
+import { getAuthUser, resolveCampaignId } from "@/lib/auth-helpers";
 
 // GET /api/admin/analytics/trends — Platform-wide trend data
+// ?campaignId=xxx — Filter by campaign (default: active, "all" for cumulative)
 export async function GET(req: NextRequest) {
   const user = await getAuthUser(req);
   if (!user || user.role !== "admin") {
@@ -13,6 +14,9 @@ export async function GET(req: NextRequest) {
   const rangeDays = parseInt(searchParams.get("days") ?? "30");
   const since = new Date();
   since.setDate(since.getDate() - rangeDays);
+
+  const campaignId = await resolveCampaignId(searchParams.get("campaignId"));
+  const sessionFilter = campaignId ? { campaignId } : {};
 
   // User growth (new users per day)
   const users = await prisma.user.findMany({
@@ -37,9 +41,9 @@ export async function GET(req: NextRequest) {
     return { date, newUsers, cumulativeUsers: cumulative };
   });
 
-  // Session trends (for all ended sessions)
+  // Session trends (for ended sessions in campaign)
   const sessions = await prisma.weeklySession.findMany({
-    where: { status: "ended" },
+    where: { status: "ended", ...sessionFilter },
     select: {
       id: true,
       title: true,
@@ -97,9 +101,14 @@ export async function GET(req: NextRequest) {
     },
   });
 
-  // Top players by accuracy
+  // Top players by accuracy (scoped by campaign)
+  const gameResultFilter = campaignId
+    ? { session: { campaignId } }
+    : {};
+
   const topPlayersRaw = await prisma.gameResult.groupBy({
     by: ["userId"],
+    where: gameResultFilter,
     _sum: { correctVotes: true, totalVotes: true },
     _count: { _all: true },
     having: { userId: { _count: { gte: 2 } } },

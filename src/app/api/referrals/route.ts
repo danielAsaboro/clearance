@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { getAuthUser } from "@/lib/auth-helpers";
+import { getAuthUser, getActiveCampaign } from "@/lib/auth-helpers";
 
 // POST /api/referrals — Track a referral
 export async function POST(req: NextRequest) {
@@ -80,6 +80,11 @@ export async function GET(req: NextRequest) {
     select: { referralCode: true },
   });
 
+  const activeCampaign = await getActiveCampaign();
+  const sessionFilter = activeCampaign
+    ? { session: { campaignId: activeCampaign.id } }
+    : {};
+
   const [referrals, tribeAggregate] = await Promise.all([
     prisma.referral.findMany({
       where: { referrerId: authUser.id },
@@ -88,6 +93,7 @@ export async function GET(req: NextRequest) {
     }),
     prisma.gameResult.aggregate({
       where: {
+        ...sessionFilter,
         OR: [
           { userId: authUser.id },
           {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { getAuthUser } from "@/lib/auth-helpers";
+import { getAuthUser, resolveCampaignId } from "@/lib/auth-helpers";
 
 export async function GET(req: NextRequest) {
   const user = await getAuthUser(req);
@@ -8,6 +8,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  const campaignId = await resolveCampaignId(req.nextUrl.searchParams.get("campaignId"));
+  const sessionFilter = campaignId ? { campaignId } : {};
   const type = req.nextUrl.searchParams.get("type");
 
   // Return sessions list (paginated)
@@ -17,6 +19,7 @@ export async function GET(req: NextRequest) {
 
     const [sessions, total] = await Promise.all([
       prisma.weeklySession.findMany({
+        where: sessionFilter,
         include: {
           _count: { select: { matchups: true, gameResults: true } },
         },
@@ -24,7 +27,7 @@ export async function GET(req: NextRequest) {
         skip: (page - 1) * limit,
         take: limit,
       }),
-      prisma.weeklySession.count(),
+      prisma.weeklySession.count({ where: sessionFilter }),
     ]);
 
     return NextResponse.json({
@@ -39,7 +42,7 @@ export async function GET(req: NextRequest) {
   // Return results for most recent ended session
   if (type === "results") {
     const session = await prisma.weeklySession.findFirst({
-      where: { status: "ended" },
+      where: { status: "ended", ...sessionFilter },
       orderBy: { weekNumber: "desc" },
     });
 
@@ -79,6 +82,13 @@ export async function GET(req: NextRequest) {
   }
 
   // Default: dashboard stats
+  const voteSessionFilter = campaignId
+    ? { matchup: { session: { campaignId } } }
+    : {};
+  const gameResultSessionFilter = campaignId
+    ? { session: { campaignId } }
+    : {};
+
   const [
     totalPlayers,
     totalVideos,
@@ -91,20 +101,22 @@ export async function GET(req: NextRequest) {
     nftsMinted,
     usdcClaimed,
   ] = await Promise.all([
-    prisma.user.count({ where: { role: "player" } }),
+    campaignId
+      ? prisma.campaignEnrollment.count({ where: { campaignId } })
+      : prisma.user.count({ where: { role: "player" } }),
     prisma.video.count(),
     prisma.weeklySession.findFirst({
-      where: { status: "scheduled" },
+      where: { status: "scheduled", ...sessionFilter },
       orderBy: { scheduledAt: "asc" },
       select: { title: true, scheduledAt: true },
     }),
-    prisma.vote.count(),
-    prisma.weeklySession.count(),
-    prisma.weeklySession.count({ where: { status: "ended" } }),
+    prisma.vote.count({ where: voteSessionFilter }),
+    prisma.weeklySession.count({ where: sessionFilter }),
+    prisma.weeklySession.count({ where: { status: "ended", ...sessionFilter } }),
     prisma.referral.count(),
-    prisma.gameResult.count(),
-    prisma.gameResult.count({ where: { nftMinted: true } }),
-    prisma.gameResult.count({ where: { usdcClaimed: true } }),
+    prisma.gameResult.count({ where: gameResultSessionFilter }),
+    prisma.gameResult.count({ where: { nftMinted: true, ...gameResultSessionFilter } }),
+    prisma.gameResult.count({ where: { usdcClaimed: true, ...gameResultSessionFilter } }),
   ]);
 
   return NextResponse.json({

@@ -107,6 +107,16 @@ export async function getActiveCampaign() {
   });
 }
 
+export async function resolveCampaignId(requestedId: string | null): Promise<string | undefined> {
+  if (requestedId && requestedId !== "all") {
+    const campaign = await prisma.campaign.findUnique({ where: { id: requestedId } });
+    return campaign?.id;
+  }
+  if (requestedId === "all") return undefined;
+  const active = await getActiveCampaign();
+  return active?.id;
+}
+
 export async function getUserCampaignRole(userId: string, campaignId: string) {
   const enrollment = await prisma.campaignEnrollment.findUnique({
     where: {

@@ -312,7 +312,21 @@ export default function LeaderboardPage() {
   const [loading, setLoading] = useState(true);
   const [playerPage, setPlayerPage] = useState(0);
   const [tribePage, setTribePage] = useState(0);
+  const [seasonLabel, setSeasonLabel] = useState("");
   const { getAccessToken, authenticated } = usePrivy();
+
+  useEffect(() => {
+    fetch("/api/campaigns/active")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.campaign) {
+          const end = new Date(data.campaign.endDate);
+          const month = end.toLocaleString("en-US", { month: "long" });
+          setSeasonLabel(`${data.campaign.title} — ${month} ${end.getFullYear()}`);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -345,7 +359,7 @@ export default function LeaderboardPage() {
         <div className="mb-5 flex items-start justify-between border-b border-white/10 pb-3">
           <div>
             <h1 className="text-[28px] font-semibold leading-none tracking-[-0.05em] text-white">LEADERBOARD</h1>
-            <p className="mt-1 text-[13px] text-[#6e6e6e]">Season 1 — June 2026</p>
+            <p className="mt-1 text-[13px] text-[#6e6e6e]">{seasonLabel}</p>
           </div>
 
           <Link href="/" className="text-[#9b9b9b] transition-colors hover:text-white">

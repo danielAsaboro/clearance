@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { calculateMajorityWinners } from "@/lib/session-engine";
-import { getAuthUser } from "@/lib/auth-helpers";
+import { getAuthUser, resolveCampaignId } from "@/lib/auth-helpers";
 
 export interface PlayerRanking {
   rank: number;
@@ -27,11 +27,16 @@ export interface TribeRanking {
 
 // GET /api/leaderboard — Public player rankings by correct predictions
 // ?tab=tribes — Tribe rankings by collective score
+// ?campaignId=xxx — Filter by campaign (default: active campaign, "all" for cumulative)
 export async function GET(req: NextRequest) {
   const tab = req.nextUrl.searchParams.get("tab");
+  const campaignId = await resolveCampaignId(req.nextUrl.searchParams.get("campaignId"));
 
-  // Pre-compute majority winners for all matchups (shared by both tabs)
+  const sessionFilter = campaignId ? { session: { campaignId } } : {};
+
+  // Pre-compute majority winners for all matchups in scope
   const allMatchups = await prisma.matchup.findMany({
+    where: campaignId ? { session: { campaignId } } : undefined,
     select: {
       id: true,
       videoAId: true,
@@ -57,10 +62,10 @@ export async function GET(req: NextRequest) {
   } catch {}
 
   if (tab === "tribes") {
-    return getTribeRankings(winnerMap, currentUserId);
+    return getTribeRankings(winnerMap, currentUserId, sessionFilter);
   }
 
-  return getPlayerRankings(winnerMap, currentUserId);
+  return getPlayerRankings(winnerMap, currentUserId, sessionFilter);
 }
 
 function countCorrectVotes(
@@ -77,10 +82,14 @@ function countCorrectVotes(
   }).length;
 }
 
-async function getPlayerRankings(winnerMap: Map<string, string>, currentUserId: string | null) {
+async function getPlayerRankings(
+  winnerMap: Map<string, string>,
+  currentUserId: string | null,
+  sessionFilter: { session?: { campaignId: string } },
+) {
   const players = await prisma.user.findMany({
     where: {
-      gameResults: { some: {} },
+      gameResults: { some: sessionFilter },
     },
     select: {
       id: true,
@@ -88,9 +97,13 @@ async function getPlayerRankings(winnerMap: Map<string, string>, currentUserId: 
       profilePhoto: true,
       walletAddress: true,
       gameResults: {
+        where: sessionFilter,
         select: { sessionId: true },
       },
       votes: {
+        where: sessionFilter.session
+          ? { matchup: { session: { campaignId: sessionFilter.session.campaignId } } }
+          : undefined,
         select: {
           decision: true,
           matchup: {
@@ -155,7 +168,11 @@ async function getPlayerRankings(winnerMap: Map<string, string>, currentUserId: 
   return NextResponse.json({ rankings, currentUserId });
 }
 
-async function getTribeRankings(winnerMap: Map<string, string>, currentUserId: string | null) {
+async function getTribeRankings(
+  winnerMap: Map<string, string>,
+  currentUserId: string | null,
+  sessionFilter: { session?: { campaignId: string } },
+) {
   // Resolve current user's tribe leader (could be themselves or their referrer)
   let currentUserTribeLeaderId: string | null = null;
   if (currentUserId) {
@@ -168,14 +185,16 @@ async function getTribeRankings(winnerMap: Map<string, string>, currentUserId: s
     });
     if (currentUser) {
       if (currentUser.referralsMade.length > 0) {
-        // User is a tribe leader
         currentUserTribeLeaderId = currentUserId;
       } else if (currentUser.referralReceived) {
-        // User is a tribe member — their leader is their referrer
         currentUserTribeLeaderId = currentUser.referralReceived.referrerId;
       }
     }
   }
+
+  const voteFilter = sessionFilter.session
+    ? { matchup: { session: { campaignId: sessionFilter.session.campaignId } } }
+    : undefined;
 
   // Find all users who have referred at least one person (tribe leaders)
   const leaders = await prisma.user.findMany({
@@ -187,6 +206,7 @@ async function getTribeRankings(winnerMap: Map<string, string>, currentUserId: s
       displayName: true,
       profilePhoto: true,
       votes: {
+        where: voteFilter,
         select: {
           decision: true,
           matchup: {
@@ -200,6 +220,7 @@ async function getTribeRankings(winnerMap: Map<string, string>, currentUserId: s
             select: {
               id: true,
               votes: {
+                where: voteFilter,
                 select: {
                   decision: true,
                   matchup: {

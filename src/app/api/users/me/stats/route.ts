@@ -1,16 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { getAuthUser } from "@/lib/auth-helpers";
+import { getAuthUser, resolveCampaignId } from "@/lib/auth-helpers";
 
 // GET /api/users/me/stats — Personal performance stats
+// ?campaignId=xxx — Filter by campaign (default: active, "all" for cumulative)
 export async function GET(req: NextRequest) {
   const user = await getAuthUser(req);
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const campaignId = await resolveCampaignId(req.nextUrl.searchParams.get("campaignId"));
+  const sessionFilter = campaignId ? { session: { campaignId } } : {};
+
   const results = await prisma.gameResult.findMany({
-    where: { userId: user.id },
+    where: { userId: user.id, ...sessionFilter },
     include: {
       session: {
         select: {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { getAuthUser } from "@/lib/auth-helpers";
+import { getAuthUser, getActiveCampaign } from "@/lib/auth-helpers";
 import { createSessionSchema } from "@/lib/validators";
 import { campaignConfig } from "@/lib/campaign-config";
 
@@ -27,26 +27,28 @@ function formatSession(
   };
 }
 
-// GET /api/sessions — Get current/next session
+// GET /api/sessions — Get current/next session (scoped to active campaign)
 export async function GET() {
   const now = new Date();
+  const activeCampaign = await getActiveCampaign();
+  const campaignFilter = activeCampaign ? { campaignId: activeCampaign.id } : {};
 
   // Find live session
   const live = await prisma.weeklySession.findFirst({
-    where: { status: "live" },
+    where: { status: "live", ...campaignFilter },
     include: sessionInclude,
   });
 
   // Find next scheduled session
   const next = await prisma.weeklySession.findFirst({
-    where: { status: "scheduled", scheduledAt: { gte: now } },
+    where: { status: "scheduled", scheduledAt: { gte: now }, ...campaignFilter },
     orderBy: { scheduledAt: "asc" },
     include: sessionInclude,
   });
 
   // Find last ended session
   const lastEnded = await prisma.weeklySession.findFirst({
-    where: { status: "ended" },
+    where: { status: "ended", ...campaignFilter },
     orderBy: { scheduledAt: "desc" },
     include: sessionInclude,
   });
@@ -57,10 +59,10 @@ export async function GET() {
   const nextSession = next ? formatSession(next) : null;
 
   // If no real session exists and sample mode is enabled, auto-create a real sample session
-  if (!current && !nextSession && campaignConfig.sampleSessionEnabled) {
+  if (!current && !nextSession && campaignConfig.sampleSessionEnabled && activeCampaign) {
     // Check for existing live sample session (weekNumber: 0)
     const existingSample = await prisma.weeklySession.findFirst({
-      where: { weekNumber: 0, status: "live" },
+      where: { weekNumber: 0, status: "live", campaignId: activeCampaign.id },
       include: sessionInclude,
     });
 
@@ -83,7 +85,9 @@ export async function GET() {
 
     if (videos.length >= 2) {
       // Delete any old ended sample sessions (weekNumber: 0) to free the unique constraint
-      await prisma.weeklySession.deleteMany({ where: { weekNumber: 0, status: "ended" } });
+      await prisma.weeklySession.deleteMany({
+        where: { weekNumber: 0, status: "ended", campaignId: activeCampaign.id },
+      });
 
       // Cycle through available videos to always fill all numMatchups rounds
       const sampleSession = await prisma.weeklySession.create({
@@ -92,6 +96,7 @@ export async function GET() {
           title: "Sample Session",
           scheduledAt: new Date(),
           status: "live",
+          campaignId: activeCampaign.id,
           matchups: {
             create: Array.from({ length: numMatchups }, (_, i) => ({
               matchupNumber: i + 1,
@@ -126,6 +131,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  const activeCampaign = await getActiveCampaign();
+  if (!activeCampaign) {
+    return NextResponse.json({ error: "No active campaign" }, { status: 400 });
+  }
+
   const body = await req.json();
   const parsed = createSessionSchema.safeParse(body);
   if (!parsed.success) {
@@ -143,6 +153,7 @@ export async function POST(req: NextRequest) {
       lateJoinCutoff: parsed.data.lateJoinCutoff
         ? new Date(parsed.data.lateJoinCutoff)
         : null,
+      campaignId: activeCampaign.id,
     },
   });
 

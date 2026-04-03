@@ -503,9 +503,9 @@ export type CampaignUncheckedUpdateManyInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type CampaignNullableScalarRelationFilter = {
-  is?: Prisma.CampaignWhereInput | null
-  isNot?: Prisma.CampaignWhereInput | null
+export type CampaignScalarRelationFilter = {
+  is?: Prisma.CampaignWhereInput
+  isNot?: Prisma.CampaignWhereInput
 }
 
 export type CampaignCountOrderByAggregateInput = {
@@ -574,23 +574,16 @@ export type CampaignSumOrderByAggregateInput = {
   matchupsPerSession?: Prisma.SortOrder
 }
 
-export type CampaignScalarRelationFilter = {
-  is?: Prisma.CampaignWhereInput
-  isNot?: Prisma.CampaignWhereInput
-}
-
 export type CampaignCreateNestedOneWithoutSessionsInput = {
   create?: Prisma.XOR<Prisma.CampaignCreateWithoutSessionsInput, Prisma.CampaignUncheckedCreateWithoutSessionsInput>
   connectOrCreate?: Prisma.CampaignCreateOrConnectWithoutSessionsInput
   connect?: Prisma.CampaignWhereUniqueInput
 }
 
-export type CampaignUpdateOneWithoutSessionsNestedInput = {
+export type CampaignUpdateOneRequiredWithoutSessionsNestedInput = {
   create?: Prisma.XOR<Prisma.CampaignCreateWithoutSessionsInput, Prisma.CampaignUncheckedCreateWithoutSessionsInput>
   connectOrCreate?: Prisma.CampaignCreateOrConnectWithoutSessionsInput
   upsert?: Prisma.CampaignUpsertWithoutSessionsInput
-  disconnect?: Prisma.CampaignWhereInput | boolean
-  delete?: Prisma.CampaignWhereInput | boolean
   connect?: Prisma.CampaignWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.CampaignUpdateToOneWithWhereWithoutSessionsInput, Prisma.CampaignUpdateWithoutSessionsInput>, Prisma.CampaignUncheckedUpdateWithoutSessionsInput>
 }

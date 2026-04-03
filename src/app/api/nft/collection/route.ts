@@ -21,8 +21,9 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const session = await prisma.weeklySession.findUnique({
+  const session = await prisma.weeklySession.findFirst({
     where: { weekNumber: sessionWeek },
+    orderBy: { scheduledAt: "desc" },
   });
 
   if (!session) {
@@ -52,7 +53,7 @@ export async function POST(req: NextRequest) {
     const collectionAddress = collectionPublicKey.toString();
 
     await prisma.weeklySession.update({
-      where: { weekNumber: sessionWeek },
+      where: { id: session.id },
       data: { collectionAddress },
     });
 

@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { getAuthUser } from "@/lib/auth-helpers";
+import { getAuthUser, resolveCampaignId } from "@/lib/auth-helpers";
 
 // GET /api/users/me/history — Paginated game history
+// ?campaignId=xxx — Filter by campaign (default: active, "all" for cumulative)
 export async function GET(req: NextRequest) {
   const user = await getAuthUser(req);
   if (!user) {
@@ -14,9 +15,12 @@ export async function GET(req: NextRequest) {
   const limit = Math.min(50, Math.max(1, parseInt(searchParams.get("limit") ?? "10")));
   const skip = (page - 1) * limit;
 
+  const campaignId = await resolveCampaignId(searchParams.get("campaignId"));
+  const sessionFilter = campaignId ? { session: { campaignId } } : {};
+
   const [games, total] = await Promise.all([
     prisma.gameResult.findMany({
-      where: { userId: user.id },
+      where: { userId: user.id, ...sessionFilter },
       include: {
         session: {
           select: {
@@ -33,7 +37,7 @@ export async function GET(req: NextRequest) {
       skip,
       take: limit,
     }),
-    prisma.gameResult.count({ where: { userId: user.id } }),
+    prisma.gameResult.count({ where: { userId: user.id, ...sessionFilter } }),
   ]);
 
   return NextResponse.json({

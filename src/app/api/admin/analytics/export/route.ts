@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { getAuthUser } from "@/lib/auth-helpers";
+import { getAuthUser, resolveCampaignId } from "@/lib/auth-helpers";
 
 // GET /api/admin/analytics/export?type=videos|players|sessions — CSV export
+// ?campaignId=xxx — Filter by campaign (default: active, "all" for cumulative)
 export async function GET(req: NextRequest) {
   const user = await getAuthUser(req);
   if (!user || user.role !== "admin") {
@@ -11,6 +12,11 @@ export async function GET(req: NextRequest) {
 
   const { searchParams } = new URL(req.url);
   const type = searchParams.get("type") ?? "videos";
+  const campaignId = await resolveCampaignId(searchParams.get("campaignId"));
+  const sessionFilter = campaignId ? { campaignId } : {};
+  const gameResultSessionFilter = campaignId
+    ? { session: { campaignId } }
+    : {};
 
   let csv = "";
   let filename = "";
@@ -54,6 +60,7 @@ export async function GET(req: NextRequest) {
     case "players": {
       const results = await prisma.gameResult.groupBy({
         by: ["userId"],
+        where: gameResultSessionFilter,
         _sum: { correctVotes: true, totalVotes: true, rewardAmount: true },
         _count: { _all: true },
         orderBy: { _sum: { correctVotes: "desc" } },
@@ -91,6 +98,7 @@ export async function GET(req: NextRequest) {
 
     case "sessions": {
       const sessions = await prisma.weeklySession.findMany({
+        where: sessionFilter,
         include: {
           _count: { select: { matchups: true, gameResults: true } },
         },

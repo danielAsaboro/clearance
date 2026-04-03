@@ -21,6 +21,7 @@
     "format:check": "prettier --check .",
     "lint": "eslint",
     "clear:reseed": "npx tsx --env-file=.env.local scripts/clear-and-reseed.ts",
+    "seed:season2": "npx tsx --env-file=.env.local scripts/seed-season-2.ts",
     "videos:process": "npx tsx --env-file=.env.local scripts/process-videos.ts",
     "start": "next start",
     "test": "jest --passWithNoTests"

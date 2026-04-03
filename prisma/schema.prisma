@@ -113,19 +113,21 @@ model VideoCategory {
 
 model WeeklySession {
   id                String        @id @default(cuid())
-  weekNumber        Int           @unique
+  weekNumber        Int
   title             String
   scheduledAt       DateTime
   status            SessionStatus @default(scheduled)
   lateJoinCutoff    DateTime?
   collectionAddress String?
   vaultAddress      String?
-  campaignId        String?
-  campaign          Campaign?     @relation(fields: [campaignId], references: [id])
+  campaignId        String
+  campaign          Campaign      @relation(fields: [campaignId], references: [id])
 
   matchups       Matchup[]
   gameResults    GameResult[]
   discountCodes  DiscountCode[]
+
+  @@unique([weekNumber, campaignId])
 }
 
 model Matchup {
