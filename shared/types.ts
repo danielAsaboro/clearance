@@ -35,21 +35,6 @@ export interface SessionData {
   };
 }
 
-export interface GameResultNFT {
-  id: string;
-  tier: "participation" | "base" | "gold";
-  rewardAmount: number;
-  nftMinted: boolean;
-  nftTokenId: string | null;
-  nftRevealed: boolean;
-  usdcClaimed: boolean;
-  claimTxHash: string | null;
-  session: {
-    title: string;
-    weekNumber: number;
-  };
-}
-
 export interface UserProfile {
   id: string;
   privyId: string;

@@ -41,18 +41,12 @@ export default function RewardsPage() {
   useEffect(() => {
     const fetchRewards = async () => {
       const token = await getAccessToken();
-      const res = await fetch("/api/users", {
+      const res = await fetch("/api/users/me/history?limit=50", {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
-        const user = await res.json();
-        const resultsRes = await fetch(`/api/users/${user.id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (resultsRes.ok) {
-          const userData = await resultsRes.json();
-          setResults(userData.gameResults || []);
-        }
+        const data = await res.json();
+        setResults(data.games || []);
       }
       setLoading(false);
     };

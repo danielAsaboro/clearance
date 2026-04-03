@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { getAuthUser, getActiveCampaign } from "@/lib/auth-helpers";
 import { createSessionSchema } from "@/lib/validators";
 import { campaignConfig } from "@/lib/campaign-config";
+import { initializeVault } from "@/lib/vault-claim";
 
 const sessionInclude = {
   _count: { select: { gameResults: true, matchups: true } },
@@ -145,6 +146,19 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // On-chain first: initialize the vault PDA. If this fails, no DB row is created.
+  let vaultAddress: string;
+  try {
+    vaultAddress = await initializeVault(parsed.data.weekNumber);
+  } catch (err) {
+    console.error("[sessions] initializeVault failed:", err);
+    return NextResponse.json(
+      { error: "Failed to initialize on-chain vault" },
+      { status: 502 },
+    );
+  }
+
+  // DB is the recording layer — only write after the chain is the source of truth.
   const session = await prisma.weeklySession.create({
     data: {
       weekNumber: parsed.data.weekNumber,
@@ -154,6 +168,7 @@ export async function POST(req: NextRequest) {
         ? new Date(parsed.data.lateJoinCutoff)
         : null,
       campaignId: activeCampaign.id,
+      vaultAddress,
     },
   });
 

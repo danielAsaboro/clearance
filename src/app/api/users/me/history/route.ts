@@ -44,11 +44,18 @@ export async function GET(req: NextRequest) {
     games: games.map((g) => {
       const totalMatchups = g.session._count.matchups;
       return {
+        id: g.id,
         sessionId: g.sessionId,
         sessionTitle: g.session.title,
         weekNumber: g.session.weekNumber,
         scheduledAt: g.session.scheduledAt,
         sessionStatus: g.session.status,
+        session: {
+          title: g.session.title,
+          weekNumber: g.session.weekNumber,
+          status: g.session.status,
+        },
+        tier: g.tier,
         totalVotes: g.totalVotes,
         correctVotes: g.correctVotes,
         totalMatchups,
@@ -61,6 +68,8 @@ export async function GET(req: NextRequest) {
         nftRevealed: g.nftRevealed,
         usdcClaimed: g.usdcClaimed,
         claimedAt: g.claimedAt,
+        claimTxHash: g.claimTxHash,
+        depositConfirmed: g.depositConfirmed,
         lateJoin: g.lateJoin,
         joinedAt: g.joinedAt,
       };

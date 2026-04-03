@@ -47,6 +47,22 @@ export async function POST(
     );
   }
 
+  // On-chain first: finalize the vault so claim_reward becomes callable.
+  // If this fails (and it's not already finalized), we abort — DB rewards
+  // would be unclaimable until the vault is finalized on-chain.
+  try {
+    await finalizeVault(session.weekNumber);
+  } catch (err) {
+    if (!String(err).includes("AlreadyFinalized")) {
+      console.error("[finalize] finalizeVault failed:", err);
+      return NextResponse.json(
+        { error: "Failed to finalize on-chain vault" },
+        { status: 502 },
+      );
+    }
+    // AlreadyFinalized — safe to proceed (idempotent retry)
+  }
+
   // Calculate majority winners
   const winnerMap = calculateMajorityWinners(
     session.matchups.map((m) => ({
@@ -137,18 +153,6 @@ export async function POST(
       });
     })
   );
-
-  // On-chain: finalize vault so no more deposits + users can claim (fire-and-forget)
-  void (async () => {
-    try {
-      await finalizeVault(session.weekNumber);
-    } catch (err) {
-      // AlreadyFinalized is fine (idempotent), log others
-      if (!String(err).includes("AlreadyFinalized")) {
-        console.error("[finalize] finalizeVault failed:", err);
-      }
-    }
-  })();
 
   // Update video performance stats (fire-and-forget)
   void updateVideoStatsForSession(id);
