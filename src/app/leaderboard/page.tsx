@@ -345,7 +345,7 @@ export default function LeaderboardPage() {
         <div className="mb-5 flex items-start justify-between border-b border-white/10 pb-3">
           <div>
             <h1 className="text-[28px] font-semibold leading-none tracking-[-0.05em] text-white">LEADERBOARD</h1>
-            <p className="mt-1 text-[13px] text-[#6e6e6e]">Season 1 — March 2026</p>
+            <p className="mt-1 text-[13px] text-[#6e6e6e]">Season 1 — June 2026</p>
           </div>
 
           <Link href="/" className="text-[#9b9b9b] transition-colors hover:text-white">

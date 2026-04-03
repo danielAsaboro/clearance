@@ -7,9 +7,9 @@ import { usePrivy } from "@privy-io/react-auth";
 import { useEffect, useRef, useState } from "react";
 import ProfileModal from "@/components/ProfileModal";
 
-// ─── Winners crawl goes live at 9:00 AM GMT+1 on March 29, 2026 ───
-const WINNERS_GO_LIVE = new Date("2026-03-29T08:00:00Z").getTime(); // 9am WAT (GMT+1)
-// ───────────────────────────────────────────────────────────────────
+// ─── Winners crawl goes live at 9:00 AM GMT+1 on June 30, 2026 ───
+const WINNERS_GO_LIVE = new Date("2026-06-30T08:00:00Z").getTime(); // 9am WAT (GMT+1)
+// ──────────────────────────────────────────────────────────────────
 
 // ════════════════════════════════════════════════════
 // Original Home Page
